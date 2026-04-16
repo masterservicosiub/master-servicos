@@ -17,13 +17,12 @@ async function callGoogleScript(payload: Record<string, string>): Promise<boolea
   }
 
   try {
-    const response = await fetch(url, {
+    await fetch(url, {
       method: "POST",
-      mode: "no-cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
+      redirect: "follow",
     });
-    // no-cors always returns opaque response, assume success
     return true;
   } catch (error) {
     console.error("Erro ao chamar Google Script:", error);
@@ -61,7 +60,10 @@ export async function sendOrderEmailNotification(order: OrderNotificationData): 
 
 export async function sendTestEmail(): Promise<boolean> {
   const notificationEmail = getNotificationEmail();
-  if (!notificationEmail) return false;
+  if (!notificationEmail) {
+    console.warn("E-mail de notificação não configurado.");
+    return false;
+  }
 
   const now = new Date();
   return callGoogleScript({
