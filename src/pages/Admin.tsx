@@ -560,11 +560,55 @@ const Admin = () => {
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                   <input value={manualPhone} onChange={(e) => setManualPhone(applyPhoneMask(e.target.value))} placeholder="Telefone"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input value={manualService} onChange={(e) => setManualService(e.target.value)} placeholder="Descrição do serviço *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input type="number" value={manualValue} onChange={(e) => setManualValue(e.target.value)} placeholder="Valor (R$) *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground">Serviços</h3>
+                    <button
+                      type="button"
+                      onClick={addManualItem}
+                      className="text-sm bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md hover:opacity-80 flex items-center gap-1"
+                    >
+                      <Plus className="w-4 h-4" /> Adicionar serviço
+                    </button>
+                  </div>
+                  {manualItems.map((item, idx) => (
+                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr,160px,auto] gap-2 items-center p-3 rounded-lg bg-secondary/40 border border-border">
+                      <input
+                        value={item.description}
+                        onChange={(e) => updateManualItem(idx, "description", e.target.value)}
+                        placeholder="Descrição do serviço *"
+                        className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.value}
+                        onChange={(e) => updateManualItem(idx, "value", e.target.value)}
+                        placeholder="Valor (R$) *"
+                        className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeManualItem(idx)}
+                        className="text-destructive hover:opacity-70 transition-opacity p-2 justify-self-end"
+                        aria-label="Remover serviço"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-sm font-semibold text-foreground">Total:</span>
+                    <span className="text-lg font-bold text-primary">
+                      {manualItems
+                        .reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0)
+                        .toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    </span>
+                  </div>
+                </div>
+
                 <button onClick={handleManualOrder} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2">
                   <Send className="w-4 h-4" /> Adicionar Pedido
                 </button>
