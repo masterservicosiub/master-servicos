@@ -253,31 +253,45 @@ const Admin = () => {
   };
 
   const handleManualOrder = async () => {
-    if (!manualName.trim() || !manualService.trim() || !manualValue.trim()) {
-      toast.error("Preencha todos os campos obrigatórios");
+    if (!manualName.trim()) {
+      toast.error("Preencha o nome do cliente");
       return;
     }
+    const validItems = manualItems.filter((it) => it.description.trim() && it.value.trim());
+    if (validItems.length === 0) {
+      toast.error("Adicione pelo menos um serviço com descrição e valor");
+      return;
+    }
+    const total = validItems.reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0);
+    const servicesText = validItems
+      .map((it) => `${it.description.trim()} - R$ ${(parseFloat(it.value) || 0).toFixed(2)}`)
+      .join(" | ");
     try {
       await insertOrder({
         name: manualName.trim(),
         phone: manualPhone.trim(),
         email: "",
         address: "",
-        services: manualService.trim(),
-        total: parseFloat(manualValue) || 0,
+        services: servicesText,
+        total,
         status: "Novo",
         notes: "Pedido manual",
       });
       setManualName("");
       setManualPhone("");
-      setManualService("");
-      setManualValue("");
+      setManualItems([{ description: "", value: "" }]);
       toast.success("Pedido adicionado!");
       loadOrders();
     } catch {
       toast.error("Erro ao adicionar pedido");
     }
   };
+
+  const addManualItem = () => setManualItems([...manualItems, { description: "", value: "" }]);
+  const removeManualItem = (idx: number) =>
+    setManualItems(manualItems.length === 1 ? [{ description: "", value: "" }] : manualItems.filter((_, i) => i !== idx));
+  const updateManualItem = (idx: number, field: "description" | "value", val: string) =>
+    setManualItems(manualItems.map((it, i) => (i === idx ? { ...it, [field]: val } : it)));
 
   const handleAddService = async () => {
     if (!svcTitle.trim() || !svcDesc.trim()) {
