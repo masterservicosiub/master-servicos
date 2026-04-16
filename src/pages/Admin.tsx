@@ -507,6 +507,16 @@ const Admin = () => {
                 </div>
               </div>
 
+              {/* Botão Relatório PDF */}
+              <div className="flex justify-end">
+                <button
+                  onClick={() => generateRevenueReport(orders, filterYear)}
+                  className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 text-sm"
+                >
+                  <FileText className="w-4 h-4" /> Gerar Relatório PDF ({filterYear})
+                </button>
+              </div>
+
               {/* Filtros */}
               <div className="bg-card rounded-xl p-4 border border-border flex flex-wrap items-center gap-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
