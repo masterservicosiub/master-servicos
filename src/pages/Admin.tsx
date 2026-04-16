@@ -30,8 +30,9 @@ const Admin = () => {
   // Manual order fields
   const [manualName, setManualName] = useState("");
   const [manualPhone, setManualPhone] = useState("");
-  const [manualService, setManualService] = useState("");
-  const [manualValue, setManualValue] = useState("");
+  const [manualItems, setManualItems] = useState<{ description: string; value: string }[]>([
+    { description: "", value: "" },
+  ]);
 
   // Services management
   const [services, setServices] = useState<ServiceRow[]>([]);
