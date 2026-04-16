@@ -10,6 +10,7 @@ import Servicos from "./pages/Servicos.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import AdminGear from "./components/AdminGear.tsx";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <AdminGear />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
