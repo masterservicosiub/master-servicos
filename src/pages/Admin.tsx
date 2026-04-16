@@ -30,8 +30,9 @@ const Admin = () => {
   // Manual order fields
   const [manualName, setManualName] = useState("");
   const [manualPhone, setManualPhone] = useState("");
-  const [manualService, setManualService] = useState("");
-  const [manualValue, setManualValue] = useState("");
+  const [manualItems, setManualItems] = useState<{ description: string; value: string }[]>([
+    { description: "", value: "" },
+  ]);
 
   // Services management
   const [services, setServices] = useState<ServiceRow[]>([]);
@@ -252,31 +253,45 @@ const Admin = () => {
   };
 
   const handleManualOrder = async () => {
-    if (!manualName.trim() || !manualService.trim() || !manualValue.trim()) {
-      toast.error("Preencha todos os campos obrigatórios");
+    if (!manualName.trim()) {
+      toast.error("Preencha o nome do cliente");
       return;
     }
+    const validItems = manualItems.filter((it) => it.description.trim() && it.value.trim());
+    if (validItems.length === 0) {
+      toast.error("Adicione pelo menos um serviço com descrição e valor");
+      return;
+    }
+    const total = validItems.reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0);
+    const servicesText = validItems
+      .map((it) => `${it.description.trim()} - R$ ${(parseFloat(it.value) || 0).toFixed(2)}`)
+      .join(" | ");
     try {
       await insertOrder({
         name: manualName.trim(),
         phone: manualPhone.trim(),
         email: "",
         address: "",
-        services: manualService.trim(),
-        total: parseFloat(manualValue) || 0,
+        services: servicesText,
+        total,
         status: "Novo",
         notes: "Pedido manual",
       });
       setManualName("");
       setManualPhone("");
-      setManualService("");
-      setManualValue("");
+      setManualItems([{ description: "", value: "" }]);
       toast.success("Pedido adicionado!");
       loadOrders();
     } catch {
       toast.error("Erro ao adicionar pedido");
     }
   };
+
+  const addManualItem = () => setManualItems([...manualItems, { description: "", value: "" }]);
+  const removeManualItem = (idx: number) =>
+    setManualItems(manualItems.length === 1 ? [{ description: "", value: "" }] : manualItems.filter((_, i) => i !== idx));
+  const updateManualItem = (idx: number, field: "description" | "value", val: string) =>
+    setManualItems(manualItems.map((it, i) => (i === idx ? { ...it, [field]: val } : it)));
 
   const handleAddService = async () => {
     if (!svcTitle.trim() || !svcDesc.trim()) {
@@ -545,11 +560,55 @@ const Admin = () => {
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                   <input value={manualPhone} onChange={(e) => setManualPhone(applyPhoneMask(e.target.value))} placeholder="Telefone"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input value={manualService} onChange={(e) => setManualService(e.target.value)} placeholder="Descrição do serviço *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input type="number" value={manualValue} onChange={(e) => setManualValue(e.target.value)} placeholder="Valor (R$) *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground">Serviços</h3>
+                    <button
+                      type="button"
+                      onClick={addManualItem}
+                      className="text-sm bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md hover:opacity-80 flex items-center gap-1"
+                    >
+                      <Plus className="w-4 h-4" /> Adicionar serviço
+                    </button>
+                  </div>
+                  {manualItems.map((item, idx) => (
+                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr,160px,auto] gap-2 items-center p-3 rounded-lg bg-secondary/40 border border-border">
+                      <input
+                        value={item.description}
+                        onChange={(e) => updateManualItem(idx, "description", e.target.value)}
+                        placeholder="Descrição do serviço *"
+                        className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={item.value}
+                        onChange={(e) => updateManualItem(idx, "value", e.target.value)}
+                        placeholder="Valor (R$) *"
+                        className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeManualItem(idx)}
+                        className="text-destructive hover:opacity-70 transition-opacity p-2 justify-self-end"
+                        aria-label="Remover serviço"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-sm font-semibold text-foreground">Total:</span>
+                    <span className="text-lg font-bold text-primary">
+                      {manualItems
+                        .reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0)
+                        .toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    </span>
+                  </div>
+                </div>
+
                 <button onClick={handleManualOrder} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2">
                   <Send className="w-4 h-4" /> Adicionar Pedido
                 </button>
