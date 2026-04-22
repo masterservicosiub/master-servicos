@@ -177,3 +177,51 @@ export async function updateEmailSettings(settings: Partial<EmailSettings>): Pro
     .eq("id", "main");
   if (error) throw error;
 }
+
+// Coupons
+export interface CouponRow {
+  id?: string;
+  created_at?: string;
+  code: string;
+  discount_type: "percent" | "fixed";
+  discount_value: number;
+  applies_to: "all" | "service";
+  service_id: string | null;
+  active: boolean;
+}
+
+export async function fetchCoupons(): Promise<CouponRow[]> {
+  const { data, error } = await supabase
+    .from("coupons")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data as CouponRow[];
+}
+
+export async function insertCoupon(coupon: Omit<CouponRow, "id" | "created_at">) {
+  const { data, error } = await supabase.from("coupons").insert([coupon]).select();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateCoupon(id: string, coupon: Partial<CouponRow>) {
+  const { error } = await supabase.from("coupons").update(coupon).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteCoupon(id: string) {
+  const { error } = await supabase.from("coupons").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function findCouponByCode(code: string): Promise<CouponRow | null> {
+  const { data, error } = await supabase
+    .from("coupons")
+    .select("*")
+    .ilike("code", code.trim())
+    .eq("active", true)
+    .maybeSingle();
+  if (error) return null;
+  return (data as CouponRow) || null;
+}

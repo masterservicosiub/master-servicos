@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings } from "@/lib/supabase";
+import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText } from "lucide-react";
+import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight } from "lucide-react";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
 import { setGoogleScriptUrl, setNotificationEmail, getGoogleScriptUrl, getNotificationEmail, syncEmailSettingsFromDB } from "@/lib/googleSheets";
@@ -73,6 +73,14 @@ const Admin = () => {
   const [notifEmail, setNotifEmail] = useState("");
   const [savingEmail, setSavingEmail] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
+
+  // Coupons
+  const [coupons, setCoupons] = useState<CouponRow[]>([]);
+  const [coupCode, setCoupCode] = useState("");
+  const [coupType, setCoupType] = useState<"percent" | "fixed">("percent");
+  const [coupValue, setCoupValue] = useState("");
+  const [coupApplies, setCoupApplies] = useState<"all" | "service">("all");
+  const [coupServiceId, setCoupServiceId] = useState("");
 
   // Load admin password from DB on mount
   useEffect(() => {
@@ -147,11 +155,21 @@ const Admin = () => {
     }
   };
 
+  const loadCoupons = async () => {
+    try {
+      const data = await fetchCoupons();
+      setCoupons(data);
+    } catch (err) {
+      console.error("Erro ao buscar cupons:", err);
+    }
+  };
+
   useEffect(() => {
     if (authenticated) {
       loadOrders();
       loadServices();
       loadBudgetServices();
+      loadCoupons();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
@@ -414,6 +432,66 @@ const Admin = () => {
       toast.success(`E-mail de teste enviado para ${notifEmail || getNotificationEmail()}!`);
     } else {
       toast.error("Falha ao enviar. Verifique a URL do script.");
+    }
+  };
+
+  const handleAddCoupon = async () => {
+    const code = coupCode.trim().toUpperCase();
+    if (!code) {
+      toast.error("Informe o código do cupom.");
+      return;
+    }
+    const value = parseFloat(coupValue);
+    if (isNaN(value) || value <= 0) {
+      toast.error("Valor de desconto inválido.");
+      return;
+    }
+    if (coupType === "percent" && value > 100) {
+      toast.error("Desconto percentual não pode ser maior que 100%.");
+      return;
+    }
+    if (coupApplies === "service" && !coupServiceId) {
+      toast.error("Selecione o serviço ao qual o cupom se aplica.");
+      return;
+    }
+    try {
+      await insertCoupon({
+        code,
+        discount_type: coupType,
+        discount_value: value,
+        applies_to: coupApplies,
+        service_id: coupApplies === "service" ? coupServiceId : null,
+        active: true,
+      });
+      setCoupCode(""); setCoupValue(""); setCoupApplies("all"); setCoupServiceId(""); setCoupType("percent");
+      toast.success("Cupom criado!");
+      loadCoupons();
+    } catch (err: any) {
+      if (String(err?.message || "").includes("duplicate")) {
+        toast.error("Já existe um cupom com este código.");
+      } else {
+        toast.error("Erro ao criar cupom.");
+      }
+    }
+  };
+
+  const handleToggleCoupon = async (c: CouponRow) => {
+    try {
+      await updateCoupon(c.id!, { active: !c.active });
+      loadCoupons();
+    } catch {
+      toast.error("Erro ao atualizar cupom.");
+    }
+  };
+
+  const handleDeleteCoupon = async (id: string) => {
+    if (!confirm("Excluir este cupom?")) return;
+    try {
+      await deleteCoupon(id);
+      setCoupons(coupons.filter((c) => c.id !== id));
+      toast.success("Cupom excluído!");
+    } catch {
+      toast.error("Erro ao excluir cupom.");
     }
   };
 
@@ -864,6 +942,139 @@ const Admin = () => {
                         )}
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Cupons de Desconto */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <Tag className="w-5 h-5" /> Cupons de Desconto
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Crie cupons que podem ser aplicados a todos os serviços ou a um serviço específico.
+                </p>
+
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Código *</label>
+                    <input
+                      value={coupCode}
+                      onChange={(e) => setCoupCode(e.target.value.toUpperCase())}
+                      placeholder="EX: PROMO10"
+                      maxLength={50}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring uppercase"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Tipo de desconto *</label>
+                    <select
+                      value={coupType}
+                      onChange={(e) => setCoupType(e.target.value as "percent" | "fixed")}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="percent">Percentual (%)</option>
+                      <option value="fixed">Valor fixo (R$)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Valor do desconto * {coupType === "percent" ? "(%)" : "(R$)"}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={coupValue}
+                      onChange={(e) => setCoupValue(e.target.value)}
+                      placeholder={coupType === "percent" ? "Ex: 10" : "Ex: 50"}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Aplicar a *</label>
+                    <select
+                      value={coupApplies}
+                      onChange={(e) => setCoupApplies(e.target.value as "all" | "service")}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="all">Todos os serviços</option>
+                      <option value="service">Serviço específico</option>
+                    </select>
+                  </div>
+                  {coupApplies === "service" && (
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-foreground mb-1">Serviço *</label>
+                      <select
+                        value={coupServiceId}
+                        onChange={(e) => setCoupServiceId(e.target.value)}
+                        className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="">Selecione um serviço...</option>
+                        {budgetServices.map((bs) => (
+                          <option key={bs.id} value={bs.id}>{bs.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleAddCoupon}
+                  className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Criar Cupom
+                </button>
+
+                {coupons.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    {coupons.map((c) => {
+                      const svc = c.service_id ? budgetServices.find((b) => b.id === c.service_id) : null;
+                      return (
+                        <div
+                          key={c.id}
+                          className={`p-4 rounded-lg border flex flex-wrap items-center justify-between gap-3 ${
+                            c.active ? "bg-secondary border-border" : "bg-muted/40 border-border opacity-60"
+                          }`}
+                        >
+                          <div className="flex-1 min-w-[200px]">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono font-bold text-foreground text-base tracking-wide">{c.code}</span>
+                              <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                                {c.discount_type === "percent"
+                                  ? `${Number(c.discount_value)}%`
+                                  : `R$ ${Number(c.discount_value).toFixed(2)}`}
+                              </span>
+                              {!c.active && (
+                                <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground font-medium">
+                                  Inativo
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {c.applies_to === "all"
+                                ? "Aplica-se a todos os serviços"
+                                : `Aplica-se apenas a: ${svc?.name ?? "(serviço removido)"}`}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleToggleCoupon(c)}
+                              className="text-primary hover:opacity-70 flex items-center gap-1 text-sm"
+                              title={c.active ? "Desativar" : "Ativar"}
+                            >
+                              {c.active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCoupon(c.id!)}
+                              className="text-destructive hover:opacity-70"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

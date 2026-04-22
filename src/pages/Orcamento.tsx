@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
-import { Trash2, Plus, Send, CheckCircle } from "lucide-react";
+import { Trash2, Plus, Send, CheckCircle, Tag, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { sendToGoogleSheets } from "@/lib/googleSheets";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { insertOrder, fetchBudgetServices } from "@/lib/supabase";
+import { insertOrder, fetchBudgetServices, findCouponByCode, type CouponRow } from "@/lib/supabase";
 import { sendOrderEmailNotification } from "@/lib/emailNotification";
 
 type ServiceType = "fixed" | "area";
@@ -83,6 +83,9 @@ const Orcamento = () => {
   const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
   const [currentServiceId, setCurrentServiceId] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponRow | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     fetchBudgetServices().then((data) => {
@@ -126,12 +129,70 @@ const Orcamento = () => {
     setSelectedServices(selectedServices.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
-  const total = useMemo(() => {
+  const subtotal = useMemo(() => {
     return selectedServices.reduce((sum, svc) => {
       const def = availableServices.find((d) => d.id === svc.id);
       return sum + (def ? calcPrice(def, svc) : 0);
     }, 0);
-  }, [selectedServices]);
+  }, [selectedServices, availableServices]);
+
+  const discount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    let base = 0;
+    if (appliedCoupon.applies_to === "all") {
+      base = subtotal;
+    } else if (appliedCoupon.service_id) {
+      const svc = selectedServices.find((s) => s.id === appliedCoupon.service_id);
+      if (svc) {
+        const def = availableServices.find((d) => d.id === svc.id);
+        base = def ? calcPrice(def, svc) : 0;
+      }
+    }
+    if (base <= 0) return 0;
+    if (appliedCoupon.discount_type === "percent") {
+      return Math.min(base, base * (Number(appliedCoupon.discount_value) / 100));
+    }
+    return Math.min(base, Number(appliedCoupon.discount_value));
+  }, [appliedCoupon, subtotal, selectedServices, availableServices]);
+
+  const total = Math.max(0, subtotal - discount);
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim();
+    if (!code) {
+      toast.error("Digite um código de cupom.");
+      return;
+    }
+    setValidatingCoupon(true);
+    try {
+      const coupon = await findCouponByCode(code);
+      if (!coupon) {
+        toast.error("Cupom inválido ou inativo.");
+        setAppliedCoupon(null);
+        return;
+      }
+      if (coupon.applies_to === "service" && coupon.service_id) {
+        const hasService = selectedServices.some((s) => s.id === coupon.service_id);
+        if (!hasService) {
+          const svcDef = availableServices.find((d) => d.id === coupon.service_id);
+          toast.error(`Este cupom é válido apenas para: ${svcDef?.name ?? "serviço específico"}.`);
+          setAppliedCoupon(null);
+          return;
+        }
+      }
+      setAppliedCoupon(coupon);
+      toast.success(`Cupom "${coupon.code}" aplicado!`);
+    } catch {
+      toast.error("Erro ao validar cupom.");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,7 +205,7 @@ const Orcamento = () => {
       return;
     }
 
-    const servicesText = selectedServices.map((svc) => {
+    const servicesLines = selectedServices.map((svc) => {
       const def = availableServices.find((d) => d.id === svc.id)!;
       const price = calcPrice(def, svc);
       let detail = svc.name;
@@ -155,7 +216,13 @@ const Orcamento = () => {
       }
       detail += ` - R$ ${price.toFixed(2)}`;
       return detail;
-    }).join(" | ");
+    });
+    if (appliedCoupon && discount > 0) {
+      servicesLines.push(
+        `Cupom ${appliedCoupon.code} (-R$ ${discount.toFixed(2)})`
+      );
+    }
+    const servicesText = servicesLines.join(" | ");
 
     // Save to Supabase
     try {
@@ -375,10 +442,73 @@ const Orcamento = () => {
 
                   {/* Total */}
                   <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
-                    <span className="text-xl font-bold text-primary">{formatBRL(total)}</span>
+                    <div className="flex flex-col gap-1 w-full">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>Subtotal:</span>
+                        <span>{formatBRL(subtotal)}</span>
+                      </div>
+                      {appliedCoupon && discount > 0 && (
+                        <div className="flex items-center justify-between text-sm text-accent">
+                          <span>Desconto ({appliedCoupon.code}):</span>
+                          <span>-{formatBRL(discount)}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
+                        <span className="text-xl font-bold text-primary">{formatBRL(total)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Cupom de Desconto */}
+            {selectedServices.length > 0 && (
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                  <Tag className="w-5 h-5" /> Cupom de Desconto
+                </h2>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30">
+                    <div className="flex items-center gap-2 text-accent text-sm">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>
+                        Cupom <strong>{appliedCoupon.code}</strong> aplicado
+                        {appliedCoupon.discount_type === "percent"
+                          ? ` (${appliedCoupon.discount_value}% de desconto)`
+                          : ` (-${formatBRL(Number(appliedCoupon.discount_value))})`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-destructive hover:opacity-70"
+                      aria-label="Remover cupom"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Digite o código do cupom"
+                      maxLength={50}
+                      className="flex-1 rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon}
+                      className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
+                    >
+                      {validatingCoupon ? "Validando..." : "Aplicar"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
