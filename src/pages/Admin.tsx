@@ -876,6 +876,10 @@ const Admin = () => {
                                 <option value="area">Por Área (m²)</option>
                               </select>
                             </div>
+                            <input value={editBsImage} onChange={(e) => setEditBsImage(e.target.value)} placeholder="URL da imagem"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                            <textarea value={editBsDescription} onChange={(e) => setEditBsDescription(e.target.value)} placeholder="Descrição curta"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={2} />
                             {editBsType === "fixed" ? (
                               <input type="number" value={editBsFixedPrice} onChange={(e) => setEditBsFixedPrice(e.target.value)} placeholder="Preço fixo"
                                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
