@@ -944,6 +944,7 @@ const Admin = () => {
                                     `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
                               </div>
+                              {bs.image_url && <img src={bs.image_url} alt={bs.name} className="w-14 h-14 object-cover rounded-md ml-2" />}
                             </div>
                             <div className="flex gap-2">
                               <button onClick={() => {
