@@ -359,8 +359,11 @@ const Admin = () => {
         fixed_price: parseFloat(bsFixedPrice) || 0,
         tiers, min_price: parseFloat(bsMinPrice) || 0,
         sort_order: budgetServices.length,
+        image_url: bsImage.trim(),
+        description: bsDescription.trim(),
       });
       setBsName(""); setBsFixedPrice(""); setBsMinPrice(""); setBsTier1(""); setBsTier2(""); setBsTier3(""); setBsType("fixed");
+      setBsImage(""); setBsDescription("");
       toast.success("Serviço de orçamento adicionado!");
       loadBudgetServices();
     } catch { toast.error("Erro ao adicionar serviço de orçamento"); }
@@ -377,6 +380,8 @@ const Admin = () => {
         name: editBsName, type: editBsType,
         fixed_price: parseFloat(editBsFixedPrice) || 0,
         tiers, min_price: parseFloat(editBsMinPrice) || 0,
+        image_url: editBsImage.trim(),
+        description: editBsDescription.trim(),
       });
       setEditingBsId(null);
       toast.success("Serviço atualizado!");
