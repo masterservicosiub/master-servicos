@@ -17,14 +17,16 @@ interface ServiceDef {
   fixedPrice?: number;
   tiers?: { maxArea: number; pricePerM2: number }[];
   minPrice?: number;
+  imageUrl?: string;
+  description?: string;
 }
 
 const defaultServices: ServiceDef[] = [
-  { id: "vazamento", name: "Verificar Vazamento", type: "fixed", fixedPrice: 90 },
-  { id: "saneago", name: "Instalação Padrão Saneago", type: "fixed", fixedPrice: 250 },
-  { id: "caixa-agua", name: "Limpeza de Caixa d'Água", type: "fixed", fixedPrice: 170 },
-  { id: "caixa-gordura", name: "Limpeza de Caixa de Gordura", type: "fixed", fixedPrice: 150 },
-  { id: "placa-solar", name: "Limpeza Placa Solar (Un)", type: "fixed", fixedPrice: 12 },
+  { id: "vazamento", name: "Verificar Vazamento", type: "fixed", fixedPrice: 90, description: "Inspeção e detecção de vazamentos hidráulicos." },
+  { id: "saneago", name: "Instalação Padrão Saneago", type: "fixed", fixedPrice: 250, description: "Instalação completa do padrão de água Saneago." },
+  { id: "caixa-agua", name: "Limpeza de Caixa d'Água", type: "fixed", fixedPrice: 170, description: "Higienização completa da caixa d'água." },
+  { id: "caixa-gordura", name: "Limpeza de Caixa de Gordura", type: "fixed", fixedPrice: 150, description: "Limpeza e desobstrução da caixa de gordura." },
+  { id: "placa-solar", name: "Limpeza Placa Solar (Un)", type: "fixed", fixedPrice: 12, description: "Preço por placa. Aumente o desempenho do seu sistema solar." },
   {
     id: "rocagem-grama",
     name: "Roçagem de Grama",
@@ -35,6 +37,7 @@ const defaultServices: ServiceDef[] = [
       { maxArea: Infinity, pricePerM2: 2.5 },
     ],
     minPrice: 80,
+    description: "Corte e nivelamento de grama em áreas residenciais e comerciais.",
   },
   {
     id: "rocagem-mato",
@@ -46,6 +49,7 @@ const defaultServices: ServiceDef[] = [
       { maxArea: Infinity, pricePerM2: 3.5 },
     ],
     minPrice: 100,
+    description: "Limpeza de terrenos com mato alto e vegetação densa.",
   },
 ];
 
