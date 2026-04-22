@@ -15,7 +15,6 @@ const Footer = () => (
         <h4 className="font-semibold mb-4">Links Rápidos</h4>
         <div className="space-y-2 text-sm opacity-70">
           <Link to="/" className="block hover:opacity-100">Início</Link>
-          <Link to="/servicos" className="block hover:opacity-100">Serviços</Link>
           <Link to="/orcamento" className="block hover:opacity-100">Orçamento</Link>
           <Link to="/sobre" className="block hover:opacity-100">Sobre Nós</Link>
         </div>
