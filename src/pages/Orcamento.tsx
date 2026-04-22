@@ -448,7 +448,7 @@ const Orcamento = () => {
                         <span>{formatBRL(subtotal)}</span>
                       </div>
                       {appliedCoupon && discount > 0 && (
-                        <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                        <div className="flex items-center justify-between text-sm text-accent">
                           <span>Desconto ({appliedCoupon.code}):</span>
                           <span>-{formatBRL(discount)}</span>
                         </div>
@@ -470,8 +470,8 @@ const Orcamento = () => {
                   <Tag className="w-5 h-5" /> Cupom de Desconto
                 </h2>
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400 text-sm">
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30">
+                    <div className="flex items-center gap-2 text-accent text-sm">
                       <CheckCircle className="w-4 h-4" />
                       <span>
                         Cupom <strong>{appliedCoupon.code}</strong> aplicado
