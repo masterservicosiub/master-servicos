@@ -104,19 +104,22 @@ const Orcamento = () => {
             pricePerM2: t.pricePerM2,
           })),
           minPrice: bs.min_price,
+          imageUrl: bs.image_url || "",
+          description: bs.description || "",
         }));
         setAvailableServices(mapped);
       }
     }).catch(() => {});
   }, []);
 
-  const addService = () => {
-    if (!currentServiceId) return;
-    if (selectedServices.find((s) => s.id === currentServiceId)) {
+  const addService = (id?: string) => {
+    const targetId = id ?? currentServiceId;
+    if (!targetId) return;
+    if (selectedServices.find((s) => s.id === targetId)) {
       toast.error("Este serviço já foi adicionado.");
       return;
     }
-    const service = availableServices.find((s) => s.id === currentServiceId);
+    const service = availableServices.find((s) => s.id === targetId);
     if (!service) return;
     setSelectedServices([
       ...selectedServices,
