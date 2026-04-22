@@ -53,6 +53,8 @@ const Admin = () => {
   const [bsTier1, setBsTier1] = useState("");
   const [bsTier2, setBsTier2] = useState("");
   const [bsTier3, setBsTier3] = useState("");
+  const [bsImage, setBsImage] = useState("");
+  const [bsDescription, setBsDescription] = useState("");
   const [editingBsId, setEditingBsId] = useState<string | null>(null);
   const [editBsName, setEditBsName] = useState("");
   const [editBsType, setEditBsType] = useState<"fixed" | "area">("fixed");
@@ -61,6 +63,8 @@ const Admin = () => {
   const [editBsTier1, setEditBsTier1] = useState("");
   const [editBsTier2, setEditBsTier2] = useState("");
   const [editBsTier3, setEditBsTier3] = useState("");
+  const [editBsImage, setEditBsImage] = useState("");
+  const [editBsDescription, setEditBsDescription] = useState("");
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
