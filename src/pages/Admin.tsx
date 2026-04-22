@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings } from "@/lib/supabase";
+import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText } from "lucide-react";
+import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight } from "lucide-react";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
 import { setGoogleScriptUrl, setNotificationEmail, getGoogleScriptUrl, getNotificationEmail, syncEmailSettingsFromDB } from "@/lib/googleSheets";
@@ -73,6 +73,14 @@ const Admin = () => {
   const [notifEmail, setNotifEmail] = useState("");
   const [savingEmail, setSavingEmail] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
+
+  // Coupons
+  const [coupons, setCoupons] = useState<CouponRow[]>([]);
+  const [coupCode, setCoupCode] = useState("");
+  const [coupType, setCoupType] = useState<"percent" | "fixed">("percent");
+  const [coupValue, setCoupValue] = useState("");
+  const [coupApplies, setCoupApplies] = useState<"all" | "service">("all");
+  const [coupServiceId, setCoupServiceId] = useState("");
 
   // Load admin password from DB on mount
   useEffect(() => {
@@ -147,11 +155,21 @@ const Admin = () => {
     }
   };
 
+  const loadCoupons = async () => {
+    try {
+      const data = await fetchCoupons();
+      setCoupons(data);
+    } catch (err) {
+      console.error("Erro ao buscar cupons:", err);
+    }
+  };
+
   useEffect(() => {
     if (authenticated) {
       loadOrders();
       loadServices();
       loadBudgetServices();
+      loadCoupons();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
