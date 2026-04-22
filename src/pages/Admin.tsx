@@ -435,6 +435,66 @@ const Admin = () => {
     }
   };
 
+  const handleAddCoupon = async () => {
+    const code = coupCode.trim().toUpperCase();
+    if (!code) {
+      toast.error("Informe o código do cupom.");
+      return;
+    }
+    const value = parseFloat(coupValue);
+    if (isNaN(value) || value <= 0) {
+      toast.error("Valor de desconto inválido.");
+      return;
+    }
+    if (coupType === "percent" && value > 100) {
+      toast.error("Desconto percentual não pode ser maior que 100%.");
+      return;
+    }
+    if (coupApplies === "service" && !coupServiceId) {
+      toast.error("Selecione o serviço ao qual o cupom se aplica.");
+      return;
+    }
+    try {
+      await insertCoupon({
+        code,
+        discount_type: coupType,
+        discount_value: value,
+        applies_to: coupApplies,
+        service_id: coupApplies === "service" ? coupServiceId : null,
+        active: true,
+      });
+      setCoupCode(""); setCoupValue(""); setCoupApplies("all"); setCoupServiceId(""); setCoupType("percent");
+      toast.success("Cupom criado!");
+      loadCoupons();
+    } catch (err: any) {
+      if (String(err?.message || "").includes("duplicate")) {
+        toast.error("Já existe um cupom com este código.");
+      } else {
+        toast.error("Erro ao criar cupom.");
+      }
+    }
+  };
+
+  const handleToggleCoupon = async (c: CouponRow) => {
+    try {
+      await updateCoupon(c.id!, { active: !c.active });
+      loadCoupons();
+    } catch {
+      toast.error("Erro ao atualizar cupom.");
+    }
+  };
+
+  const handleDeleteCoupon = async (id: string) => {
+    if (!confirm("Excluir este cupom?")) return;
+    try {
+      await deleteCoupon(id);
+      setCoupons(coupons.filter((c) => c.id !== id));
+      toast.success("Cupom excluído!");
+    } catch {
+      toast.error("Erro ao excluir cupom.");
+    }
+  };
+
   if (!authenticated) {
     return (
       <div className="min-h-screen">
