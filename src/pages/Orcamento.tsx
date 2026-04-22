@@ -205,7 +205,7 @@ const Orcamento = () => {
       return;
     }
 
-    const servicesText = selectedServices.map((svc) => {
+    const servicesLines = selectedServices.map((svc) => {
       const def = availableServices.find((d) => d.id === svc.id)!;
       const price = calcPrice(def, svc);
       let detail = svc.name;
@@ -216,7 +216,13 @@ const Orcamento = () => {
       }
       detail += ` - R$ ${price.toFixed(2)}`;
       return detail;
-    }).join(" | ");
+    });
+    if (appliedCoupon && discount > 0) {
+      servicesLines.push(
+        `Cupom ${appliedCoupon.code} (-R$ ${discount.toFixed(2)})`
+      );
+    }
+    const servicesText = servicesLines.join(" | ");
 
     // Save to Supabase
     try {
@@ -436,10 +442,73 @@ const Orcamento = () => {
 
                   {/* Total */}
                   <div className="flex items-center justify-between pt-4 border-t border-border">
-                    <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
-                    <span className="text-xl font-bold text-primary">{formatBRL(total)}</span>
+                    <div className="flex flex-col gap-1 w-full">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>Subtotal:</span>
+                        <span>{formatBRL(subtotal)}</span>
+                      </div>
+                      {appliedCoupon && discount > 0 && (
+                        <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+                          <span>Desconto ({appliedCoupon.code}):</span>
+                          <span>-{formatBRL(discount)}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
+                        <span className="text-xl font-bold text-primary">{formatBRL(total)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Cupom de Desconto */}
+            {selectedServices.length > 0 && (
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                  <Tag className="w-5 h-5" /> Cupom de Desconto
+                </h2>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400 text-sm">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>
+                        Cupom <strong>{appliedCoupon.code}</strong> aplicado
+                        {appliedCoupon.discount_type === "percent"
+                          ? ` (${appliedCoupon.discount_value}% de desconto)`
+                          : ` (-${formatBRL(Number(appliedCoupon.discount_value))})`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-destructive hover:opacity-70"
+                      aria-label="Remover cupom"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Digite o código do cupom"
+                      maxLength={50}
+                      className="flex-1 rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon}
+                      className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
+                    >
+                      {validatingCoupon ? "Validando..." : "Aplicar"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
