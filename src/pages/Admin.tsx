@@ -838,6 +838,10 @@ const Admin = () => {
                     <option value="area">Por Área (m²)</option>
                   </select>
                 </div>
+                <input value={bsImage} onChange={(e) => setBsImage(e.target.value)} placeholder="URL da imagem (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" />
+                <textarea value={bsDescription} onChange={(e) => setBsDescription(e.target.value)} placeholder="Descrição curta (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" rows={2} />
                 {bsType === "fixed" ? (
                   <input type="number" value={bsFixedPrice} onChange={(e) => setBsFixedPrice(e.target.value)} placeholder="Preço fixo (R$) *"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" />
