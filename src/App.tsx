@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Orcamento from "./pages/Orcamento.tsx";
 import Sobre from "./pages/Sobre.tsx";
-import Servicos from "./pages/Servicos.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
@@ -25,7 +24,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/orcamento" element={<Orcamento />} />
           <Route path="/sobre" element={<Sobre />} />
-          <Route path="/servicos" element={<Servicos />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
