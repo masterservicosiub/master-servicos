@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
-import { Trash2, Plus, Send, CheckCircle } from "lucide-react";
+import { Trash2, Plus, Send, CheckCircle, Tag, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { sendToGoogleSheets } from "@/lib/googleSheets";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { insertOrder, fetchBudgetServices } from "@/lib/supabase";
+import { insertOrder, fetchBudgetServices, findCouponByCode, type CouponRow } from "@/lib/supabase";
 import { sendOrderEmailNotification } from "@/lib/emailNotification";
 
 type ServiceType = "fixed" | "area";
@@ -83,6 +83,9 @@ const Orcamento = () => {
   const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
   const [currentServiceId, setCurrentServiceId] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponRow | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     fetchBudgetServices().then((data) => {
@@ -126,12 +129,70 @@ const Orcamento = () => {
     setSelectedServices(selectedServices.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
-  const total = useMemo(() => {
+  const subtotal = useMemo(() => {
     return selectedServices.reduce((sum, svc) => {
       const def = availableServices.find((d) => d.id === svc.id);
       return sum + (def ? calcPrice(def, svc) : 0);
     }, 0);
-  }, [selectedServices]);
+  }, [selectedServices, availableServices]);
+
+  const discount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    let base = 0;
+    if (appliedCoupon.applies_to === "all") {
+      base = subtotal;
+    } else if (appliedCoupon.service_id) {
+      const svc = selectedServices.find((s) => s.id === appliedCoupon.service_id);
+      if (svc) {
+        const def = availableServices.find((d) => d.id === svc.id);
+        base = def ? calcPrice(def, svc) : 0;
+      }
+    }
+    if (base <= 0) return 0;
+    if (appliedCoupon.discount_type === "percent") {
+      return Math.min(base, base * (Number(appliedCoupon.discount_value) / 100));
+    }
+    return Math.min(base, Number(appliedCoupon.discount_value));
+  }, [appliedCoupon, subtotal, selectedServices, availableServices]);
+
+  const total = Math.max(0, subtotal - discount);
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim();
+    if (!code) {
+      toast.error("Digite um código de cupom.");
+      return;
+    }
+    setValidatingCoupon(true);
+    try {
+      const coupon = await findCouponByCode(code);
+      if (!coupon) {
+        toast.error("Cupom inválido ou inativo.");
+        setAppliedCoupon(null);
+        return;
+      }
+      if (coupon.applies_to === "service" && coupon.service_id) {
+        const hasService = selectedServices.some((s) => s.id === coupon.service_id);
+        if (!hasService) {
+          const svcDef = availableServices.find((d) => d.id === coupon.service_id);
+          toast.error(`Este cupom é válido apenas para: ${svcDef?.name ?? "serviço específico"}.`);
+          setAppliedCoupon(null);
+          return;
+        }
+      }
+      setAppliedCoupon(coupon);
+      toast.success(`Cupom "${coupon.code}" aplicado!`);
+    } catch {
+      toast.error("Erro ao validar cupom.");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
