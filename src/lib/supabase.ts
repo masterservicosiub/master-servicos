@@ -104,6 +104,8 @@ export interface BudgetServiceRow {
   tiers: { maxArea: number; pricePerM2: number }[] | null;
   min_price: number;
   sort_order: number;
+  image_url?: string;
+  description?: string;
 }
 
 export async function fetchBudgetServices(): Promise<BudgetServiceRow[]> {
