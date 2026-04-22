@@ -951,6 +951,7 @@ const Admin = () => {
                                 setEditBsFixedPrice(String(bs.fixed_price || "")); setEditBsMinPrice(String(bs.min_price || ""));
                                 const t = bs.tiers || [];
                                 setEditBsTier1(String(t[0]?.pricePerM2 || "")); setEditBsTier2(String(t[1]?.pricePerM2 || "")); setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                setEditBsImage(bs.image_url || ""); setEditBsDescription(bs.description || "");
                               }} className="text-primary hover:opacity-70"><Edit2 className="w-4 h-4" /></button>
                               <button onClick={() => handleDeleteBudgetService(bs.id!)}
                                 className="text-destructive hover:opacity-70"><Trash2 className="w-4 h-4" /></button>
