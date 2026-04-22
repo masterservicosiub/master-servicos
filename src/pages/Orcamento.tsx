@@ -17,14 +17,16 @@ interface ServiceDef {
   fixedPrice?: number;
   tiers?: { maxArea: number; pricePerM2: number }[];
   minPrice?: number;
+  imageUrl?: string;
+  description?: string;
 }
 
 const defaultServices: ServiceDef[] = [
-  { id: "vazamento", name: "Verificar Vazamento", type: "fixed", fixedPrice: 90 },
-  { id: "saneago", name: "Instalação Padrão Saneago", type: "fixed", fixedPrice: 250 },
-  { id: "caixa-agua", name: "Limpeza de Caixa d'Água", type: "fixed", fixedPrice: 170 },
-  { id: "caixa-gordura", name: "Limpeza de Caixa de Gordura", type: "fixed", fixedPrice: 150 },
-  { id: "placa-solar", name: "Limpeza Placa Solar (Un)", type: "fixed", fixedPrice: 12 },
+  { id: "vazamento", name: "Verificar Vazamento", type: "fixed", fixedPrice: 90, description: "Inspeção e detecção de vazamentos hidráulicos." },
+  { id: "saneago", name: "Instalação Padrão Saneago", type: "fixed", fixedPrice: 250, description: "Instalação completa do padrão de água Saneago." },
+  { id: "caixa-agua", name: "Limpeza de Caixa d'Água", type: "fixed", fixedPrice: 170, description: "Higienização completa da caixa d'água." },
+  { id: "caixa-gordura", name: "Limpeza de Caixa de Gordura", type: "fixed", fixedPrice: 150, description: "Limpeza e desobstrução da caixa de gordura." },
+  { id: "placa-solar", name: "Limpeza Placa Solar (Un)", type: "fixed", fixedPrice: 12, description: "Preço por placa. Aumente o desempenho do seu sistema solar." },
   {
     id: "rocagem-grama",
     name: "Roçagem de Grama",
@@ -35,6 +37,7 @@ const defaultServices: ServiceDef[] = [
       { maxArea: Infinity, pricePerM2: 2.5 },
     ],
     minPrice: 80,
+    description: "Corte e nivelamento de grama em áreas residenciais e comerciais.",
   },
   {
     id: "rocagem-mato",
@@ -46,6 +49,7 @@ const defaultServices: ServiceDef[] = [
       { maxArea: Infinity, pricePerM2: 3.5 },
     ],
     minPrice: 100,
+    description: "Limpeza de terrenos com mato alto e vegetação densa.",
   },
 ];
 
@@ -100,19 +104,22 @@ const Orcamento = () => {
             pricePerM2: t.pricePerM2,
           })),
           minPrice: bs.min_price,
+          imageUrl: bs.image_url || "",
+          description: bs.description || "",
         }));
         setAvailableServices(mapped);
       }
     }).catch(() => {});
   }, []);
 
-  const addService = () => {
-    if (!currentServiceId) return;
-    if (selectedServices.find((s) => s.id === currentServiceId)) {
+  const addService = (id?: string) => {
+    const targetId = id ?? currentServiceId;
+    if (!targetId) return;
+    if (selectedServices.find((s) => s.id === targetId)) {
       toast.error("Este serviço já foi adicionado.");
       return;
     }
-    const service = availableServices.find((s) => s.id === currentServiceId);
+    const service = availableServices.find((s) => s.id === targetId);
     if (!service) return;
     setSelectedServices([
       ...selectedServices,
@@ -345,30 +352,57 @@ const Orcamento = () => {
 
             {/* Service Selection */}
             <div className="bg-card rounded-xl p-6 border border-border">
-              <h2 className="text-xl font-semibold text-card-foreground mb-4">Adicionar Serviços</h2>
-              <div className="space-y-3">
-  <select
-    value={currentServiceId}
-    onChange={(e) => setCurrentServiceId(e.target.value)}
-    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-  >
-    <option value="">Selecione um serviço...</option>
-    {availableServices.map((s) => (
-      <option key={s.id} value={s.id}>
-        {s.name} {s.type === "fixed" ? `— ${formatBRL(s.fixedPrice ?? 0)}` : "— por m²"}
-      </option>
-    ))}
-  </select>
-
-  <button
-    type="button"
-    onClick={addService}
-    className="w-full bg-primary text-primary-foreground px-4 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-  >
-    <Plus className="w-4 h-4" />
-    Adicionar
-  </button>
-</div>
+              <h2 className="text-xl font-semibold text-card-foreground mb-1">Catálogo de Serviços</h2>
+              <p className="text-sm text-muted-foreground mb-5">Toque em um serviço para adicioná-lo ao seu orçamento.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableServices.map((s) => {
+                  const added = !!selectedServices.find((sel) => sel.id === s.id);
+                  return (
+                    <div
+                      key={s.id}
+                      className={`group rounded-xl border bg-secondary overflow-hidden flex flex-col transition-all ${
+                        added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="aspect-[4/3] bg-muted overflow-hidden flex items-center justify-center">
+                        {s.imageUrl ? (
+                          <img
+                            src={s.imageUrl}
+                            alt={s.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Sem imagem</span>
+                        )}
+                      </div>
+                      <div className="p-4 flex flex-col flex-1">
+                        <h3 className="font-semibold text-foreground leading-tight">{s.name}</h3>
+                        {s.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{s.description}</p>
+                        )}
+                        <div className="mt-3 mb-3 text-sm font-semibold text-primary">
+                          {s.type === "fixed"
+                            ? formatBRL(s.fixedPrice ?? 0)
+                            : `A partir de ${formatBRL(s.minPrice ?? 0)} • por m²`}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => addService(s.id)}
+                          disabled={added}
+                          className="mt-auto w-full bg-primary text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {added ? (
+                            <><CheckCircle className="w-4 h-4" /> Adicionado</>
+                          ) : (
+                            <><Plus className="w-4 h-4" /> Adicionar</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Selected Services */}

@@ -53,6 +53,8 @@ const Admin = () => {
   const [bsTier1, setBsTier1] = useState("");
   const [bsTier2, setBsTier2] = useState("");
   const [bsTier3, setBsTier3] = useState("");
+  const [bsImage, setBsImage] = useState("");
+  const [bsDescription, setBsDescription] = useState("");
   const [editingBsId, setEditingBsId] = useState<string | null>(null);
   const [editBsName, setEditBsName] = useState("");
   const [editBsType, setEditBsType] = useState<"fixed" | "area">("fixed");
@@ -61,6 +63,8 @@ const Admin = () => {
   const [editBsTier1, setEditBsTier1] = useState("");
   const [editBsTier2, setEditBsTier2] = useState("");
   const [editBsTier3, setEditBsTier3] = useState("");
+  const [editBsImage, setEditBsImage] = useState("");
+  const [editBsDescription, setEditBsDescription] = useState("");
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
@@ -355,8 +359,11 @@ const Admin = () => {
         fixed_price: parseFloat(bsFixedPrice) || 0,
         tiers, min_price: parseFloat(bsMinPrice) || 0,
         sort_order: budgetServices.length,
+        image_url: bsImage.trim(),
+        description: bsDescription.trim(),
       });
       setBsName(""); setBsFixedPrice(""); setBsMinPrice(""); setBsTier1(""); setBsTier2(""); setBsTier3(""); setBsType("fixed");
+      setBsImage(""); setBsDescription("");
       toast.success("Serviço de orçamento adicionado!");
       loadBudgetServices();
     } catch { toast.error("Erro ao adicionar serviço de orçamento"); }
@@ -373,6 +380,8 @@ const Admin = () => {
         name: editBsName, type: editBsType,
         fixed_price: parseFloat(editBsFixedPrice) || 0,
         tiers, min_price: parseFloat(editBsMinPrice) || 0,
+        image_url: editBsImage.trim(),
+        description: editBsDescription.trim(),
       });
       setEditingBsId(null);
       toast.success("Serviço atualizado!");
@@ -829,6 +838,10 @@ const Admin = () => {
                     <option value="area">Por Área (m²)</option>
                   </select>
                 </div>
+                <input value={bsImage} onChange={(e) => setBsImage(e.target.value)} placeholder="URL da imagem (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" />
+                <textarea value={bsDescription} onChange={(e) => setBsDescription(e.target.value)} placeholder="Descrição curta (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" rows={2} />
                 {bsType === "fixed" ? (
                   <input type="number" value={bsFixedPrice} onChange={(e) => setBsFixedPrice(e.target.value)} placeholder="Preço fixo (R$) *"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" />
@@ -863,6 +876,10 @@ const Admin = () => {
                                 <option value="area">Por Área (m²)</option>
                               </select>
                             </div>
+                            <input value={editBsImage} onChange={(e) => setEditBsImage(e.target.value)} placeholder="URL da imagem"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                            <textarea value={editBsDescription} onChange={(e) => setEditBsDescription(e.target.value)} placeholder="Descrição curta"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={2} />
                             {editBsType === "fixed" ? (
                               <input type="number" value={editBsFixedPrice} onChange={(e) => setEditBsFixedPrice(e.target.value)} placeholder="Preço fixo"
                                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
@@ -927,6 +944,7 @@ const Admin = () => {
                                     `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
                               </div>
+                              {bs.image_url && <img src={bs.image_url} alt={bs.name} className="w-14 h-14 object-cover rounded-md ml-2" />}
                             </div>
                             <div className="flex gap-2">
                               <button onClick={() => {
@@ -934,6 +952,7 @@ const Admin = () => {
                                 setEditBsFixedPrice(String(bs.fixed_price || "")); setEditBsMinPrice(String(bs.min_price || ""));
                                 const t = bs.tiers || [];
                                 setEditBsTier1(String(t[0]?.pricePerM2 || "")); setEditBsTier2(String(t[1]?.pricePerM2 || "")); setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                setEditBsImage(bs.image_url || ""); setEditBsDescription(bs.description || "");
                               }} className="text-primary hover:opacity-70"><Edit2 className="w-4 h-4" /></button>
                               <button onClick={() => handleDeleteBudgetService(bs.id!)}
                                 className="text-destructive hover:opacity-70"><Trash2 className="w-4 h-4" /></button>
