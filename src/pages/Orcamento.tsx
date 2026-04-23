@@ -360,11 +360,11 @@ const Orcamento = () => {
                   return (
                     <div
                       key={s.id}
-                      className={`group rounded-xl border bg-secondary overflow-hidden flex flex-col transition-all ${
+                      className={`group rounded-xl border bg-muted overflow-hidden flex flex-col transition-all shadow-sm ${
                         added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <div className="aspect-[4/3] bg-muted overflow-hidden flex items-center justify-center">
+                      <div className="aspect-[4/3] bg-background overflow-hidden flex items-center justify-center">
                         {s.imageUrl ? (
                           <img
                             src={s.imageUrl}
