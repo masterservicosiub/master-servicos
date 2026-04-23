@@ -360,7 +360,7 @@ const Orcamento = () => {
                   return (
                     <div
                       key={s.id}
-                      className={`group rounded-xl border bg-muted overflow-hidden flex flex-col transition-all shadow-sm ${
+                      className={`group rounded-xl border bg-neutral-200 overflow-hidden flex flex-col transition-all shadow-sm ${
                         added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                       }`}
                     >
