@@ -275,6 +275,38 @@ const Orcamento = () => {
       total,
     }).catch(console.error);
 
+    // Enviar pedido por WhatsApp
+    const whatsappLines = [
+      `*Novo Orçamento*`,
+      ``,
+      `*Cliente:* ${name.trim()}`,
+      `*Telefone:* ${phone.trim()}`,
+      email.trim() ? `*E-mail:* ${email.trim()}` : null,
+      `*Endereço:* ${address.trim()}`,
+      ``,
+      `*Serviços:*`,
+      ...selectedServices.map((svc) => {
+        const def = availableServices.find((d) => d.id === svc.id)!;
+        const price = calcPrice(def, svc);
+        let detail = `• ${svc.name}`;
+        if (svc.width && svc.height) {
+          detail += ` (${svc.width}x${svc.height}m = ${(svc.width * svc.height).toFixed(1)}m²)`;
+        } else if (svc.quantity > 1) {
+          detail += ` (x${svc.quantity})`;
+        }
+        detail += ` — ${formatBRL(price)}`;
+        if (svc.observation) detail += `\n   Obs: ${svc.observation}`;
+        return detail;
+      }),
+      appliedCoupon && discount > 0
+        ? `\n*Cupom:* ${appliedCoupon.code} (-${formatBRL(discount)})`
+        : null,
+      ``,
+      `*Total: ${formatBRL(total)}*`,
+    ].filter(Boolean);
+    const whatsappMessage = encodeURIComponent(whatsappLines.join("\n"));
+    window.open(`https://wa.me/5564992642950?text=${whatsappMessage}`, "_blank");
+
     setSubmitted(true);
     toast.success("Orçamento enviado com sucesso!");
   };
