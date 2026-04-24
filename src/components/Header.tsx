@@ -35,7 +35,7 @@ const Header = () => {
             to="/orcamento"
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
           >
-            Solicitar Orçamento
+            Fazer Orçamento
           </Link>
         </nav>
         <button className="md:hidden text-foreground" onClick={() => setMenuOpen(!menuOpen)}>
