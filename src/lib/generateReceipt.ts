@@ -225,7 +225,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
   // ===== PAYMENT BLOCK (FOOTER) =====
-  const footerH = 70;
+  const footerH = 35;
   const footerY = pageH - footerH - 10;
 
   doc.setFillColor(245, 247, 250);
