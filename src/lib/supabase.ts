@@ -227,3 +227,39 @@ export async function findCouponByCode(code: string): Promise<CouponRow | null> 
   if (error) return null;
   return (data as CouponRow) || null;
 }
+
+// Clients CRUD
+export interface ClientRow {
+  id?: string;
+  created_at?: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  notes: string;
+}
+
+export async function fetchClients(): Promise<ClientRow[]> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("*")
+    .order("name", { ascending: true });
+  if (error) throw error;
+  return data as ClientRow[];
+}
+
+export async function insertClient(client: Omit<ClientRow, "id" | "created_at">) {
+  const { data, error } = await supabase.from("clients").insert([client]).select();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateClient(id: string, client: Partial<ClientRow>) {
+  const { error } = await supabase.from("clients").update(client).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteClient(id: string) {
+  const { error } = await supabase.from("clients").delete().eq("id", id);
+  if (error) throw error;
+}
