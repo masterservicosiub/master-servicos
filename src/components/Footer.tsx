@@ -28,8 +28,6 @@ const Footer = () => (
           <a href="mailto:masterservicos.iub@gmail.com" className="flex items-center gap-2 hover:opacity-100">
             <Mail className="w-4 h-4" /> masterservicos.iub@gmail.com
           </a>
-          <Mail className="w-4 h-4" /> Itumbiara/GO - Setor Planalto
-          </a>
         </div>
       </div>
     </div>
