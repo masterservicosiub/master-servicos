@@ -11,8 +11,7 @@ const COMPANY = {
   phone: "(64) 9 9264-2950",
 };
 
-const fmtBRL = (v: number) =>
-  `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmtBRL = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 async function loadImageDataUrl(url: string): Promise<string> {
   const res = await fetch(url);
@@ -31,8 +30,7 @@ async function loadImageDataUrl(url: string): Promise<string> {
 function buildPixPayload(opts: { key: string; name: string; city: string; amount: number; txid?: string }): string {
   const { key, name, city, amount, txid = "***" } = opts;
 
-  const tlv = (id: string, value: string) =>
-    id + value.length.toString().padStart(2, "0") + value;
+  const tlv = (id: string, value: string) => id + value.length.toString().padStart(2, "0") + value;
 
   const gui = tlv("00", "br.gov.bcb.pix");
   const keyField = tlv("01", key);
@@ -104,9 +102,7 @@ export async function generateReceipt(order: OrderRow) {
   // Watermark (centered, semi-transparent)
   if (logoData) {
     try {
-      const gState = (doc as any).GState
-        ? new (doc as any).GState({ opacity: 0.08 })
-        : null;
+      const gState = (doc as any).GState ? new (doc as any).GState({ opacity: 0.08 }) : null;
       if (gState) (doc as any).setGState(gState);
       const wmW = 130;
       const wmH = 130;
@@ -165,10 +161,20 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   let y = 79;
-  doc.text(`Nome: ${order.name || "-"}`, 14, y); y += 5;
-  if (order.address) { doc.text(`Endereço: ${order.address}`, 14, y); y += 5; }
-  if (order.phone)   { doc.text(`Contato: ${order.phone}`, 14, y); y += 5; }
-  if (order.email)   { doc.text(`E-mail: ${order.email}`, 14, y); y += 5; }
+  doc.text(`Nome: ${order.name || "-"}`, 14, y);
+  y += 5;
+  if (order.address) {
+    doc.text(`Endereço: ${order.address}`, 14, y);
+    y += 5;
+  }
+  if (order.phone) {
+    doc.text(`Contato: ${order.phone}`, 14, y);
+    y += 5;
+  }
+  if (order.email) {
+    doc.text(`E-mail: ${order.email}`, 14, y);
+    y += 5;
+  }
 
   // ===== SERVICES TABLE =====
   const items = parseServices(order.services || "");
@@ -176,9 +182,10 @@ export async function generateReceipt(order: OrderRow) {
   const total = Number(order.total) || subtotal;
   const discount = Math.max(0, subtotal - total);
 
-  const tableBody = items.length > 0
-    ? items.map((it) => [it.description, fmtBRL(it.value)])
-    : [[order.services || "Serviços executados", fmtBRL(total)]];
+  const tableBody =
+    items.length > 0
+      ? items.map((it) => [it.description, fmtBRL(it.value)])
+      : [[order.services || "Serviços executados", fmtBRL(total)]];
 
   autoTable(doc, {
     startY: y + 4,
@@ -202,7 +209,7 @@ export async function generateReceipt(order: OrderRow) {
 
   if (discount > 0) {
     doc.setTextColor(180, 30, 30);
-    doc.text(`Desconto aplicado:`, pageW - 60, afterTableY);
+    doc.text(`Desconto:`, pageW - 60, afterTableY);
     doc.text(`- ${fmtBRL(discount)}`, pageW - 14, afterTableY, { align: "right" });
     doc.setTextColor(40, 40, 40);
     afterTableY += 6;
@@ -213,21 +220,19 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(`TOTAL:`, pageW - 60, afterTableY);
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
-  // ===== PAYMENT BLOCK (FOOTER) — 50% smaller =====
-  const footerH = 35;
-  const footerW = (pageW - 28) / 2;
-  const footerX = 14;
+  // ===== PAYMENT BLOCK (FOOTER) =====
+  const footerH = 70;
   const footerY = pageH - footerH - 10;
 
   doc.setFillColor(245, 247, 250);
   doc.setDrawColor(41, 128, 185);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(footerX, footerY, footerW, footerH, 2, 2, "FD");
+  doc.setLineWidth(0.6);
+  doc.roundedRect(14, footerY, pageW - 28, footerH, 3, 3, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(12);
   doc.setTextColor(41, 128, 185);
-  doc.text("PAGAMENTO — PIX", footerX + footerW / 2, footerY + 4, { align: "center" });
+  doc.text("FORMA DE PAGAMENTO — PIX", pageW / 2, footerY + 8, { align: "center" });
 
   // QR code
   try {
@@ -239,36 +244,35 @@ export async function generateReceipt(order: OrderRow) {
       txid: receiptNumber,
     });
     const qrDataUrl = await QRCode.toDataURL(pixPayload, { margin: 1, width: 256 });
-    doc.addImage(qrDataUrl, "PNG", footerX + 2, footerY + 6, 23, 23);
+    doc.addImage(qrDataUrl, "PNG", 20, footerY + 12, 45, 45);
   } catch (e) {
     console.error("Erro ao gerar QR code:", e);
   }
 
-  const tx = footerX + 28;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.5);
+  doc.setFontSize(10);
   doc.setTextColor(40, 40, 40);
-  doc.text("Chave PIX (CNPJ):", tx, footerY + 9);
+  doc.text("Chave PIX (CNPJ):", 72, footerY + 20);
   doc.setFont("helvetica", "bold");
-  doc.text(COMPANY.cnpj, tx, footerY + 12);
+  doc.text(COMPANY.cnpj, 72, footerY + 26);
 
   doc.setFont("helvetica", "normal");
-  doc.text("Beneficiário:", tx, footerY + 16);
+  doc.text("Beneficiário:", 72, footerY + 34);
   doc.setFont("helvetica", "bold");
-  doc.text(COMPANY.name, tx, footerY + 19);
+  doc.text(COMPANY.name, 72, footerY + 40);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.5);
-  doc.text("Valor total:", tx, footerY + 24);
+  doc.setFontSize(11);
+  doc.text("Valor total:", 72, footerY + 50);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(14);
   doc.setTextColor(41, 128, 185);
-  doc.text(fmtBRL(total), tx, footerY + 28);
+  doc.text(fmtBRL(total), 72, footerY + 58);
 
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(5.5);
+  doc.setFontSize(8);
   doc.setTextColor(110, 110, 110);
-  doc.text("Aponte a câmera para o QR Code.", footerX + footerW / 2, footerY + footerH - 2, { align: "center" });
+  doc.text("Aponte a câmera para o QR Code para pagar via PIX.", pageW / 2, footerY + footerH - 4, { align: "center" });
 
   doc.save(`recibo-${receiptNumber}-${(order.name || "cliente").replace(/\s+/g, "_")}.pdf`);
 }
