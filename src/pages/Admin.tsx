@@ -184,12 +184,22 @@ const Admin = () => {
     }
   };
 
+  const loadClients = async () => {
+    try {
+      const data = await fetchClients();
+      setClients(data);
+    } catch (err) {
+      console.error("Erro ao buscar clientes:", err);
+    }
+  };
+
   useEffect(() => {
     if (authenticated) {
       loadOrders();
       loadServices();
       loadBudgetServices();
       loadCoupons();
+      loadClients();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
