@@ -225,18 +225,18 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
   // ===== PAYMENT BLOCK (FOOTER) =====
-  const footerH = 70;
-  const footerY = pageH - footerH - 10;
+  const footerH = 35;
+  const footerY = pageH - footerH - 5;
 
   doc.setFillColor(245, 247, 250);
   doc.setDrawColor(41, 128, 185);
-  doc.setLineWidth(0.6);
-  doc.roundedRect(14, footerY, pageW - 28, footerH, 3, 3, "FD");
+  doc.setLineWidth(0.3);
+  doc.roundedRect(7, footerY, pageW - 14, footerH, 1.5, 1.5, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
+  doc.setFontSize(6);
   doc.setTextColor(41, 128, 185);
-  doc.text("FORMA DE PAGAMENTO — PIX", pageW / 2, footerY + 8, { align: "center" });
+  doc.text("FORMA DE PAGAMENTO — PIX", pageW / 2, footerY + 4, { align: "center" });
 
   // QR code
   try {
