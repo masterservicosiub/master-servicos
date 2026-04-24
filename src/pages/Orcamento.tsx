@@ -221,12 +221,12 @@ const Orcamento = () => {
       } else if (svc.quantity > 1) {
         detail += ` (x${svc.quantity})`;
       }
-      detail += ` - R$ ${price.toFixed(2)}`;
+      detail += ` - ${formatBRL(price)}`;
       return detail;
     });
     if (appliedCoupon && discount > 0) {
       servicesLines.push(
-        `Cupom ${appliedCoupon.code} (-R$ ${discount.toFixed(2)})`
+        `Cupom ${appliedCoupon.code} (-${formatBRL(discount)})`
       );
     }
     const servicesText = servicesLines.join(" | ");
