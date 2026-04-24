@@ -531,7 +531,7 @@ const Orcamento = () => {
 
             {/* Cupom de Desconto */}
             {selectedServices.length > 0 && (
-              <div className="bg-card rounded-xl p-6 border border-border">
+              <div className="bg-neutral-200 rounded-xl p-6 border border-border shadow-sm">
                 <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
                   <Tag className="w-5 h-5" /> Cupom de Desconto
                 </h2>
