@@ -28,13 +28,14 @@ const Footer = () => (
           <a href="mailto:masterservicos.iub@gmail.com" className="flex items-center gap-2 hover:opacity-100">
             <Mail className="w-4 h-4" /> masterservicos.iub@gmail.com
           </a>
+          <Mail className="w-4 h-4" /> Itumbiara/GO - Setor Planalto
+          </a>
         </div>
       </div>
     </div>
     <div className="container mx-auto px-4 mt-8 pt-8 border-t border-background/20 text-center text-sm opacity-50">
       <div className="flex items-center justify-center gap-4">
         <span>© 2026 Master Serviços. Todos os direitos reservados.</span>
-        <Link to="/admin" className="hover:opacity-100 underline">Admin</Link>
       </div>
       <div className="mt-2">CNPJ: 61.906.390/0001-58</div>
     </div>
