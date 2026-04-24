@@ -443,7 +443,7 @@ const Orcamento = () => {
             </div>
 
             {/* Service Selection */}
-            <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="bg-blue-200 rounded-xl p-6 border border-border">
               <h2 className="text-xl font-semibold text-card-foreground mb-1">Catálogo de Serviços</h2>
               <p className="text-sm text-muted-foreground mb-5">
                 Toque em um serviço para adicioná-lo ao seu orçamento.
