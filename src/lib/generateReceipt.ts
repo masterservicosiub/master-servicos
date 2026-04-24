@@ -24,13 +24,9 @@ async function loadImageDataUrl(url: string): Promise<string> {
   });
 }
 
-/**
- * Builds the PIX "copia e cola" payload (BR Code / EMV) for a static PIX with CNPJ key.
- */
 function buildPixPayload(opts: { key: string; name: string; city: string; amount: number; txid?: string }): string {
   const { key, name, city, amount, txid = "***" } = opts;
 
-  // ✅ Remove acentos e caracteres especiais
   const normalize = (str: string) =>
     str
       .normalize("NFD")
@@ -47,8 +43,8 @@ function buildPixPayload(opts: { key: string; name: string; city: string; amount
   const transactionCurrency = tlv("53", "986");
   const transactionAmount = amount > 0 ? tlv("54", amount.toFixed(2)) : "";
   const countryCode = tlv("58", "BR");
-  const merchantName = tlv("59", normalize(name).substring(0, 25)); // ✅ normalizado
-  const merchantCity = tlv("60", normalize(city).substring(0, 15)); // ✅ normalizado
+  const merchantName = tlv("59", normalize(name).substring(0, 25));
+  const merchantCity = tlv("60", normalize(city).substring(0, 15));
   const additionalData = tlv("62", tlv("05", txid.substring(0, 25)));
   const payloadFormatIndicator = tlv("00", "01");
 
@@ -63,7 +59,6 @@ function buildPixPayload(opts: { key: string; name: string; city: string; amount
     merchantCity +
     additionalData;
 
-  // CRC16-CCITT (sem alterações — estava correto)
   const toCrc = payload + "6304";
   let crc = 0xffff;
   for (let i = 0; i < toCrc.length; i++) {
@@ -95,7 +90,7 @@ export async function generateReceipt(order: OrderRow) {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
 
-  // Load logo
+  // ===== LOGO =====
   let logoData = "";
   try {
     logoData = await loadImageDataUrl(logoUrl);
@@ -103,7 +98,7 @@ export async function generateReceipt(order: OrderRow) {
     console.error("Erro ao carregar logo:", e);
   }
 
-  // Watermark (centered, semi-transparent)
+  // Watermark
   if (logoData) {
     try {
       const gState = (doc as any).GState ? new (doc as any).GState({ opacity: 0.08 }) : null;
@@ -196,7 +191,12 @@ export async function generateReceipt(order: OrderRow) {
     head: [["Serviços Executados", "Valor"]],
     body: tableBody,
     theme: "grid",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold", fontSize: 10 },
+    headStyles: {
+      fillColor: [41, 128, 185],
+      textColor: 255,
+      fontStyle: "bold",
+      fontSize: 10,
+    },
     bodyStyles: { fontSize: 10, textColor: [40, 40, 40] },
     columnStyles: { 1: { halign: "right", cellWidth: 40 } },
     margin: { left: 14, right: 14 },
@@ -207,63 +207,70 @@ export async function generateReceipt(order: OrderRow) {
   // Subtotal / discount / total
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
+  doc.setTextColor(40, 40, 40);
   doc.text(`Subtotal:`, pageW - 60, afterTableY);
-  doc.text(fmtBRL(subtotal > 0 ? subtotal : total), pageW - 14, afterTableY, { align: "right" });
+  doc.text(fmtBRL(subtotal > 0 ? subtotal : total), pageW - 14, afterTableY, {
+    align: "right",
+  });
   afterTableY += 6;
 
   if (discount > 0) {
     doc.setTextColor(180, 30, 30);
     doc.text(`Desconto:`, pageW - 60, afterTableY);
-    doc.text(`- ${fmtBRL(discount)}`, pageW - 14, afterTableY, { align: "right" });
+    doc.text(`- ${fmtBRL(discount)}`, pageW - 14, afterTableY, {
+      align: "right",
+    });
     doc.setTextColor(40, 40, 40);
     afterTableY += 6;
   }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
+  doc.setTextColor(20, 20, 20);
   doc.text(`TOTAL:`, pageW - 60, afterTableY);
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
-  // ===== OBSERVAÇÕES (acima do bloco PIX) =====
-  const notesLines: string[] =
-    order.notes && order.notes.trim() ? doc.splitTextToSize(order.notes.trim(), pageW - 28) : [];
-  const notesBlockH = notesLines.length > 0 ? 6 + notesLines.length * 4.5 + 4 : 0;
-
+  // ===== LAYOUT: calcular alturas dos blocos do rodapé =====
+  const blockX = 7;
+  const blockW = (pageW - 28) * 0.7;
   const footerH = 49;
+
+  // Pré-calcular linhas das observações
+  const notesLines: string[] =
+    order.notes && order.notes.trim() ? doc.splitTextToSize(order.notes.trim(), blockW - 8) : [];
+  const notesBlockH = notesLines.length > 0 ? 7 + notesLines.length * 4.5 + 4 : 0;
+
+  // footerY empurrado para cima se houver observações
   const footerY = pageH - footerH - 10 - notesBlockH;
 
+  // ===== OBSERVAÇÕES (acima do bloco PIX) =====
   if (notesLines.length > 0) {
-    const notesBlockY = footerY - notesBlockH + 4;
+    const notesBlockY = footerY - notesBlockH + 2;
 
-    doc.setFillColor(255, 253, 235); // fundo amarelo claro
-    doc.setDrawColor(200, 160, 0); // borda dourada
+    doc.setFillColor(255, 253, 235);
+    doc.setDrawColor(200, 160, 0);
     doc.setLineWidth(0.4);
-    doc.roundedRect(blockX, notesBlockY - 2, blockW, notesBlockH, 2, 2, "FD");
+    doc.roundedRect(blockX, notesBlockY, blockW, notesBlockH, 2, 2, "FD");
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(120, 80, 0);
-    doc.text("OBSERVAÇÕES", blockX + 4, notesBlockY + 4);
+    doc.text("OBSERVAÇÕES", blockX + 4, notesBlockY + 5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.setTextColor(60, 50, 0);
-    doc.text(notesLines, blockX + 4, notesBlockY + 9);
+    doc.text(notesLines, blockX + 4, notesBlockY + 10);
   }
 
   // ===== PAYMENT BLOCK (FOOTER) =====
-  const footerH = 49; // 70 * 0.7
-  const footerY = pageH - footerH - 10;
-  const blockW = (pageW - 28) * 0.7; // largura reduzida 30%
-  const blockX = 7; // margem horizontal = 14/2
-
   doc.setFillColor(245, 247, 250);
   doc.setDrawColor(41, 128, 185);
   doc.setLineWidth(0.6);
   doc.roundedRect(blockX, footerY, blockW, footerH, 3, 3, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.4); // 12 * 0.7
+  doc.setFontSize(8.4);
   doc.setTextColor(41, 128, 185);
   doc.text("FORMA DE PAGAMENTO — PIX", blockX + blockW / 2, footerY + 5.6, { align: "center" });
 
@@ -276,16 +283,19 @@ export async function generateReceipt(order: OrderRow) {
       amount: total,
       txid: receiptNumber,
     });
-    const qrDataUrl = await QRCode.toDataURL(pixPayload, { margin: 1, width: 256 });
-    doc.addImage(qrDataUrl, "PNG", blockX + 4, footerY + 8.4, 31.5, 31.5); // pos e tamanho * 0.7
+    const qrDataUrl = await QRCode.toDataURL(pixPayload, {
+      margin: 1,
+      width: 256,
+    });
+    doc.addImage(qrDataUrl, "PNG", blockX + 4, footerY + 8.4, 31.5, 31.5);
   } catch (e) {
     console.error("Erro ao gerar QR code:", e);
   }
 
-  const textX = blockX + 4 + 31.5 + 4; // após o QR + gap
+  const textX = blockX + 4 + 31.5 + 4;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7); // 10 * 0.7
+  doc.setFontSize(7);
   doc.setTextColor(40, 40, 40);
   doc.text("Chave PIX (CNPJ):", textX, footerY + 14);
   doc.setFont("helvetica", "bold");
@@ -297,17 +307,16 @@ export async function generateReceipt(order: OrderRow) {
   doc.text("61.906.390 ANGELO MARCOS", textX, footerY + 28);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.7); // 11 * 0.7
+  doc.setFontSize(7.7);
   doc.text("Valor total:", textX, footerY + 35);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.8); // 14 * 0.7
+  doc.setFontSize(9.8);
   doc.setTextColor(41, 128, 185);
   doc.text(fmtBRL(total), textX, footerY + 40.6);
 
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(5.6); // 8 * 0.7
-  doc.setTextColor(110, 110, 110);
   doc.setFontSize(8.4);
+  doc.setTextColor(110, 110, 110);
   doc.text("GARANTIA DE 90 DIAS.", blockX + blockW / 2, footerY + footerH - 2.8, {
     align: "center",
   });
