@@ -255,7 +255,7 @@ export async function generateReceipt(order: OrderRow) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(120, 80, 0);
-    doc.text("OBSERVAÇÕES", blockX + 4, notesBlockY + 5);
+    doc.text("OBSERVAÇÕES/LAUDO", blockX + 4, notesBlockY + 5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
