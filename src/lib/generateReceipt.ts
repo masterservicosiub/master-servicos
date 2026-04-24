@@ -234,7 +234,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6);
   doc.setTextColor(41, 128, 185);
-  doc.text("FORMA DE PAGAMENTO — PIX", pageW / 2, footerY + 4, { align: "center" });
+  doc.text("PAGAMENTO — PIX", 14, footerY + 4);
 
   // QR code
   try {
@@ -271,7 +271,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "italic");
   doc.setFontSize(4);
   doc.setTextColor(110, 110, 110);
-  doc.text("GARANTIA DE 90 DIAS", 14, footerY + footerH - 2);
+  doc.text("GARANTIA DE 90 DIAS", pageW / 2, footerY + 4, { align: "center" });
 
   doc.save(`recibo-${receiptNumber}-${(order.name || "cliente").replace(/\s+/g, "_")}.pdf`);
 }
