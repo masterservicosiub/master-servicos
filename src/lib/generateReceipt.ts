@@ -271,8 +271,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "italic");
   doc.setFontSize(4);
   doc.setTextColor(110, 110, 110);
-  doc.setFontSize(12);
-doc.text("GARANTIA DE 90 DIAS", pageW / 2, footerY + footerH - 2, { align: "center"
+  doc.text("GARANTIA DE 90 DIAS", pageW / 2, footerY + 4, { align: "center" });
 
   doc.save(`recibo-${receiptNumber}-${(order.name || "cliente").replace(/\s+/g, "_")}.pdf`);
 }
