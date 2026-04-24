@@ -443,7 +443,7 @@ const Orcamento = () => {
             </div>
 
             {/* Service Selection */}
-            <div className="bg-blue-200 rounded-xl p-6 border border-border">
+            <div className="bg-blue-100 rounded-xl p-6 border border-border">
               <h2 className="text-xl font-semibold text-card-foreground mb-1">Catálogo de Serviços</h2>
               <p className="text-sm text-muted-foreground mb-5">
                 Toque em um serviço para adicioná-lo ao seu orçamento.
@@ -454,7 +454,7 @@ const Orcamento = () => {
                   return (
                     <div
                       key={s.id}
-                      className={`group rounded-xl border bg-blue-100 overflow-hidden flex flex-col transition-all shadow-sm ${
+                      className={`group rounded-xl border bg-white overflow-hidden flex flex-col transition-all shadow-sm ${
                         added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                       }`}
                     >
