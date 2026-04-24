@@ -8,9 +8,7 @@ const COMPANY = {
   name: "MASTER SERVIÇOS",
   cnpj: "61.906.390/0001-58",
   address: "Setor Planalto - Itumbiara/GO",
-  cep: "75533-250",
   phone: "(64) 9 9264-2950",
-  email: "masterservicos.iub@gmail.com",
 };
 
 const fmtBRL = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -156,7 +154,7 @@ export async function generateReceipt(order: OrderRow) {
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(`Recibo/Orçamento Nº: ${receiptNumber}`, 14, 62);
+  doc.text(`Recibo/ORÇAMENTO Nº: ${receiptNumber}`, 14, 62);
   doc.text(`Data: ${issueDate}`, pageW - 14, 62, { align: "right" });
 
   // ===== CLIENT INFO =====
