@@ -22,11 +22,41 @@ interface ServiceDef {
 }
 
 const defaultServices: ServiceDef[] = [
-  { id: "vazamento", name: "Verificar Vazamento", type: "fixed", fixedPrice: 90, description: "Inspeção e detecção de vazamentos hidráulicos." },
-  { id: "saneago", name: "Instalação Padrão Saneago", type: "fixed", fixedPrice: 250, description: "Instalação completa do padrão de água Saneago." },
-  { id: "caixa-agua", name: "Limpeza de Caixa d'Água", type: "fixed", fixedPrice: 170, description: "Higienização completa da caixa d'água." },
-  { id: "caixa-gordura", name: "Limpeza de Caixa de Gordura", type: "fixed", fixedPrice: 150, description: "Limpeza e desobstrução da caixa de gordura." },
-  { id: "placa-solar", name: "Limpeza Placa Solar (Un)", type: "fixed", fixedPrice: 12, description: "Preço por placa. Aumente o desempenho do seu sistema solar." },
+  {
+    id: "vazamento",
+    name: "Verificar Vazamento",
+    type: "fixed",
+    fixedPrice: 90,
+    description: "Inspeção e detecção de vazamentos hidráulicos.",
+  },
+  {
+    id: "saneago",
+    name: "Instalação Padrão Saneago",
+    type: "fixed",
+    fixedPrice: 250,
+    description: "Instalação completa do padrão de água Saneago.",
+  },
+  {
+    id: "caixa-agua",
+    name: "Limpeza de Caixa d'Água",
+    type: "fixed",
+    fixedPrice: 170,
+    description: "Higienização completa da caixa d'água.",
+  },
+  {
+    id: "caixa-gordura",
+    name: "Limpeza de Caixa de Gordura",
+    type: "fixed",
+    fixedPrice: 150,
+    description: "Limpeza e desobstrução da caixa de gordura.",
+  },
+  {
+    id: "placa-solar",
+    name: "Limpeza Placa Solar (Un)",
+    type: "fixed",
+    fixedPrice: 12,
+    description: "Preço por placa. Aumente o desempenho do seu sistema solar.",
+  },
   {
     id: "rocagem-grama",
     name: "Roçagem de Grama",
@@ -92,24 +122,26 @@ const Orcamento = () => {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
-    fetchBudgetServices().then((data) => {
-      if (data.length > 0) {
-        const mapped: ServiceDef[] = data.map((bs) => ({
-          id: bs.id!,
-          name: bs.name,
-          type: bs.type as ServiceType,
-          fixedPrice: bs.fixed_price,
-          tiers: bs.tiers?.map((t: any) => ({
-            maxArea: t.maxArea === null ? Infinity : t.maxArea,
-            pricePerM2: t.pricePerM2,
-          })),
-          minPrice: bs.min_price,
-          imageUrl: bs.image_url || "",
-          description: bs.description || "",
-        }));
-        setAvailableServices(mapped);
-      }
-    }).catch(() => {});
+    fetchBudgetServices()
+      .then((data) => {
+        if (data.length > 0) {
+          const mapped: ServiceDef[] = data.map((bs) => ({
+            id: bs.id!,
+            name: bs.name,
+            type: bs.type as ServiceType,
+            fixedPrice: bs.fixed_price,
+            tiers: bs.tiers?.map((t: any) => ({
+              maxArea: t.maxArea === null ? Infinity : t.maxArea,
+              pricePerM2: t.pricePerM2,
+            })),
+            minPrice: bs.min_price,
+            imageUrl: bs.image_url || "",
+            description: bs.description || "",
+          }));
+          setAvailableServices(mapped);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const addService = (id?: string) => {
@@ -225,9 +257,7 @@ const Orcamento = () => {
       return detail;
     });
     if (appliedCoupon && discount > 0) {
-      servicesLines.push(
-        `Cupom ${appliedCoupon.code} (-${formatBRL(discount)})`
-      );
+      servicesLines.push(`Cupom ${appliedCoupon.code} (-${formatBRL(discount)})`);
     }
     const servicesText = servicesLines.join(" | ");
 
@@ -298,9 +328,7 @@ const Orcamento = () => {
         if (svc.observation) detail += `\n   Obs: ${svc.observation}`;
         return detail;
       }),
-      appliedCoupon && discount > 0
-        ? `\n*Cupom:* ${appliedCoupon.code} (-${formatBRL(discount)})`
-        : null,
+      appliedCoupon && discount > 0 ? `\n*Cupom:* ${appliedCoupon.code} (-${formatBRL(discount)})` : null,
       ``,
       `*Total: ${formatBRL(total)}*`,
     ].filter(Boolean);
@@ -326,7 +354,14 @@ const Orcamento = () => {
               Entraremos em contato em breve pelo telefone ou e-mail informado.
             </p>
             <button
-              onClick={() => { setSubmitted(false); setSelectedServices([]); setName(""); setPhone(""); setEmail(""); setAddress(""); }}
+              onClick={() => {
+                setSubmitted(false);
+                setSelectedServices([]);
+                setName("");
+                setPhone("");
+                setEmail("");
+                setAddress("");
+              }}
               className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               Novo Orçamento
@@ -345,39 +380,64 @@ const Orcamento = () => {
         <div className="bg-primary py-12">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">Solicite seu Orçamento</h1>
-            <p className="text-primary-foreground/80">Preencha seus dados, escolha os serviços e envie sua solicitação.</p>
+            <p className="text-primary-foreground/80">
+              Preencha seus dados, escolha os serviços e envie sua solicitação.
+            </p>
           </div>
         </div>
 
         <div className="container mx-auto px-4 py-12">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
             {/* Client Info */}
-            <div className="bg-neutral-200 rounded-xl p-6 border border-border shadow-sm">
+            <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
               <h2 className="text-xl font-semibold text-card-foreground mb-4">Seus Dados</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Nome Completo *</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Seu nome" maxLength={100} required />
+                    placeholder="Seu nome"
+                    maxLength={100}
+                    required
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Telefone / WhatsApp *</label>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(applyPhoneMask(e.target.value))}
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(applyPhoneMask(e.target.value))}
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="(64) 9 9999-9999" maxLength={20} required />
+                    placeholder="(64) 9 9999-9999"
+                    maxLength={20}
+                    required
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">E-mail</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="seu@email.com" maxLength={255} />
+                    placeholder="seu@email.com"
+                    maxLength={255}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Endereço *</label>
-                  <input type="text" value={address} onChange={(e) => setAddress(e.target.value)}
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Rua, número, bairro" maxLength={200} required />
+                    placeholder="Rua, número, bairro"
+                    maxLength={200}
+                    required
+                  />
                 </div>
               </div>
             </div>
@@ -385,14 +445,16 @@ const Orcamento = () => {
             {/* Service Selection */}
             <div className="bg-card rounded-xl p-6 border border-border">
               <h2 className="text-xl font-semibold text-card-foreground mb-1">Catálogo de Serviços</h2>
-              <p className="text-sm text-muted-foreground mb-5">Toque em um serviço para adicioná-lo ao seu orçamento.</p>
+              <p className="text-sm text-muted-foreground mb-5">
+                Toque em um serviço para adicioná-lo ao seu orçamento.
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {availableServices.map((s) => {
                   const added = !!selectedServices.find((sel) => sel.id === s.id);
                   return (
                     <div
                       key={s.id}
-                      className={`group rounded-xl border bg-neutral-200 overflow-hidden flex flex-col transition-all shadow-sm ${
+                      className={`group rounded-xl border bg-blue-100 overflow-hidden flex flex-col transition-all shadow-sm ${
                         added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                       }`}
                     >
@@ -425,9 +487,13 @@ const Orcamento = () => {
                           className="mt-auto w-full bg-primary text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                           {added ? (
-                            <><CheckCircle className="w-4 h-4" /> Adicionado</>
+                            <>
+                              <CheckCircle className="w-4 h-4" /> Adicionado
+                            </>
                           ) : (
-                            <><Plus className="w-4 h-4" /> Adicionar</>
+                            <>
+                              <Plus className="w-4 h-4" /> Adicionar
+                            </>
                           )}
                         </button>
                       </div>
@@ -439,7 +505,7 @@ const Orcamento = () => {
 
             {/* Selected Services */}
             {selectedServices.length > 0 && (
-              <div className="bg-neutral-200 rounded-xl p-6 border border-border shadow-sm">
+              <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4">
                   Serviços Selecionados ({selectedServices.length})
                 </h2>
@@ -451,7 +517,11 @@ const Orcamento = () => {
                       <div key={svc.id} className="p-4 rounded-lg bg-secondary border border-border">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="font-medium text-foreground">{svc.name}</h3>
-                          <button type="button" onClick={() => removeService(svc.id)} className="text-destructive hover:opacity-70 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => removeService(svc.id)}
+                            className="text-destructive hover:opacity-70 transition-opacity"
+                          >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
@@ -459,9 +529,13 @@ const Orcamento = () => {
                         {def.type === "fixed" && (
                           <div className="flex items-center gap-3 mb-2">
                             <label className="text-sm text-muted-foreground">Qtd:</label>
-                            <input type="number" min={1} value={svc.quantity}
+                            <input
+                              type="number"
+                              min={1}
+                              value={svc.quantity}
                               onChange={(e) => updateField(svc.id, "quantity", Math.max(1, Number(e.target.value)))}
-                              className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                              className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
                             <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
                           </div>
                         )}
@@ -471,15 +545,25 @@ const Orcamento = () => {
                             <div className="flex flex-wrap items-center gap-3">
                               <div className="flex items-center gap-2">
                                 <label className="text-sm text-muted-foreground">Largura (m):</label>
-                                <input type="number" min={0} step={0.1} value={svc.width || ""}
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={svc.width || ""}
                                   onChange={(e) => updateField(svc.id, "width", Math.max(0, Number(e.target.value)))}
-                                  className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                                  className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
                               </div>
                               <div className="flex items-center gap-2">
                                 <label className="text-sm text-muted-foreground">Comprimento (m):</label>
-                                <input type="number" min={0} step={0.1} value={svc.height || ""}
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={svc.height || ""}
                                   onChange={(e) => updateField(svc.id, "height", Math.max(0, Number(e.target.value)))}
-                                  className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                                  className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
                               </div>
                             </div>
                             {svc.width > 0 && svc.height > 0 && (
@@ -492,16 +576,22 @@ const Orcamento = () => {
                               </div>
                             )}
                             <p className="text-xs text-muted-foreground">
-                              Até 50m²: {formatBRL(def.tiers![0].pricePerM2)}/m² · 51–100m²: {formatBRL(def.tiers![1].pricePerM2)}/m² · +100m²: {formatBRL(def.tiers![2].pricePerM2)}/m²
+                              Até 50m²: {formatBRL(def.tiers![0].pricePerM2)}/m² · 51–100m²:{" "}
+                              {formatBRL(def.tiers![1].pricePerM2)}/m² · +100m²: {formatBRL(def.tiers![2].pricePerM2)}
+                              /m²
                               {def.minPrice ? ` · Mínimo: ${formatBRL(def.minPrice)}` : ""}
                             </p>
                           </div>
                         )}
 
-                        <input type="text" value={svc.observation}
+                        <input
+                          type="text"
+                          value={svc.observation}
                           onChange={(e) => updateField(svc.id, "observation", e.target.value)}
                           className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                          placeholder="Observação (opcional)" maxLength={300} />
+                          placeholder="Observação (opcional)"
+                          maxLength={300}
+                        />
                       </div>
                     );
                   })}
@@ -531,7 +621,7 @@ const Orcamento = () => {
 
             {/* Cupom de Desconto */}
             {selectedServices.length > 0 && (
-              <div className="bg-neutral-200 rounded-xl p-6 border border-border shadow-sm">
+              <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
                 <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
                   <Tag className="w-5 h-5" /> Cupom de Desconto
                 </h2>
@@ -579,8 +669,10 @@ const Orcamento = () => {
             )}
 
             {/* Submit */}
-            <button type="submit"
-              className="w-full bg-accent text-accent-foreground py-3.5 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+            <button
+              type="submit"
+              className="w-full bg-accent text-accent-foreground py-3.5 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+            >
               <Send className="w-5 h-5" />
               Solicitar Serviços
             </button>
