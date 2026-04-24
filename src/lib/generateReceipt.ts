@@ -150,11 +150,11 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(20, 20, 20);
-  doc.text("RECIBO DE SERVIÇOS", pageW / 2, 52, { align: "center" });
+  doc.text("RECIBO/ORÇAMENTO DE SERVIÇOS", pageW / 2, 52, { align: "center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(`Recibo Nº: ${receiptNumber}`, 14, 62);
+  doc.text(`Recibo/ORÇAMENTO Nº: ${receiptNumber}`, 14, 62);
   doc.text(`Data: ${issueDate}`, pageW - 14, 62, { align: "right" });
 
   // ===== CLIENT INFO =====
