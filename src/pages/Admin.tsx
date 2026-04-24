@@ -1,21 +1,100 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow, fetchClients, insertClient, updateClient, deleteClient, type ClientRow } from "@/lib/supabase";
+import {
+  fetchOrders,
+  updateOrderStatus,
+  updateOrderNotes,
+  deleteOrderById,
+  insertOrder,
+  type OrderRow,
+  fetchServicesAdmin,
+  insertService,
+  updateService,
+  deleteService,
+  type ServiceRow,
+  fetchBudgetServices,
+  insertBudgetService,
+  updateBudgetService,
+  deleteBudgetService,
+  updateBudgetService as updateBudgetSvc,
+  type BudgetServiceRow,
+  fetchAdminPassword,
+  updateAdminPassword,
+  fetchEmailSettings,
+  updateEmailSettings,
+  fetchCoupons,
+  insertCoupon,
+  updateCoupon,
+  deleteCoupon,
+  type CouponRow,
+  fetchClients,
+  insertClient,
+  updateClient,
+  deleteClient,
+  type ClientRow,
+} from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight, Receipt, Users, Search } from "lucide-react";
+import {
+  Trash2,
+  Phone,
+  MapPin,
+  Plus,
+  Send,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  Filter,
+  Camera,
+  Edit2,
+  Save,
+  X,
+  Settings,
+  ClipboardList,
+  ArrowUp,
+  ArrowDown,
+  Bell,
+  Lock,
+  Mail,
+  FlaskConical,
+  CheckCircle,
+  FileText,
+  Tag,
+  ToggleLeft,
+  ToggleRight,
+  Receipt,
+  Users,
+  Search,
+} from "lucide-react";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
-import { setGoogleScriptUrl, setNotificationEmail, getGoogleScriptUrl, getNotificationEmail, syncEmailSettingsFromDB } from "@/lib/googleSheets";
+import {
+  setGoogleScriptUrl,
+  setNotificationEmail,
+  getGoogleScriptUrl,
+  getNotificationEmail,
+  syncEmailSettingsFromDB,
+} from "@/lib/googleSheets";
 import { sendTestEmail } from "@/lib/emailNotification";
 
 const STATUS_OPTIONS = ["Todos", "Novo", "Em andamento", "Concluído", "Pago", "Cancelado"];
 
 const MONTHS = [
-  "Todos", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  "Todos",
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
 ];
 
 const Admin = () => {
@@ -104,7 +183,9 @@ const Admin = () => {
 
   // Load admin password from DB on mount
   useEffect(() => {
-    fetchAdminPassword().then(setAdminPw).catch(() => setAdminPw("1478"));
+    fetchAdminPassword()
+      .then(setAdminPw)
+      .catch(() => setAdminPw("1478"));
   }, []);
 
   const handleLogin = () => {
@@ -217,29 +298,29 @@ const Admin = () => {
     const currentYear = filterYear;
     const currentMonth = now.getMonth();
 
-    const yearOrders = orders.filter(o => {
+    const yearOrders = orders.filter((o) => {
       if (!o.created_at) return false;
       const d = new Date(o.created_at);
       return d.getFullYear() === currentYear;
     });
 
     const annualRevenue = yearOrders
-      .filter(o => o.status === "Pago")
+      .filter((o) => o.status === "Pago")
       .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
-    const monthOrders = yearOrders.filter(o => {
+    const monthOrders = yearOrders.filter((o) => {
       if (!o.created_at) return false;
       return new Date(o.created_at).getMonth() === currentMonth;
     });
 
     const monthlyRevenue = monthOrders
-      .filter(o => o.status === "Pago")
+      .filter((o) => o.status === "Pago")
       .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
     const monthlyBreakdown: number[] = Array(12).fill(0);
     yearOrders
-      .filter(o => o.status === "Pago")
-      .forEach(o => {
+      .filter((o) => o.status === "Pago")
+      .forEach((o) => {
         if (o.created_at) {
           const m = new Date(o.created_at).getMonth();
           monthlyBreakdown[m] += Number(o.total || 0);
@@ -251,7 +332,7 @@ const Admin = () => {
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
+    return orders.filter((o) => {
       if (filterStatus !== "Todos" && o.status !== filterStatus) return false;
       if (!o.created_at) return true;
       const d = new Date(o.created_at);
@@ -263,7 +344,7 @@ const Admin = () => {
 
   const availableYears = useMemo(() => {
     const years = new Set<number>();
-    orders.forEach(o => {
+    orders.forEach((o) => {
       if (o.created_at) years.add(new Date(o.created_at).getFullYear());
     });
     years.add(new Date().getFullYear());
@@ -273,7 +354,7 @@ const Admin = () => {
   const handleUpdateStatus = async (id: string, status: string) => {
     try {
       await updateOrderStatus(id, status);
-      setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
+      setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
       toast.success("Status atualizado!");
     } catch {
       toast.error("Erro ao atualizar status");
@@ -283,7 +364,7 @@ const Admin = () => {
   const handleUpdateNotes = async (id: string, notes: string) => {
     try {
       await updateOrderNotes(id, notes);
-      setOrders(orders.map(o => o.id === id ? { ...o, notes } : o));
+      setOrders(orders.map((o) => (o.id === id ? { ...o, notes } : o)));
     } catch {
       toast.error("Erro ao salvar observação");
     }
@@ -293,7 +374,7 @@ const Admin = () => {
     if (!confirm("Deseja excluir este pedido?")) return;
     try {
       await deleteOrderById(id);
-      setOrders(orders.filter(o => o.id !== id));
+      setOrders(orders.filter((o) => o.id !== id));
       toast.success("Pedido excluído!");
     } catch {
       toast.error("Erro ao excluir pedido");
@@ -337,7 +418,9 @@ const Admin = () => {
 
   const addManualItem = () => setManualItems([...manualItems, { description: "", value: "" }]);
   const removeManualItem = (idx: number) =>
-    setManualItems(manualItems.length === 1 ? [{ description: "", value: "" }] : manualItems.filter((_, i) => i !== idx));
+    setManualItems(
+      manualItems.length === 1 ? [{ description: "", value: "" }] : manualItems.filter((_, i) => i !== idx),
+    );
   const updateManualItem = (idx: number, field: "description" | "value", val: string) =>
     setManualItems(manualItems.map((it, i) => (i === idx ? { ...it, [field]: val } : it)));
 
@@ -348,10 +431,14 @@ const Admin = () => {
     }
     try {
       await insertService({ title: svcTitle.trim(), description: svcDesc.trim(), image_url: svcImage.trim() });
-      setSvcTitle(""); setSvcDesc(""); setSvcImage("");
+      setSvcTitle("");
+      setSvcDesc("");
+      setSvcImage("");
       toast.success("Serviço adicionado!");
       loadServices();
-    } catch { toast.error("Erro ao adicionar serviço"); }
+    } catch {
+      toast.error("Erro ao adicionar serviço");
+    }
   };
 
   const handleEditService = async (id: string) => {
@@ -360,68 +447,98 @@ const Admin = () => {
       setEditingSvcId(null);
       toast.success("Serviço atualizado!");
       loadServices();
-    } catch { toast.error("Erro ao atualizar serviço"); }
+    } catch {
+      toast.error("Erro ao atualizar serviço");
+    }
   };
 
   const handleDeleteService = async (id: string) => {
     if (!confirm("Excluir este serviço?")) return;
     try {
       await deleteService(id);
-      setServices(services.filter(s => s.id !== id));
+      setServices(services.filter((s) => s.id !== id));
       toast.success("Serviço excluído!");
-    } catch { toast.error("Erro ao excluir serviço"); }
+    } catch {
+      toast.error("Erro ao excluir serviço");
+    }
   };
 
   const handleAddBudgetService = async () => {
-    if (!bsName.trim()) { toast.error("Preencha o nome do serviço"); return; }
-    const tiers = bsType === "area" ? [
-      { maxArea: 50, pricePerM2: parseFloat(bsTier1) || 0 },
-      { maxArea: 100, pricePerM2: parseFloat(bsTier2) || 0 },
-      { maxArea: Infinity, pricePerM2: parseFloat(bsTier3) || 0 },
-    ] : null;
+    if (!bsName.trim()) {
+      toast.error("Preencha o nome do serviço");
+      return;
+    }
+    const tiers =
+      bsType === "area"
+        ? [
+            { maxArea: 50, pricePerM2: parseFloat(bsTier1) || 0 },
+            { maxArea: 100, pricePerM2: parseFloat(bsTier2) || 0 },
+            { maxArea: Infinity, pricePerM2: parseFloat(bsTier3) || 0 },
+          ]
+        : null;
     try {
       await insertBudgetService({
-        name: bsName.trim(), type: bsType,
+        name: bsName.trim(),
+        type: bsType,
         fixed_price: parseFloat(bsFixedPrice) || 0,
-        tiers, min_price: parseFloat(bsMinPrice) || 0,
+        tiers,
+        min_price: parseFloat(bsMinPrice) || 0,
         sort_order: budgetServices.length,
         image_url: bsImage.trim(),
         description: bsDescription.trim(),
       });
-      setBsName(""); setBsFixedPrice(""); setBsMinPrice(""); setBsTier1(""); setBsTier2(""); setBsTier3(""); setBsType("fixed");
-      setBsImage(""); setBsDescription("");
+      setBsName("");
+      setBsFixedPrice("");
+      setBsMinPrice("");
+      setBsTier1("");
+      setBsTier2("");
+      setBsTier3("");
+      setBsType("fixed");
+      setBsImage("");
+      setBsDescription("");
       toast.success("Serviço de orçamento adicionado!");
       loadBudgetServices();
-    } catch { toast.error("Erro ao adicionar serviço de orçamento"); }
+    } catch {
+      toast.error("Erro ao adicionar serviço de orçamento");
+    }
   };
 
   const handleEditBudgetService = async (id: string) => {
-    const tiers = editBsType === "area" ? [
-      { maxArea: 50, pricePerM2: parseFloat(editBsTier1) || 0 },
-      { maxArea: 100, pricePerM2: parseFloat(editBsTier2) || 0 },
-      { maxArea: Infinity, pricePerM2: parseFloat(editBsTier3) || 0 },
-    ] : null;
+    const tiers =
+      editBsType === "area"
+        ? [
+            { maxArea: 50, pricePerM2: parseFloat(editBsTier1) || 0 },
+            { maxArea: 100, pricePerM2: parseFloat(editBsTier2) || 0 },
+            { maxArea: Infinity, pricePerM2: parseFloat(editBsTier3) || 0 },
+          ]
+        : null;
     try {
       await updateBudgetService(id, {
-        name: editBsName, type: editBsType,
+        name: editBsName,
+        type: editBsType,
         fixed_price: parseFloat(editBsFixedPrice) || 0,
-        tiers, min_price: parseFloat(editBsMinPrice) || 0,
+        tiers,
+        min_price: parseFloat(editBsMinPrice) || 0,
         image_url: editBsImage.trim(),
         description: editBsDescription.trim(),
       });
       setEditingBsId(null);
       toast.success("Serviço atualizado!");
       loadBudgetServices();
-    } catch { toast.error("Erro ao atualizar"); }
+    } catch {
+      toast.error("Erro ao atualizar");
+    }
   };
 
   const handleDeleteBudgetService = async (id: string) => {
     if (!confirm("Excluir este serviço de orçamento?")) return;
     try {
       await deleteBudgetService(id);
-      setBudgetServices(budgetServices.filter(s => s.id !== id));
+      setBudgetServices(budgetServices.filter((s) => s.id !== id));
       toast.success("Serviço excluído!");
-    } catch { toast.error("Erro ao excluir"); }
+    } catch {
+      toast.error("Erro ao excluir");
+    }
   };
 
   const handleSaveEmailSettings = async () => {
@@ -498,7 +615,11 @@ const Admin = () => {
         service_id: coupApplies === "service" ? coupServiceId : null,
         active: true,
       });
-      setCoupCode(""); setCoupValue(""); setCoupApplies("all"); setCoupServiceId(""); setCoupType("percent");
+      setCoupCode("");
+      setCoupValue("");
+      setCoupApplies("all");
+      setCoupServiceId("");
+      setCoupType("percent");
       toast.success("Cupom criado!");
       loadCoupons();
     } catch (err: any) {
@@ -543,7 +664,11 @@ const Admin = () => {
         address: clAddress.trim(),
         notes: clNotes.trim(),
       });
-      setClName(""); setClPhone(""); setClEmail(""); setClAddress(""); setClNotes("");
+      setClName("");
+      setClPhone("");
+      setClEmail("");
+      setClAddress("");
+      setClNotes("");
       toast.success("Cliente cadastrado!");
       loadClients();
     } catch {
@@ -596,7 +721,7 @@ const Admin = () => {
     const q = clientSearch.trim().toLowerCase();
     if (!q) return clients;
     return clients.filter((c) =>
-      [c.name, c.phone, c.email, c.address].some((f) => (f || "").toLowerCase().includes(q))
+      [c.name, c.phone, c.email, c.address].some((f) => (f || "").toLowerCase().includes(q)),
     );
   }, [clients, clientSearch]);
 
@@ -615,7 +740,10 @@ const Admin = () => {
               placeholder="Senha"
               className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground mb-4 focus:outline-none focus:ring-2 focus:ring-ring"
             />
-            <button onClick={handleLogin} className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90">
+            <button
+              onClick={handleLogin}
+              className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90"
+            >
               Entrar
             </button>
           </div>
@@ -724,17 +852,38 @@ const Admin = () => {
               {/* Filtros */}
               <div className="bg-card rounded-xl p-4 border border-border flex flex-wrap items-center gap-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
-                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
                 </select>
-                <select value={filterYear} onChange={(e) => setFilterYear(Number(e.target.value))}
-                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                  {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+                <select
+                  value={filterYear}
+                  onChange={(e) => setFilterYear(Number(e.target.value))}
+                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {availableYears.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
                 </select>
-                <select value={filterMonth} onChange={(e) => setFilterMonth(Number(e.target.value))}
-                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                  {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                <select
+                  value={filterMonth}
+                  onChange={(e) => setFilterMonth(Number(e.target.value))}
+                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {MONTHS.map((m, i) => (
+                    <option key={i} value={i}>
+                      {m}
+                    </option>
+                  ))}
                 </select>
                 <span className="text-sm text-muted-foreground">{filteredOrders.length} pedidos encontrados</span>
               </div>
@@ -745,10 +894,18 @@ const Admin = () => {
                   <Plus className="w-5 h-5" /> Pedido Manual
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                  <input value={manualName} onChange={(e) => setManualName(e.target.value)} placeholder="Nome do cliente *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input value={manualPhone} onChange={(e) => setManualPhone(applyPhoneMask(e.target.value))} placeholder="Telefone"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <input
+                    value={manualName}
+                    onChange={(e) => setManualName(e.target.value)}
+                    placeholder="Nome do cliente *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    value={manualPhone}
+                    onChange={(e) => setManualPhone(applyPhoneMask(e.target.value))}
+                    placeholder="Telefone"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
                 </div>
 
                 <div className="space-y-3 mb-4">
@@ -763,7 +920,10 @@ const Admin = () => {
                     </button>
                   </div>
                   {manualItems.map((item, idx) => (
-                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr,160px,auto] gap-2 items-center p-3 rounded-lg bg-secondary/40 border border-border">
+                    <div
+                      key={idx}
+                      className="grid grid-cols-1 sm:grid-cols-[1fr,160px,auto] gap-2 items-center p-3 rounded-lg bg-secondary/40 border border-border"
+                    >
                       <input
                         value={item.description}
                         onChange={(e) => updateManualItem(idx, "description", e.target.value)}
@@ -798,21 +958,28 @@ const Admin = () => {
                   </div>
                 </div>
 
-                <button onClick={handleManualOrder} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2">
+                <button
+                  onClick={handleManualOrder}
+                  className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
                   <Send className="w-4 h-4" /> Adicionar Pedido
                 </button>
               </div>
 
               {/* Lista de Pedidos */}
               {loading && <p className="text-muted-foreground text-center">Carregando...</p>}
-              {!loading && filteredOrders.length === 0 && <p className="text-muted-foreground text-center">Nenhum pedido encontrado</p>}
+              {!loading && filteredOrders.length === 0 && (
+                <p className="text-muted-foreground text-center">Nenhum pedido encontrado</p>
+              )}
 
               {filteredOrders.map((order) => (
                 <div key={order.id} className="bg-card rounded-xl p-6 border border-border">
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
                     <div>
                       <h3 className="font-bold text-lg text-card-foreground">{order.name}</h3>
-                      <p className="text-xs text-muted-foreground">{order.created_at ? new Date(order.created_at).toLocaleString("pt-BR") : ""}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {order.created_at ? new Date(order.created_at).toLocaleString("pt-BR") : ""}
+                      </p>
                     </div>
                     <select
                       value={order.status}
@@ -827,16 +994,32 @@ const Admin = () => {
                     </select>
                   </div>
 
-                  {order.phone && <p className="text-sm text-foreground"><strong>Tel:</strong> {order.phone}</p>}
-                  {order.email && <p className="text-sm text-foreground"><strong>Email:</strong> {order.email}</p>}
-                  {order.address && <p className="text-sm text-foreground"><strong>Endereço:</strong> {order.address}</p>}
-                  <p className="text-sm text-foreground mt-1"><strong>Serviços:</strong> {order.services}</p>
+                  {order.phone && (
+                    <p className="text-sm text-foreground">
+                      <strong>Tel:</strong> {order.phone}
+                    </p>
+                  )}
+                  {order.email && (
+                    <p className="text-sm text-foreground">
+                      <strong>Email:</strong> {order.email}
+                    </p>
+                  )}
+                  {order.address && (
+                    <p className="text-sm text-foreground">
+                      <strong>Endereço:</strong> {order.address}
+                    </p>
+                  )}
+                  <p className="text-sm text-foreground mt-1">
+                    <strong>Serviços:</strong> {order.services}
+                  </p>
                   <p className="text-sm font-bold text-primary mt-1">Total: R$ {Number(order.total).toFixed(2)}</p>
 
                   <div className="mt-3">
                     <textarea
                       value={order.notes || ""}
-                      onChange={(e) => setOrders(orders.map(o => o.id === order.id ? { ...o, notes: e.target.value } : o))}
+                      onChange={(e) =>
+                        setOrders(orders.map((o) => (o.id === order.id ? { ...o, notes: e.target.value } : o)))
+                      }
                       onBlur={() => handleUpdateNotes(order.id!, order.notes)}
                       placeholder="Observações / Agendamento"
                       className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -846,19 +1029,29 @@ const Admin = () => {
 
                   <div className="flex flex-wrap gap-2 mt-3">
                     {order.phone && (
-                      <a href={`https://wa.me/55${order.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"
-                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90">
+                      <a
+                        href={`https://wa.me/55${order.phone.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90"
+                      >
                         <Phone className="w-4 h-4" /> WhatsApp
                       </a>
                     )}
                     {order.address && (
-                      <a href={`https://www.google.com/maps/search/${encodeURIComponent(order.address)}`} target="_blank" rel="noopener noreferrer"
-                        className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90">
+                      <a
+                        href={`https://www.google.com/maps/search/${encodeURIComponent(order.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90"
+                      >
                         <MapPin className="w-4 h-4" /> Como Chegar
                       </a>
                     )}
-                    <button onClick={() => handleDelete(order.id!)}
-                      className="bg-destructive text-destructive-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90">
+                    <button
+                      onClick={() => handleDelete(order.id!)}
+                      className="bg-destructive text-destructive-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90"
+                    >
                       <Trash2 className="w-4 h-4" /> Excluir
                     </button>
                     <button
@@ -871,7 +1064,8 @@ const Admin = () => {
                           toast.error("Erro ao gerar recibo");
                         }
                       }}
-                      className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90">
+                      className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90"
+                    >
                       <Receipt className="w-4 h-4" /> Gerar Recibo PDF
                     </button>
                   </div>
@@ -1007,17 +1201,21 @@ const Admin = () => {
                               <p className="font-semibold text-card-foreground">{c.name}</p>
                               <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
                                 {c.phone && (
-                                  <p className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {c.phone}</p>
+                                  <p className="flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5" /> {c.phone}
+                                  </p>
                                 )}
                                 {c.email && (
-                                  <p className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {c.email}</p>
+                                  <p className="flex items-center gap-1.5">
+                                    <Mail className="w-3.5 h-3.5" /> {c.email}
+                                  </p>
                                 )}
                                 {c.address && (
-                                  <p className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {c.address}</p>
+                                  <p className="flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5" /> {c.address}
+                                  </p>
                                 )}
-                                {c.notes && (
-                                  <p className="italic mt-1">{c.notes}</p>
-                                )}
+                                {c.notes && <p className="italic mt-1">{c.notes}</p>}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -1046,99 +1244,84 @@ const Admin = () => {
             </>
           ) : (
             <>
-              {/* Configurações - Gerenciar Serviços */}
-              <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                  <Camera className="w-5 h-5" /> Gerenciar Serviços (Página Serviços)
-                </h2>
-                <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                  <input value={svcTitle} onChange={(e) => setSvcTitle(e.target.value)} placeholder="Título do serviço *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <input value={svcImage} onChange={(e) => setSvcImage(e.target.value)} placeholder="URL da imagem (opcional)"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                </div>
-                <textarea value={svcDesc} onChange={(e) => setSvcDesc(e.target.value)} placeholder="Descrição do serviço *"
-                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" rows={3} />
-                <button onClick={handleAddService} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2">
-                  <Plus className="w-4 h-4" /> Adicionar Serviço
-                </button>
-
-                {services.length > 0 && (
-                  <div className="mt-6 space-y-4">
-                    {services.map((svc) => (
-                      <div key={svc.id} className="p-4 rounded-lg bg-secondary border border-border">
-                        {editingSvcId === svc.id ? (
-                          <div className="space-y-3">
-                            <input value={editSvcTitle} onChange={(e) => setEditSvcTitle(e.target.value)}
-                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                            <input value={editSvcImage} onChange={(e) => setEditSvcImage(e.target.value)} placeholder="URL da imagem"
-                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                            <textarea value={editSvcDesc} onChange={(e) => setEditSvcDesc(e.target.value)}
-                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={2} />
-                            <div className="flex gap-2">
-                              <button onClick={() => handleEditService(svc.id!)} className="bg-primary text-primary-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1">
-                                <Save className="w-4 h-4" /> Salvar
-                              </button>
-                              <button onClick={() => setEditingSvcId(null)} className="bg-muted text-muted-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1">
-                                <X className="w-4 h-4" /> Cancelar
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-start gap-4">
-                            {svc.image_url && <img src={svc.image_url} alt={svc.title} className="w-20 h-20 object-cover rounded-lg" />}
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-foreground">{svc.title}</h3>
-                              <p className="text-sm text-muted-foreground">{svc.description}</p>
-                            </div>
-                            <div className="flex gap-2">
-                              <button onClick={() => { setEditingSvcId(svc.id!); setEditSvcTitle(svc.title); setEditSvcDesc(svc.description); setEditSvcImage(svc.image_url); }}
-                                className="text-primary hover:opacity-70"><Edit2 className="w-4 h-4" /></button>
-                              <button onClick={() => handleDeleteService(svc.id!)}
-                                className="text-destructive hover:opacity-70"><Trash2 className="w-4 h-4" /></button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* Gerenciar Serviços de Orçamento */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
                   <DollarSign className="w-5 h-5" /> Serviços da Página Orçamento
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                  <input value={bsName} onChange={(e) => setBsName(e.target.value)} placeholder="Nome do serviço *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                  <select value={bsType} onChange={(e) => setBsType(e.target.value as "fixed" | "area")}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                  <input
+                    value={bsName}
+                    onChange={(e) => setBsName(e.target.value)}
+                    placeholder="Nome do serviço *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <select
+                    value={bsType}
+                    onChange={(e) => setBsType(e.target.value as "fixed" | "area")}
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
                     <option value="fixed">Preço Fixo (por unidade)</option>
                     <option value="area">Por Área (m²)</option>
                   </select>
                 </div>
-                <input value={bsImage} onChange={(e) => setBsImage(e.target.value)} placeholder="URL da imagem (catálogo)"
-                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" />
-                <textarea value={bsDescription} onChange={(e) => setBsDescription(e.target.value)} placeholder="Descrição curta (catálogo)"
-                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" rows={2} />
+                <input
+                  value={bsImage}
+                  onChange={(e) => setBsImage(e.target.value)}
+                  placeholder="URL da imagem (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
+                <textarea
+                  value={bsDescription}
+                  onChange={(e) => setBsDescription(e.target.value)}
+                  placeholder="Descrição curta (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                  rows={2}
+                />
                 {bsType === "fixed" ? (
-                  <input type="number" value={bsFixedPrice} onChange={(e) => setBsFixedPrice(e.target.value)} placeholder="Preço fixo (R$) *"
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4" />
+                  <input
+                    type="number"
+                    value={bsFixedPrice}
+                    onChange={(e) => setBsFixedPrice(e.target.value)}
+                    placeholder="Preço fixo (R$) *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                  />
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                    <input type="number" value={bsTier1} onChange={(e) => setBsTier1(e.target.value)} placeholder="Preço/m² até 50m²"
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                    <input type="number" value={bsTier2} onChange={(e) => setBsTier2(e.target.value)} placeholder="Preço/m² 51-100m²"
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                    <input type="number" value={bsTier3} onChange={(e) => setBsTier3(e.target.value)} placeholder="Preço/m² acima 100m²"
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                    <input type="number" value={bsMinPrice} onChange={(e) => setBsMinPrice(e.target.value)} placeholder="Preço mínimo (R$)"
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                    <input
+                      type="number"
+                      value={bsTier1}
+                      onChange={(e) => setBsTier1(e.target.value)}
+                      placeholder="Preço/m² até 50m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier2}
+                      onChange={(e) => setBsTier2(e.target.value)}
+                      placeholder="Preço/m² 51-100m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier3}
+                      onChange={(e) => setBsTier3(e.target.value)}
+                      placeholder="Preço/m² acima 100m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsMinPrice}
+                      onChange={(e) => setBsMinPrice(e.target.value)}
+                      placeholder="Preço mínimo (R$)"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
                   </div>
                 )}
-                <button onClick={handleAddBudgetService} className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2">
+                <button
+                  onClick={handleAddBudgetService}
+                  className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
                   <Plus className="w-4 h-4" /> Adicionar Serviço
                 </button>
 
@@ -1149,38 +1332,85 @@ const Admin = () => {
                         {editingBsId === bs.id ? (
                           <div className="space-y-3">
                             <div className="grid sm:grid-cols-2 gap-3">
-                              <input value={editBsName} onChange={(e) => setEditBsName(e.target.value)} placeholder="Nome"
-                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                              <select value={editBsType} onChange={(e) => setEditBsType(e.target.value as "fixed" | "area")}
-                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                              <input
+                                value={editBsName}
+                                onChange={(e) => setEditBsName(e.target.value)}
+                                placeholder="Nome"
+                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <select
+                                value={editBsType}
+                                onChange={(e) => setEditBsType(e.target.value as "fixed" | "area")}
+                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              >
                                 <option value="fixed">Preço Fixo</option>
                                 <option value="area">Por Área (m²)</option>
                               </select>
                             </div>
-                            <input value={editBsImage} onChange={(e) => setEditBsImage(e.target.value)} placeholder="URL da imagem"
-                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                            <textarea value={editBsDescription} onChange={(e) => setEditBsDescription(e.target.value)} placeholder="Descrição curta"
-                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={2} />
+                            <input
+                              value={editBsImage}
+                              onChange={(e) => setEditBsImage(e.target.value)}
+                              placeholder="URL da imagem"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <textarea
+                              value={editBsDescription}
+                              onChange={(e) => setEditBsDescription(e.target.value)}
+                              placeholder="Descrição curta"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              rows={2}
+                            />
                             {editBsType === "fixed" ? (
-                              <input type="number" value={editBsFixedPrice} onChange={(e) => setEditBsFixedPrice(e.target.value)} placeholder="Preço fixo"
-                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                              <input
+                                type="number"
+                                value={editBsFixedPrice}
+                                onChange={(e) => setEditBsFixedPrice(e.target.value)}
+                                placeholder="Preço fixo"
+                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
                             ) : (
                               <div className="grid sm:grid-cols-2 gap-3">
-                                <input type="number" value={editBsTier1} onChange={(e) => setEditBsTier1(e.target.value)} placeholder="R$/m² até 50m²"
-                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                                <input type="number" value={editBsTier2} onChange={(e) => setEditBsTier2(e.target.value)} placeholder="R$/m² 51-100m²"
-                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                                <input type="number" value={editBsTier3} onChange={(e) => setEditBsTier3(e.target.value)} placeholder="R$/m² +100m²"
-                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                                <input type="number" value={editBsMinPrice} onChange={(e) => setEditBsMinPrice(e.target.value)} placeholder="Preço mínimo"
-                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                                <input
+                                  type="number"
+                                  value={editBsTier1}
+                                  onChange={(e) => setEditBsTier1(e.target.value)}
+                                  placeholder="R$/m² até 50m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier2}
+                                  onChange={(e) => setEditBsTier2(e.target.value)}
+                                  placeholder="R$/m² 51-100m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier3}
+                                  onChange={(e) => setEditBsTier3(e.target.value)}
+                                  placeholder="R$/m² +100m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsMinPrice}
+                                  onChange={(e) => setEditBsMinPrice(e.target.value)}
+                                  placeholder="Preço mínimo"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
                               </div>
                             )}
                             <div className="flex gap-2">
-                              <button onClick={() => handleEditBudgetService(bs.id!)} className="bg-primary text-primary-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                              <button
+                                onClick={() => handleEditBudgetService(bs.id!)}
+                                className="bg-primary text-primary-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                              >
                                 <Save className="w-4 h-4" /> Salvar
                               </button>
-                              <button onClick={() => setEditingBsId(null)} className="bg-muted text-muted-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1">
+                              <button
+                                onClick={() => setEditingBsId(null)}
+                                className="bg-muted text-muted-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                              >
                                 <X className="w-4 h-4" /> Cancelar
                               </button>
                             </div>
@@ -1191,7 +1421,7 @@ const Admin = () => {
                               <div className="flex flex-col gap-1">
                                 <button
                                   onClick={async () => {
-                                    const idx = budgetServices.findIndex(b => b.id === bs.id);
+                                    const idx = budgetServices.findIndex((b) => b.id === bs.id);
                                     if (idx <= 0) return;
                                     const prev = budgetServices[idx - 1];
                                     await updateBudgetService(bs.id!, { sort_order: prev.sort_order });
@@ -1199,13 +1429,13 @@ const Admin = () => {
                                     loadBudgetServices();
                                   }}
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                  disabled={budgetServices.findIndex(b => b.id === bs.id) === 0}
+                                  disabled={budgetServices.findIndex((b) => b.id === bs.id) === 0}
                                 >
                                   <ArrowUp className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={async () => {
-                                    const idx = budgetServices.findIndex(b => b.id === bs.id);
+                                    const idx = budgetServices.findIndex((b) => b.id === bs.id);
                                     if (idx >= budgetServices.length - 1) return;
                                     const next = budgetServices[idx + 1];
                                     await updateBudgetService(bs.id!, { sort_order: next.sort_order });
@@ -1213,7 +1443,9 @@ const Admin = () => {
                                     loadBudgetServices();
                                   }}
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                  disabled={budgetServices.findIndex(b => b.id === bs.id) === budgetServices.length - 1}
+                                  disabled={
+                                    budgetServices.findIndex((b) => b.id === bs.id) === budgetServices.length - 1
+                                  }
                                 >
                                   <ArrowDown className="w-4 h-4" />
                                 </button>
@@ -1221,22 +1453,44 @@ const Admin = () => {
                               <div>
                                 <h3 className="font-semibold text-foreground">{bs.name}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                  {bs.type === "fixed" ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}` :
-                                    `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
+                                  {bs.type === "fixed"
+                                    ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}`
+                                    : `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
                               </div>
-                              {bs.image_url && <img src={bs.image_url} alt={bs.name} className="w-14 h-14 object-cover rounded-md ml-2" />}
+                              {bs.image_url && (
+                                <img
+                                  src={bs.image_url}
+                                  alt={bs.name}
+                                  className="w-14 h-14 object-cover rounded-md ml-2"
+                                />
+                              )}
                             </div>
                             <div className="flex gap-2">
-                              <button onClick={() => {
-                                setEditingBsId(bs.id!); setEditBsName(bs.name); setEditBsType(bs.type);
-                                setEditBsFixedPrice(String(bs.fixed_price || "")); setEditBsMinPrice(String(bs.min_price || ""));
-                                const t = bs.tiers || [];
-                                setEditBsTier1(String(t[0]?.pricePerM2 || "")); setEditBsTier2(String(t[1]?.pricePerM2 || "")); setEditBsTier3(String(t[2]?.pricePerM2 || ""));
-                                setEditBsImage(bs.image_url || ""); setEditBsDescription(bs.description || "");
-                              }} className="text-primary hover:opacity-70"><Edit2 className="w-4 h-4" /></button>
-                              <button onClick={() => handleDeleteBudgetService(bs.id!)}
-                                className="text-destructive hover:opacity-70"><Trash2 className="w-4 h-4" /></button>
+                              <button
+                                onClick={() => {
+                                  setEditingBsId(bs.id!);
+                                  setEditBsName(bs.name);
+                                  setEditBsType(bs.type);
+                                  setEditBsFixedPrice(String(bs.fixed_price || ""));
+                                  setEditBsMinPrice(String(bs.min_price || ""));
+                                  const t = bs.tiers || [];
+                                  setEditBsTier1(String(t[0]?.pricePerM2 || ""));
+                                  setEditBsTier2(String(t[1]?.pricePerM2 || ""));
+                                  setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                  setEditBsImage(bs.image_url || "");
+                                  setEditBsDescription(bs.description || "");
+                                }}
+                                className="text-primary hover:opacity-70"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBudgetService(bs.id!)}
+                                className="text-destructive hover:opacity-70"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         )}
@@ -1312,7 +1566,9 @@ const Admin = () => {
                       >
                         <option value="">Selecione um serviço...</option>
                         {budgetServices.map((bs) => (
-                          <option key={bs.id} value={bs.id}>{bs.name}</option>
+                          <option key={bs.id} value={bs.id}>
+                            {bs.name}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -1339,7 +1595,9 @@ const Admin = () => {
                         >
                           <div className="flex-1 min-w-[200px]">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono font-bold text-foreground text-base tracking-wide">{c.code}</span>
+                              <span className="font-mono font-bold text-foreground text-base tracking-wide">
+                                {c.code}
+                              </span>
                               <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
                                 {c.discount_type === "percent"
                                   ? `${Number(c.discount_value)}%`
@@ -1390,9 +1648,7 @@ const Admin = () => {
 
                 <div className="space-y-4 max-w-xl">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      URL do Google Apps Script
-                    </label>
+                    <label className="block text-sm font-medium text-foreground mb-1">URL do Google Apps Script</label>
                     <input
                       type="url"
                       value={scriptUrl}
@@ -1443,13 +1699,17 @@ const Admin = () => {
                   {scriptUrl && (
                     <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg px-4 py-2.5">
                       <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                      <span>Script configurado. Notificações automáticas <strong>ativas</strong>.</span>
+                      <span>
+                        Script configurado. Notificações automáticas <strong>ativas</strong>.
+                      </span>
                     </div>
                   )}
                   {!scriptUrl && (
                     <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/50 border border-border rounded-lg px-4 py-2.5">
                       <Bell className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <span>Sem URL configurada. Notificações por e-mail <strong>desativadas</strong>.</span>
+                      <span>
+                        Sem URL configurada. Notificações por e-mail <strong>desativadas</strong>.
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1466,24 +1726,38 @@ const Admin = () => {
                 <div className="space-y-3 max-w-md">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Senha Atual</label>
-                    <input type="password" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)}
+                    <input
+                      type="password"
+                      value={currentPw}
+                      onChange={(e) => setCurrentPw(e.target.value)}
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Digite a senha atual" />
+                      placeholder="Digite a senha atual"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Nova Senha</label>
-                    <input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)}
+                    <input
+                      type="password"
+                      value={newPw}
+                      onChange={(e) => setNewPw(e.target.value)}
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Digite a nova senha" />
+                      placeholder="Digite a nova senha"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Confirmar Nova Senha</label>
-                    <input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)}
+                    <input
+                      type="password"
+                      value={confirmPw}
+                      onChange={(e) => setConfirmPw(e.target.value)}
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Confirme a nova senha" />
+                      placeholder="Confirme a nova senha"
+                    />
                   </div>
-                  <button onClick={handleChangePassword}
-                    className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2">
+                  <button
+                    onClick={handleChangePassword}
+                    className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                  >
                     <Lock className="w-4 h-4" /> Alterar Senha
                   </button>
                 </div>
