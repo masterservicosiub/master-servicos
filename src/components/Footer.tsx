@@ -36,6 +36,7 @@ const Footer = () => (
         <span>© 2026 Master Serviços. Todos os direitos reservados.</span>
         <Link to="/admin" className="hover:opacity-100 underline">Admin</Link>
       </div>
+      <div className="mt-2">CNPJ: 61.906.390/0001-58</div>
     </div>
   </footer>
 );
