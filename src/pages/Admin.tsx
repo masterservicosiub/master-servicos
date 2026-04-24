@@ -643,6 +643,12 @@ const Admin = () => {
                 <ClipboardList className="w-4 h-4" /> Pedidos
               </button>
               <button
+                onClick={() => setActiveTab("clientes")}
+                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "clientes" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <Users className="w-4 h-4" /> Clientes
+              </button>
+              <button
                 onClick={() => setActiveTab("config")}
                 className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "config" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
