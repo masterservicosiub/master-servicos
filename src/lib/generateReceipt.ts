@@ -224,6 +224,32 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(`TOTAL:`, pageW - 60, afterTableY);
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
+  // ===== OBSERVAÇÕES (acima do bloco PIX) =====
+  const notesLines: string[] =
+    order.notes && order.notes.trim() ? doc.splitTextToSize(order.notes.trim(), pageW - 28) : [];
+  const notesBlockH = notesLines.length > 0 ? 6 + notesLines.length * 4.5 + 4 : 0;
+
+  const footerH = 49;
+  const footerY = pageH - footerH - 10 - notesBlockH;
+
+  if (notesLines.length > 0) {
+    const notesBlockY = footerY - notesBlockH + 4;
+
+    doc.setFillColor(255, 253, 235); // fundo amarelo claro
+    doc.setDrawColor(200, 160, 0); // borda dourada
+    doc.setLineWidth(0.4);
+    doc.roundedRect(blockX, notesBlockY - 2, blockW, notesBlockH, 2, 2, "FD");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(120, 80, 0);
+    doc.text("OBSERVAÇÕES", blockX + 4, notesBlockY + 4);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(60, 50, 0);
+    doc.text(notesLines, blockX + 4, notesBlockY + 9);
+  }
   // ===== PAYMENT BLOCK (FOOTER) =====
   const footerH = 49; // 70 * 0.7
   const footerY = pageH - footerH - 10;
