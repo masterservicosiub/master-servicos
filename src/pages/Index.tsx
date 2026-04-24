@@ -33,12 +33,22 @@ const Index = () => (
     {/* Hero */}
     <section className="relative min-h-[600px] flex items-center pt-16">
       <div className="absolute inset-0">
-        <img src={heroBg} alt="Serviços profissionais" className="w-full h-full object-cover" width={1920} height={1024} />
+        <img
+          src={heroBg}
+          alt="Serviços profissionais"
+          className="w-full h-full object-cover"
+          width={1920}
+          height={1024}
+        />
         <div className="absolute inset-0 bg-foreground/70" />
       </div>
       <div className="container mx-auto px-4 relative z-10 py-20">
         <div className="max-w-2xl">
-          <img src={logo} alt="Master Serviços" className="h-32 md:h-40 lg:h-48 w-auto mb-6 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] drop-shadow-2xl" />
+          <img
+            src={logo}
+            alt="Master Serviços"
+            className="h-32 md:h-40 lg:h-48 w-auto mb-6 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] drop-shadow-2xl"
+          />
           <div className="mb-8 max-w-xl overflow-hidden">
             <img
               src={sloganBanner}
@@ -51,7 +61,7 @@ const Index = () => (
               to="/orcamento"
               className="bg-primary text-primary-foreground w-56 text-center py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity"
             >
-              Solicitar Orçamento
+              Fazer Orçamento
             </Link>
             <a
               href="https://wa.me/5564992642950"
@@ -134,7 +144,7 @@ const Index = () => (
           to="/orcamento"
           className="inline-block bg-accent text-accent-foreground px-8 py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity"
         >
-          Solicitar Orçamento Gratuito
+          Fazer Orçamento Gratuito
         </Link>
       </div>
     </section>
