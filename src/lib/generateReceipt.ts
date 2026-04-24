@@ -263,7 +263,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "normal");
   doc.text("Beneficiário:", 72, footerY + 34);
   doc.setFont("helvetica", "bold");
-  doc.text(COMPANY.name, 72, footerY + 40);
+  doc.text("61.906.390 ANGELO MARCOS", 72, footerY + 40);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
