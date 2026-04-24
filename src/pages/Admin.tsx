@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow } from "@/lib/supabase";
+import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow, fetchClients, insertClient, updateClient, deleteClient, type ClientRow } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight, Receipt } from "lucide-react";
+import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight, Receipt, Users, Search } from "lucide-react";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
@@ -26,7 +26,7 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "config">("pedidos");
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -86,6 +86,21 @@ const Admin = () => {
   const [coupValue, setCoupValue] = useState("");
   const [coupApplies, setCoupApplies] = useState<"all" | "service">("all");
   const [coupServiceId, setCoupServiceId] = useState("");
+
+  // Clients
+  const [clients, setClients] = useState<ClientRow[]>([]);
+  const [clientSearch, setClientSearch] = useState("");
+  const [clName, setClName] = useState("");
+  const [clPhone, setClPhone] = useState("");
+  const [clEmail, setClEmail] = useState("");
+  const [clAddress, setClAddress] = useState("");
+  const [clNotes, setClNotes] = useState("");
+  const [editingClientId, setEditingClientId] = useState<string | null>(null);
+  const [editClName, setEditClName] = useState("");
+  const [editClPhone, setEditClPhone] = useState("");
+  const [editClEmail, setEditClEmail] = useState("");
+  const [editClAddress, setEditClAddress] = useState("");
+  const [editClNotes, setEditClNotes] = useState("");
 
   // Load admin password from DB on mount
   useEffect(() => {
