@@ -439,7 +439,7 @@ const Orcamento = () => {
 
             {/* Selected Services */}
             {selectedServices.length > 0 && (
-              <div className="bg-card rounded-xl p-6 border border-border">
+              <div className="bg-neutral-200 rounded-xl p-6 border border-border shadow-sm">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4">
                   Serviços Selecionados ({selectedServices.length})
                 </h2>
