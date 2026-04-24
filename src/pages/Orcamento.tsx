@@ -671,10 +671,10 @@ const Orcamento = () => {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-accent text-accent-foreground py-3.5 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              className="w-full bg-[#036e0c] text-accent-foreground py-3.5 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
               <Send className="w-5 h-5" />
-              Solicitar Serviços
+              Contratar Serviços
             </button>
           </form>
         </div>
