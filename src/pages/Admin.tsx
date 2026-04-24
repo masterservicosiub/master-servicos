@@ -530,6 +530,76 @@ const Admin = () => {
     }
   };
 
+  const handleAddClient = async () => {
+    if (!clName.trim()) {
+      toast.error("Informe o nome do cliente.");
+      return;
+    }
+    try {
+      await insertClient({
+        name: clName.trim(),
+        phone: clPhone.trim(),
+        email: clEmail.trim(),
+        address: clAddress.trim(),
+        notes: clNotes.trim(),
+      });
+      setClName(""); setClPhone(""); setClEmail(""); setClAddress(""); setClNotes("");
+      toast.success("Cliente cadastrado!");
+      loadClients();
+    } catch {
+      toast.error("Erro ao cadastrar cliente.");
+    }
+  };
+
+  const startEditClient = (c: ClientRow) => {
+    setEditingClientId(c.id!);
+    setEditClName(c.name);
+    setEditClPhone(c.phone);
+    setEditClEmail(c.email);
+    setEditClAddress(c.address);
+    setEditClNotes(c.notes);
+  };
+
+  const handleSaveClient = async (id: string) => {
+    if (!editClName.trim()) {
+      toast.error("Informe o nome do cliente.");
+      return;
+    }
+    try {
+      await updateClient(id, {
+        name: editClName.trim(),
+        phone: editClPhone.trim(),
+        email: editClEmail.trim(),
+        address: editClAddress.trim(),
+        notes: editClNotes.trim(),
+      });
+      setEditingClientId(null);
+      toast.success("Cliente atualizado!");
+      loadClients();
+    } catch {
+      toast.error("Erro ao atualizar cliente.");
+    }
+  };
+
+  const handleDeleteClient = async (id: string) => {
+    if (!confirm("Excluir este cliente?")) return;
+    try {
+      await deleteClient(id);
+      setClients(clients.filter((c) => c.id !== id));
+      toast.success("Cliente excluído!");
+    } catch {
+      toast.error("Erro ao excluir cliente.");
+    }
+  };
+
+  const filteredClients = useMemo(() => {
+    const q = clientSearch.trim().toLowerCase();
+    if (!q) return clients;
+    return clients.filter((c) =>
+      [c.name, c.phone, c.email, c.address].some((f) => (f || "").toLowerCase().includes(q))
+    );
+  }, [clients, clientSearch]);
+
   if (!authenticated) {
     return (
       <div className="min-h-screen">
