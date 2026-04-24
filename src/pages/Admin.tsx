@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow } from "@/lib/supabase";
+import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow, fetchClients, insertClient, updateClient, deleteClient, type ClientRow } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight, Receipt } from "lucide-react";
+import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight, Receipt, Users, Search } from "lucide-react";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
@@ -26,7 +26,7 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "config">("pedidos");
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -86,6 +86,21 @@ const Admin = () => {
   const [coupValue, setCoupValue] = useState("");
   const [coupApplies, setCoupApplies] = useState<"all" | "service">("all");
   const [coupServiceId, setCoupServiceId] = useState("");
+
+  // Clients
+  const [clients, setClients] = useState<ClientRow[]>([]);
+  const [clientSearch, setClientSearch] = useState("");
+  const [clName, setClName] = useState("");
+  const [clPhone, setClPhone] = useState("");
+  const [clEmail, setClEmail] = useState("");
+  const [clAddress, setClAddress] = useState("");
+  const [clNotes, setClNotes] = useState("");
+  const [editingClientId, setEditingClientId] = useState<string | null>(null);
+  const [editClName, setEditClName] = useState("");
+  const [editClPhone, setEditClPhone] = useState("");
+  const [editClEmail, setEditClEmail] = useState("");
+  const [editClAddress, setEditClAddress] = useState("");
+  const [editClNotes, setEditClNotes] = useState("");
 
   // Load admin password from DB on mount
   useEffect(() => {
@@ -169,12 +184,22 @@ const Admin = () => {
     }
   };
 
+  const loadClients = async () => {
+    try {
+      const data = await fetchClients();
+      setClients(data);
+    } catch (err) {
+      console.error("Erro ao buscar clientes:", err);
+    }
+  };
+
   useEffect(() => {
     if (authenticated) {
       loadOrders();
       loadServices();
       loadBudgetServices();
       loadCoupons();
+      loadClients();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
@@ -505,6 +530,76 @@ const Admin = () => {
     }
   };
 
+  const handleAddClient = async () => {
+    if (!clName.trim()) {
+      toast.error("Informe o nome do cliente.");
+      return;
+    }
+    try {
+      await insertClient({
+        name: clName.trim(),
+        phone: clPhone.trim(),
+        email: clEmail.trim(),
+        address: clAddress.trim(),
+        notes: clNotes.trim(),
+      });
+      setClName(""); setClPhone(""); setClEmail(""); setClAddress(""); setClNotes("");
+      toast.success("Cliente cadastrado!");
+      loadClients();
+    } catch {
+      toast.error("Erro ao cadastrar cliente.");
+    }
+  };
+
+  const startEditClient = (c: ClientRow) => {
+    setEditingClientId(c.id!);
+    setEditClName(c.name);
+    setEditClPhone(c.phone);
+    setEditClEmail(c.email);
+    setEditClAddress(c.address);
+    setEditClNotes(c.notes);
+  };
+
+  const handleSaveClient = async (id: string) => {
+    if (!editClName.trim()) {
+      toast.error("Informe o nome do cliente.");
+      return;
+    }
+    try {
+      await updateClient(id, {
+        name: editClName.trim(),
+        phone: editClPhone.trim(),
+        email: editClEmail.trim(),
+        address: editClAddress.trim(),
+        notes: editClNotes.trim(),
+      });
+      setEditingClientId(null);
+      toast.success("Cliente atualizado!");
+      loadClients();
+    } catch {
+      toast.error("Erro ao atualizar cliente.");
+    }
+  };
+
+  const handleDeleteClient = async (id: string) => {
+    if (!confirm("Excluir este cliente?")) return;
+    try {
+      await deleteClient(id);
+      setClients(clients.filter((c) => c.id !== id));
+      toast.success("Cliente excluído!");
+    } catch {
+      toast.error("Erro ao excluir cliente.");
+    }
+  };
+
+  const filteredClients = useMemo(() => {
+    const q = clientSearch.trim().toLowerCase();
+    if (!q) return clients;
+    return clients.filter((c) =>
+      [c.name, c.phone, c.email, c.address].some((f) => (f || "").toLowerCase().includes(q))
+    );
+  }, [clients, clientSearch]);
+
   if (!authenticated) {
     return (
       <div className="min-h-screen">
@@ -546,6 +641,12 @@ const Admin = () => {
                 className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "pedidos" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
                 <ClipboardList className="w-4 h-4" /> Pedidos
+              </button>
+              <button
+                onClick={() => setActiveTab("clientes")}
+                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "clientes" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <Users className="w-4 h-4" /> Clientes
               </button>
               <button
                 onClick={() => setActiveTab("config")}
@@ -776,6 +877,172 @@ const Admin = () => {
                   </div>
                 </div>
               ))}
+            </>
+          ) : activeTab === "clientes" ? (
+            <>
+              {/* Cadastro de Clientes */}
+              <div className="bg-secondary/40 rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Plus className="w-5 h-5" /> Cadastrar Cliente
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <input
+                    value={clName}
+                    onChange={(e) => setClName(e.target.value)}
+                    placeholder="Nome *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    value={clPhone}
+                    onChange={(e) => setClPhone(applyPhoneMask(e.target.value))}
+                    placeholder="Telefone"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="email"
+                    value={clEmail}
+                    onChange={(e) => setClEmail(e.target.value)}
+                    placeholder="E-mail"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    value={clAddress}
+                    onChange={(e) => setClAddress(e.target.value)}
+                    placeholder="Endereço"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <textarea
+                    value={clNotes}
+                    onChange={(e) => setClNotes(e.target.value)}
+                    placeholder="Observações"
+                    rows={2}
+                    className="sm:col-span-2 w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <button
+                  onClick={handleAddClient}
+                  className="mt-4 bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Cadastrar Cliente
+                </button>
+              </div>
+
+              {/* Lista de Clientes */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <h2 className="text-xl font-semibold text-card-foreground flex items-center gap-2">
+                    <Users className="w-5 h-5" /> Clientes Cadastrados ({filteredClients.length})
+                  </h2>
+                  <div className="flex items-center gap-2 bg-background border border-input rounded-lg px-3 py-1.5">
+                    <Search className="w-4 h-4 text-muted-foreground" />
+                    <input
+                      value={clientSearch}
+                      onChange={(e) => setClientSearch(e.target.value)}
+                      placeholder="Buscar..."
+                      className="bg-transparent text-sm text-foreground focus:outline-none w-48"
+                    />
+                  </div>
+                </div>
+
+                {filteredClients.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Nenhum cliente encontrado.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredClients.map((c) => (
+                      <div key={c.id} className="bg-secondary/40 border border-border rounded-lg p-4">
+                        {editingClientId === c.id ? (
+                          <div className="space-y-3">
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              <input
+                                value={editClName}
+                                onChange={(e) => setEditClName(e.target.value)}
+                                placeholder="Nome *"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <input
+                                value={editClPhone}
+                                onChange={(e) => setEditClPhone(applyPhoneMask(e.target.value))}
+                                placeholder="Telefone"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <input
+                                type="email"
+                                value={editClEmail}
+                                onChange={(e) => setEditClEmail(e.target.value)}
+                                placeholder="E-mail"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <input
+                                value={editClAddress}
+                                onChange={(e) => setEditClAddress(e.target.value)}
+                                placeholder="Endereço"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <textarea
+                                value={editClNotes}
+                                onChange={(e) => setEditClNotes(e.target.value)}
+                                placeholder="Observações"
+                                rows={2}
+                                className="sm:col-span-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleSaveClient(c.id!)}
+                                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-1"
+                              >
+                                <Save className="w-4 h-4" /> Salvar
+                              </button>
+                              <button
+                                onClick={() => setEditingClientId(null)}
+                                className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-80 flex items-center gap-1"
+                              >
+                                <X className="w-4 h-4" /> Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-card-foreground">{c.name}</p>
+                              <div className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                                {c.phone && (
+                                  <p className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {c.phone}</p>
+                                )}
+                                {c.email && (
+                                  <p className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {c.email}</p>
+                                )}
+                                {c.address && (
+                                  <p className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {c.address}</p>
+                                )}
+                                {c.notes && (
+                                  <p className="italic mt-1">{c.notes}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => startEditClient(c)}
+                                className="text-primary hover:opacity-70 p-2"
+                                aria-label="Editar"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClient(c.id!)}
+                                className="text-destructive hover:opacity-70 p-2"
+                                aria-label="Excluir"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>
