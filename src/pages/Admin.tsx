@@ -4,8 +4,9 @@ import Footer from "@/components/Footer";
 import { fetchOrders, updateOrderStatus, updateOrderNotes, deleteOrderById, insertOrder, type OrderRow, fetchServicesAdmin, insertService, updateService, deleteService, type ServiceRow, fetchBudgetServices, insertBudgetService, updateBudgetService, deleteBudgetService, updateBudgetService as updateBudgetSvc, type BudgetServiceRow, fetchAdminPassword, updateAdminPassword, fetchEmailSettings, updateEmailSettings, fetchCoupons, insertCoupon, updateCoupon, deleteCoupon, type CouponRow } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight } from "lucide-react";
+import { Trash2, Phone, MapPin, Plus, Send, DollarSign, TrendingUp, Calendar, Filter, Camera, Edit2, Save, X, Settings, ClipboardList, ArrowUp, ArrowDown, Bell, Lock, Mail, FlaskConical, CheckCircle, FileText, Tag, ToggleLeft, ToggleRight, Receipt } from "lucide-react";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
+import { generateReceipt } from "@/lib/generateReceipt";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
 import { setGoogleScriptUrl, setNotificationEmail, getGoogleScriptUrl, getNotificationEmail, syncEmailSettingsFromDB } from "@/lib/googleSheets";
 import { sendTestEmail } from "@/lib/emailNotification";
@@ -758,6 +759,19 @@ const Admin = () => {
                     <button onClick={() => handleDelete(order.id!)}
                       className="bg-destructive text-destructive-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90">
                       <Trash2 className="w-4 h-4" /> Excluir
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await generateReceipt(order);
+                          toast.success("Recibo gerado!");
+                        } catch (err) {
+                          console.error("Erro ao gerar recibo:", err);
+                          toast.error("Erro ao gerar recibo");
+                        }
+                      }}
+                      className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90">
+                      <Receipt className="w-4 h-4" /> Gerar Recibo PDF
                     </button>
                   </div>
                 </div>
