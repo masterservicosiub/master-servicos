@@ -30,21 +30,26 @@ async function loadImageDataUrl(url: string): Promise<string> {
 function buildPixPayload(opts: { key: string; name: string; city: string; amount: number; txid?: string }): string {
   const { key, name, city, amount, txid = "***" } = opts;
 
+  // ✅ Remove acentos e caracteres especiais
+  const normalize = (str: string) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\x20-\x7E]/g, "")
+      .toUpperCase();
+
   const tlv = (id: string, value: string) => id + value.length.toString().padStart(2, "0") + value;
 
   const gui = tlv("00", "br.gov.bcb.pix");
   const keyField = tlv("01", key);
   const merchantAccountInfo = tlv("26", gui + keyField);
-
   const merchantCategoryCode = tlv("52", "0000");
   const transactionCurrency = tlv("53", "986");
   const transactionAmount = amount > 0 ? tlv("54", amount.toFixed(2)) : "";
   const countryCode = tlv("58", "BR");
-
-  const merchantName = tlv("59", name.substring(0, 25));
-  const merchantCity = tlv("60", city.substring(0, 15));
+  const merchantName = tlv("59", normalize(name).substring(0, 25)); // ✅ normalizado
+  const merchantCity = tlv("60", normalize(city).substring(0, 15)); // ✅ normalizado
   const additionalData = tlv("62", tlv("05", txid.substring(0, 25)));
-
   const payloadFormatIndicator = tlv("00", "01");
 
   let payload =
@@ -58,7 +63,7 @@ function buildPixPayload(opts: { key: string; name: string; city: string; amount
     merchantCity +
     additionalData;
 
-  // CRC16-CCITT
+  // CRC16-CCITT (sem alterações — estava correto)
   const toCrc = payload + "6304";
   let crc = 0xffff;
   for (let i = 0; i < toCrc.length; i++) {
@@ -68,7 +73,6 @@ function buildPixPayload(opts: { key: string; name: string; city: string; amount
     }
   }
   const crcStr = crc.toString(16).toUpperCase().padStart(4, "0");
-
   return toCrc + crcStr;
 }
 
