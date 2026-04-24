@@ -213,19 +213,21 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(`TOTAL:`, pageW - 60, afterTableY);
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
-  // ===== PAYMENT BLOCK (FOOTER) =====
-  const footerH = 70;
+  // ===== PAYMENT BLOCK (FOOTER) — 50% smaller =====
+  const footerH = 35;
+  const footerW = (pageW - 28) / 2;
+  const footerX = 14;
   const footerY = pageH - footerH - 10;
 
   doc.setFillColor(245, 247, 250);
   doc.setDrawColor(41, 128, 185);
-  doc.setLineWidth(0.6);
-  doc.roundedRect(14, footerY, pageW - 28, footerH, 3, 3, "FD");
+  doc.setLineWidth(0.4);
+  doc.roundedRect(footerX, footerY, footerW, footerH, 2, 2, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
+  doc.setFontSize(8);
   doc.setTextColor(41, 128, 185);
-  doc.text("FORMA DE PAGAMENTO — PIX", pageW / 2, footerY + 8, { align: "center" });
+  doc.text("PAGAMENTO — PIX", footerX + footerW / 2, footerY + 4, { align: "center" });
 
   // QR code
   try {
@@ -237,35 +239,36 @@ export async function generateReceipt(order: OrderRow) {
       txid: receiptNumber,
     });
     const qrDataUrl = await QRCode.toDataURL(pixPayload, { margin: 1, width: 256 });
-    doc.addImage(qrDataUrl, "PNG", 20, footerY + 12, 45, 45);
+    doc.addImage(qrDataUrl, "PNG", footerX + 2, footerY + 6, 23, 23);
   } catch (e) {
     console.error("Erro ao gerar QR code:", e);
   }
 
+  const tx = footerX + 28;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(6.5);
   doc.setTextColor(40, 40, 40);
-  doc.text("Chave PIX (CNPJ):", 72, footerY + 20);
+  doc.text("Chave PIX (CNPJ):", tx, footerY + 9);
   doc.setFont("helvetica", "bold");
-  doc.text(COMPANY.cnpj, 72, footerY + 26);
+  doc.text(COMPANY.cnpj, tx, footerY + 12);
 
   doc.setFont("helvetica", "normal");
-  doc.text("Beneficiário:", 72, footerY + 34);
+  doc.text("Beneficiário:", tx, footerY + 16);
   doc.setFont("helvetica", "bold");
-  doc.text(COMPANY.name, 72, footerY + 40);
+  doc.text(COMPANY.name, tx, footerY + 19);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text("Valor total:", 72, footerY + 50);
+  doc.setFontSize(6.5);
+  doc.text("Valor total:", tx, footerY + 24);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(9);
   doc.setTextColor(41, 128, 185);
-  doc.text(fmtBRL(total), 72, footerY + 58);
+  doc.text(fmtBRL(total), tx, footerY + 28);
 
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
+  doc.setFontSize(5.5);
   doc.setTextColor(110, 110, 110);
-  doc.text("Aponte a câmera para o QR Code para pagar via PIX.", pageW / 2, footerY + footerH - 4, { align: "center" });
+  doc.text("Aponte a câmera para o QR Code.", footerX + footerW / 2, footerY + footerH - 2, { align: "center" });
 
   doc.save(`recibo-${receiptNumber}-${(order.name || "cliente").replace(/\s+/g, "_")}.pdf`);
 }
