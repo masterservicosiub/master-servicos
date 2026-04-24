@@ -224,6 +224,17 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(`TOTAL:`, pageW - 60, afterTableY);
   doc.text(fmtBRL(total), pageW - 14, afterTableY, { align: "right" });
 
+  // ===== OBSERVAÇÕES (dentro do bloco PIX) =====
+  if (order.notes && order.notes.trim()) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6);
+    doc.setTextColor(80, 80, 80);
+    doc.text("Obs:", textX, footerY + 46);
+    doc.setFont("helvetica", "italic");
+    const splitNotes = doc.splitTextToSize(order.notes.trim(), blockW - (textX - blockX) - 4);
+    doc.text(splitNotes, textX, footerY + 50);
+  }
+
   // ===== PAYMENT BLOCK (FOOTER) =====
   const footerH = 49; // 70 * 0.7
   const footerY = pageH - footerH - 10;
@@ -277,16 +288,6 @@ export async function generateReceipt(order: OrderRow) {
   doc.setTextColor(41, 128, 185);
   doc.text(fmtBRL(total), textX, footerY + 40.6);
 
-  // ===== OBSERVAÇÕES (dentro do bloco PIX) =====
-  if (order.notes && order.notes.trim()) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6);
-    doc.setTextColor(80, 80, 80);
-    doc.text("Obs:", textX, footerY + 46);
-    doc.setFont("helvetica", "italic");
-    const splitNotes = doc.splitTextToSize(order.notes.trim(), blockW - (textX - blockX) - 4);
-    doc.text(splitNotes, textX, footerY + 50);
-  }
   doc.setFont("helvetica", "italic");
   doc.setFontSize(5.6); // 8 * 0.7
   doc.setTextColor(110, 110, 110);
