@@ -271,7 +271,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "italic");
   doc.setFontSize(4);
   doc.setTextColor(110, 110, 110);
-  doc.text("Aponte a câmera para o QR Code para pagar via PIX.", pageW / 2, footerY + footerH - 2, { align: "center" });
+  doc.text("GARANTIA DE 90 DIAS", 14, footerY + footerH - 2);
 
   doc.save(`recibo-${receiptNumber}-${(order.name || "cliente").replace(/\s+/g, "_")}.pdf`);
 }
