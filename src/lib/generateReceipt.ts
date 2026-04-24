@@ -193,7 +193,7 @@ export async function generateReceipt(order: OrderRow) {
 
   autoTable(doc, {
     startY: y + 4,
-    head: [["Descrição dos Serviços Executados", "Valor"]],
+    head: [["Serviços Executados", "Valor"]],
     body: tableBody,
     theme: "grid",
     headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold", fontSize: 10 },
