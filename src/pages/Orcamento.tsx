@@ -352,7 +352,7 @@ const Orcamento = () => {
         <div className="container mx-auto px-4 py-12">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
             {/* Client Info */}
-            <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="bg-neutral-200 rounded-xl p-6 border border-border shadow-sm">
               <h2 className="text-xl font-semibold text-card-foreground mb-4">Seus Dados</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
