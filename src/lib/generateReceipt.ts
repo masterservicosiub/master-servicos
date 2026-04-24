@@ -258,7 +258,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.setTextColor(40, 40, 40);
   doc.text("Chave PIX (CNPJ):", 72, footerY + 20);
   doc.setFont("helvetica", "bold");
-  doc.text("61.906.390 ANGELO MARCOS", 72, footerY + 40);
+  doc.text(COMPANY.cnpj, 72, footerY + 26);
 
   doc.setFont("helvetica", "normal");
   doc.text("Beneficiário:", 72, footerY + 34);
