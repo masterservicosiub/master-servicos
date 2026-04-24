@@ -287,7 +287,7 @@ const Admin = () => {
         setScriptUrl(getGoogleScriptUrl());
         setNotifEmail(getNotificationEmail());
       });
-      const interval = setInterval(loadOrders, 10000);
+      const interval = setInterval(loadOrders, 30000);
       return () => clearInterval(interval);
     }
   }, [authenticated]);
