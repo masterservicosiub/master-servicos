@@ -253,7 +253,7 @@ export async function generateReceipt(order: OrderRow) {
   doc.text(COMPANY.cnpj, tx, footerY + 12);
 
   doc.setFont("helvetica", "normal");
-  doc.text("Beneficiário:", tx, futurama_safe(footerY + 16));
+  doc.text("Beneficiário:", tx, footerY + 16);
   doc.setFont("helvetica", "bold");
   doc.text(COMPANY.name, tx, footerY + 19);
 
