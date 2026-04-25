@@ -172,6 +172,13 @@ const Afiliados = () => {
       setSession(af);
       setMode("dashboard");
       toast.success(`Bem-vindo, ${af.full_name.split(" ")[0]}!`);
+    } catch (err: any) {
+      const msg = String(err?.message || "");
+      if (msg.startsWith("AFFILIATE_BLOCKED:")) {
+        toast.error("Conta bloqueada: " + msg.replace("AFFILIATE_BLOCKED:", ""));
+      } else {
+        toast.error("Erro ao entrar.");
+      }
     } finally {
       setSubmitting(false);
     }

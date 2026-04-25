@@ -351,7 +351,11 @@ export async function loginAffiliate(username: string, password: string): Promis
     .eq("password_hash", password_hash)
     .maybeSingle();
   if (error) return null;
-  return (data as AffiliateRow) || null;
+  const af = (data as AffiliateRow) || null;
+  if (af && af.blocked) {
+    throw new Error("AFFILIATE_BLOCKED:" + (af.blocked_reason || "Conta bloqueada por suspeita de fraude."));
+  }
+  return af;
 }
 
 export async function fetchAffiliateOrders(referral_code: string): Promise<OrderRow[]> {
