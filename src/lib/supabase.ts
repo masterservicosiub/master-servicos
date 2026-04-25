@@ -17,6 +17,10 @@ export interface OrderRow {
   status: string;
   notes: string;
   affiliate_code?: string;
+  fraud_status?: string;
+  fraud_reasons?: string;
+  client_fingerprint?: string;
+  client_ip?: string;
 }
 
 export async function insertOrder(order: OrderRow) {
@@ -279,6 +283,9 @@ export interface AffiliateRow {
   password_hash: string;
   referral_code: string;
   active?: boolean;
+  blocked?: boolean;
+  blocked_reason?: string;
+  fraud_score?: number;
 }
 
 // Lightweight password hash (SHA-256) — note: anon key access; treat as obfuscation
