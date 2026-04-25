@@ -263,3 +263,95 @@ export async function deleteClient(id: string) {
   const { error } = await supabase.from("clients").delete().eq("id", id);
   if (error) throw error;
 }
+
+// ---------------- Affiliates ----------------
+export interface AffiliateRow {
+  id?: string;
+  created_at?: string;
+  full_name: string;
+  cpf: string;
+  address: string;
+  phone: string;
+  email: string;
+  pix_key: string;
+  username: string;
+  password_hash: string;
+  referral_code: string;
+  active?: boolean;
+}
+
+// Lightweight password hash (SHA-256) — note: anon key access; treat as obfuscation
+async function sha256(text: string): Promise<string> {
+  const buf = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export async function hashPassword(pw: string): Promise<string> {
+  return sha256(`master-affiliate::${pw}`);
+}
+
+export function generateReferralCode(name: string): string {
+  const base = (name || "AF")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z]/g, "")
+    .toUpperCase()
+    .slice(0, 4) || "AF";
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${base}${rand}`;
+}
+
+export async function registerAffiliate(input: Omit<AffiliateRow, "id" | "created_at" | "password_hash" | "referral_code"> & { password: string }) {
+  const password_hash = await hashPassword(input.password);
+  let referral_code = generateReferralCode(input.full_name);
+  // ensure uniqueness with retry
+  for (let i = 0; i < 4; i++) {
+    const { data: exists } = await supabase
+      .from("affiliates")
+      .select("id")
+      .eq("referral_code", referral_code)
+      .maybeSingle();
+    if (!exists) break;
+    referral_code = generateReferralCode(input.full_name);
+  }
+  const row: AffiliateRow = {
+    full_name: input.full_name,
+    cpf: input.cpf,
+    address: input.address,
+    phone: input.phone,
+    email: input.email,
+    pix_key: input.pix_key,
+    username: input.username,
+    password_hash,
+    referral_code,
+    active: true,
+  };
+  const { data, error } = await supabase.from("affiliates").insert([row]).select().single();
+  if (error) throw error;
+  return data as AffiliateRow;
+}
+
+export async function loginAffiliate(username: string, password: string): Promise<AffiliateRow | null> {
+  const password_hash = await hashPassword(password);
+  const { data, error } = await supabase
+    .from("affiliates")
+    .select("*")
+    .eq("username", username.trim())
+    .eq("password_hash", password_hash)
+    .maybeSingle();
+  if (error) return null;
+  return (data as AffiliateRow) || null;
+}
+
+export async function fetchAffiliateOrders(referral_code: string): Promise<OrderRow[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("affiliate_code", referral_code)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as OrderRow[]) || [];
+}
