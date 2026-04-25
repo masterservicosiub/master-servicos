@@ -67,6 +67,14 @@ import {
   Users,
   Search,
 } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
+import {
+  fetchAffiliatesAll,
+  setAffiliateBlocked,
+  setOrderFraudStatus,
+  fetchSuspiciousOrders,
+} from "@/lib/antifraud";
+import type { AffiliateRow } from "@/lib/supabase";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
@@ -105,7 +113,12 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "config">("pedidos");
+
+  // Antifraude state
+  const [afAffiliates, setAfAffiliates] = useState<AffiliateRow[]>([]);
+  const [afOrders, setAfOrders] = useState<OrderRow[]>([]);
+  const [afLoading, setAfLoading] = useState(false);
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
