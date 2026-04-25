@@ -305,6 +305,23 @@ const Admin = () => {
     }
   }, [authenticated]);
 
+  const loadAntifraud = async () => {
+    setAfLoading(true);
+    try {
+      const [a, o] = await Promise.all([fetchAffiliatesAll(), fetchSuspiciousOrders()]);
+      setAfAffiliates(a);
+      setAfOrders(o);
+    } catch (e) {
+      toast.error("Erro ao carregar antifraude.");
+    } finally {
+      setAfLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated && activeTab === "antifraude") loadAntifraud();
+  }, [authenticated, activeTab]);
+
   // Dashboard calculations
   const { annualRevenue, monthlyRevenue, monthlyBreakdown } = useMemo(() => {
     const now = new Date();
