@@ -16,6 +16,7 @@ export interface OrderRow {
   total: number;
   status: string;
   notes: string;
+  affiliate_code?: string;
 }
 
 export async function insertOrder(order: OrderRow) {
