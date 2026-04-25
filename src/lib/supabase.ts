@@ -21,6 +21,7 @@ export interface OrderRow {
   fraud_reasons?: string;
   client_fingerprint?: string;
   client_ip?: string;
+  paid_at?: string;
 }
 
 export async function insertOrder(order: OrderRow) {
@@ -42,9 +43,15 @@ export async function fetchOrders() {
 }
 
 export async function updateOrderStatus(id: string, status: string) {
+  const updateData: any = { status };
+  if (status === "Pago") {
+    updateData.paid_at = new Date().toISOString();
+  } else {
+    updateData.paid_at = null;
+  }
   const { error } = await supabase
     .from("orders")
-    .update({ status })
+    .update(updateData)
     .eq("id", id);
   if (error) throw error;
 }
@@ -138,23 +145,45 @@ export async function deleteBudgetService(id: string) {
   if (error) throw error;
 }
 
-// Admin Settings (password + email config)
-export async function fetchAdminPassword(): Promise<string> {
-  const { data, error } = await supabase
-    .from("admin_settings")
-    .select("password")
-    .eq("id", "main")
-    .single();
-  if (error || !data) return "1478";
-  return data.password;
+// Admin Settings (auth + email config)
+export interface AdminAuthSettings {
+  username?: string;
+  password?: string;
+  email?: string;
 }
 
-export async function updateAdminPassword(newPassword: string): Promise<void> {
+export async function fetchAdminAuth(): Promise<AdminAuthSettings> {
+  const { data, error } = await supabase
+    .from("admin_settings")
+    .select("username, password, email")
+    .eq("id", "main")
+    .single();
+  if (error || !data) return { username: "admin", password: "1478", email: "masterservicos.iub@gmail.com" };
+  return data;
+}
+
+export async function updateAdminAuth(updates: AdminAuthSettings): Promise<void> {
   const { error } = await supabase
     .from("admin_settings")
-    .update({ password: newPassword, updated_at: new Date().toISOString() })
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("id", "main");
   if (error) throw error;
+}
+
+export async function recoverAdminPassword(email: string): Promise<string> {
+  const { data, error } = await supabase
+    .from("admin_settings")
+    .select("email")
+    .eq("id", "main")
+    .single();
+    
+  if (error || !data || data.email !== email) {
+    throw new Error("E-mail não corresponde ao cadastrado no sistema.");
+  }
+
+  const newPass = Math.floor(100000 + Math.random() * 900000).toString();
+  await updateAdminAuth({ password: newPass });
+  return newPass;
 }
 
 export interface EmailSettings {
@@ -286,6 +315,7 @@ export interface AffiliateRow {
   blocked?: boolean;
   blocked_reason?: string;
   fraud_score?: number;
+  terms_agreed?: boolean;
 }
 
 // Lightweight password hash (SHA-256) — note: anon key access; treat as obfuscation
@@ -336,6 +366,7 @@ export async function registerAffiliate(input: Omit<AffiliateRow, "id" | "create
     password_hash,
     referral_code,
     active: true,
+    terms_agreed: input.terms_agreed,
   };
   const { data, error } = await supabase.from("affiliates").insert([row]).select().single();
   if (error) throw error;
@@ -366,4 +397,32 @@ export async function fetchAffiliateOrders(referral_code: string): Promise<Order
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data as OrderRow[]) || [];
+}
+
+export async function recoverAffiliatePassword(email: string, cpf: string): Promise<string> {
+  const { data, error } = await supabase
+    .from("affiliates")
+    .select("id")
+    .ilike("email", email.trim())
+    .eq("cpf", cpf.trim())
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error("Usuário não encontrado com estes dados.");
+  }
+
+  // Generate 6 digit random password
+  const newPassword = Math.floor(100000 + Math.random() * 900000).toString();
+  const password_hash = await hashPassword(newPassword);
+
+  const { error: updateError } = await supabase
+    .from("affiliates")
+    .update({ password_hash })
+    .eq("id", data.id);
+
+  if (updateError) {
+    throw new Error("Erro ao atualizar a senha.");
+  }
+
+  return newPassword;
 }

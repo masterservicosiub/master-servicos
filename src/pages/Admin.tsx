@@ -19,8 +19,10 @@ import {
   deleteBudgetService,
   updateBudgetService as updateBudgetSvc,
   type BudgetServiceRow,
-  fetchAdminPassword,
-  updateAdminPassword,
+  fetchAdminAuth,
+  updateAdminAuth,
+  recoverAdminPassword,
+  type AdminAuthSettings,
   fetchEmailSettings,
   updateEmailSettings,
   fetchCoupons,
@@ -73,6 +75,7 @@ import {
   setAffiliateBlocked,
   setOrderFraudStatus,
   fetchSuspiciousOrders,
+  deleteAffiliate,
 } from "@/lib/antifraud";
 import type { AffiliateRow } from "@/lib/supabase";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
@@ -107,7 +110,10 @@ const MONTHS = [
 
 const Admin = () => {
   const [authenticated, setAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loginMode, setLoginMode] = useState<"login" | "forgot">("login");
+  const [recoverEmail, setRecoverEmail] = useState("");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
@@ -119,6 +125,7 @@ const Admin = () => {
   const [afAffiliates, setAfAffiliates] = useState<AffiliateRow[]>([]);
   const [afOrders, setAfOrders] = useState<OrderRow[]>([]);
   const [afLoading, setAfLoading] = useState(false);
+  const [viewingAffiliateId, setViewingAffiliateId] = useState<string | null>(null);
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -163,7 +170,9 @@ const Admin = () => {
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
-  const [adminPw, setAdminPw] = useState<string | null>(null);
+  const [adminAuth, setAdminAuth] = useState<AdminAuthSettings | null>(null);
+  const [editAdminUser, setEditAdminUser] = useState("");
+  const [editAdminEmail, setEditAdminEmail] = useState("");
 
   // Email / Google Script settings
   const [scriptUrl, setScriptUrl] = useState("");
@@ -194,48 +203,81 @@ const Admin = () => {
   const [editClAddress, setEditClAddress] = useState("");
   const [editClNotes, setEditClNotes] = useState("");
 
-  // Load admin password from DB on mount
+  // Load admin auth from DB on mount
   useEffect(() => {
-    fetchAdminPassword()
-      .then(setAdminPw)
-      .catch(() => setAdminPw("1478"));
+    fetchAdminAuth()
+      .then(data => {
+        setAdminAuth(data);
+        setEditAdminUser(data.username || "admin");
+        setEditAdminEmail(data.email || "masterservicos.iub@gmail.com");
+      })
+      .catch(() => setAdminAuth({ username: "admin", password: "1478", email: "masterservicos.iub@gmail.com" }));
   }, []);
 
-  const handleLogin = () => {
-    if (adminPw === null) {
-      toast.error("Carregando senha, tente novamente.");
+  const handleLogin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (adminAuth === null) {
+      toast.error("Carregando configurações, tente novamente.");
       return;
     }
-    if (password === adminPw) {
+    const safeUsername = adminAuth.username || "admin";
+    if (password === adminAuth.password && username === safeUsername) {
       setAuthenticated(true);
     } else {
-      toast.error("Senha incorreta!");
+      toast.error("Usuário ou senha incorretos!");
     }
   };
 
-  const handleChangePassword = async () => {
-    if (currentPw !== adminPw) {
+  const handleRecover = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recoverEmail) return toast.error("Informe o e-mail.");
+    try {
+      const newPass = await recoverAdminPassword(recoverEmail);
+      toast.success("Nova senha gerada com sucesso!");
+      alert(`Sua nova senha temporária é: ${newPass}\n\nPor favor, anote-a e faça login para alterá-la.`);
+      if (adminAuth) {
+        setAdminAuth({ ...adminAuth, password: newPass });
+      }
+      setLoginMode("login");
+      setRecoverEmail("");
+      setPassword("");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao recuperar senha.");
+    }
+  };
+
+  const handleUpdateAdminSettings = async () => {
+    if (currentPw !== adminAuth?.password) {
       toast.error("Senha atual incorreta!");
       return;
     }
-    if (newPw.length < 4) {
+    if (newPw && newPw.length < 4) {
       toast.error("A nova senha deve ter pelo menos 4 caracteres.");
       return;
     }
-    if (newPw !== confirmPw) {
+    if (newPw && newPw !== confirmPw) {
       toast.error("As senhas não coincidem!");
       return;
     }
+    
     try {
-      await updateAdminPassword(newPw);
-      setAdminPw(newPw);
+      const updates: AdminAuthSettings = {
+        username: editAdminUser || "admin",
+        email: editAdminEmail || "masterservicos.iub@gmail.com",
+      };
+      if (newPw) {
+        updates.password = newPw;
+      }
+      
+      await updateAdminAuth(updates);
+      setAdminAuth({ ...adminAuth, ...updates });
       setCurrentPw("");
       setNewPw("");
       setConfirmPw("");
-      toast.success("Senha alterada com sucesso!");
+      toast.success("Configurações de acesso atualizadas!");
     } catch (err) {
-      console.error("Erro ao alterar senha:", err);
-      toast.error("Erro ao salvar a nova senha.");
+      console.error("Erro ao alterar acesso:", err);
+      toast.error("Erro ao salvar configurações.");
     }
   };
 
@@ -321,6 +363,33 @@ const Admin = () => {
   useEffect(() => {
     if (authenticated && activeTab === "antifraude") loadAntifraud();
   }, [authenticated, activeTab]);
+
+  const getAffiliateCommissions = (referral_code: string) => {
+    const COMMISSION_RATE = 0.01;
+    const affiliateOrders = orders.filter(
+      (o) => o.affiliate_code === referral_code && (o.fraud_status || "ok") === "ok" && o.status === "Pago"
+    );
+
+    const now = new Date().getTime();
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+
+    let released = 0;
+    let pending = 0;
+
+    affiliateOrders.forEach((o) => {
+      const dateToUse = o.paid_at || o.created_at;
+      if (dateToUse) {
+        const orderDate = new Date(dateToUse).getTime();
+        if (now - orderDate >= SEVEN_DAYS) {
+          released += (Number(o.total || 0) * COMMISSION_RATE);
+        } else {
+          pending += (Number(o.total || 0) * COMMISSION_RATE);
+        }
+      }
+    });
+
+    return { released, pending, affiliateOrders };
+  };
 
   // Dashboard calculations
   const { annualRevenue, monthlyRevenue, monthlyBreakdown } = useMemo(() => {
@@ -762,20 +831,56 @@ const Admin = () => {
         <div className="pt-16 min-h-[80vh] flex items-center justify-center bg-background">
           <div className="bg-card p-8 rounded-xl border border-border w-full max-w-sm">
             <h2 className="text-2xl font-bold text-card-foreground mb-6 text-center">Admin</h2>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              placeholder="Senha"
-              className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground mb-4 focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <button
-              onClick={handleLogin}
-              className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90"
-            >
-              Entrar
-            </button>
+            {loginMode === "login" ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.trim().toLowerCase())}
+                  placeholder="Usuário"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Senha"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <div className="text-right mt-1">
+                    <button type="button" onClick={() => setLoginMode("forgot")} className="text-xs text-primary underline">Esqueci minha senha</button>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90"
+                >
+                  Entrar
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRecover} className="space-y-4">
+                <p className="text-sm text-muted-foreground mb-4">Informe o e-mail de recuperação cadastrado no Admin.</p>
+                <input
+                  type="email"
+                  value={recoverEmail}
+                  onChange={(e) => setRecoverEmail(e.target.value)}
+                  placeholder="E-mail"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90"
+                >
+                  Recuperar Senha
+                </button>
+                <button type="button" onClick={() => setLoginMode("login")} className="w-full py-2 text-sm font-semibold underline text-muted-foreground hover:text-foreground">
+                  Voltar ao login
+                </button>
+              </form>
+            )}
           </div>
         </div>
         <Footer />
@@ -810,7 +915,7 @@ const Admin = () => {
                 onClick={() => setActiveTab("antifraude")}
                 className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "antifraude" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
-                <ShieldAlert className="w-4 h-4" /> Antifraude
+                <ShieldAlert className="w-4 h-4" /> Afiliados
               </button>
               <button
                 onClick={() => setActiveTab("config")}
@@ -1384,11 +1489,15 @@ const Admin = () => {
                           <th className="py-2 pr-3">Código</th>
                           <th className="py-2 pr-3">CPF</th>
                           <th className="py-2 pr-3">Status</th>
+                          <th className="py-2 pr-3">A Pagar</th>
+                          <th className="py-2 pr-3">Pendente</th>
                           <th className="py-2 pr-3">Ações</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {afAffiliates.map((a) => (
+                        {afAffiliates.map((a) => {
+                          const { released, pending } = getAffiliateCommissions(a.referral_code);
+                          return (
                           <tr key={a.id} className="border-b last:border-0">
                             <td className="py-2 pr-3">{a.full_name}</td>
                             <td className="py-2 pr-3">{a.username}</td>
@@ -1405,34 +1514,60 @@ const Admin = () => {
                                 </span>
                               )}
                             </td>
+                            <td className="py-2 pr-3 font-semibold text-green-600">R$ {released.toFixed(2)}</td>
+                            <td className="py-2 pr-3 font-semibold text-yellow-600">R$ {pending.toFixed(2)}</td>
                             <td className="py-2 pr-3">
-                              {a.blocked ? (
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() => setViewingAffiliateId(a.id!)}
+                                  className="text-xs bg-blue-600 text-white px-2 py-1 rounded"
+                                >
+                                  Extrato
+                                </button>
+                                {a.blocked ? (
+                                  <button
+                                    onClick={async () => {
+                                      await setAffiliateBlocked(a.id!, false, "");
+                                      toast.success("Afiliado desbloqueado.");
+                                      loadAntifraud();
+                                    }}
+                                    className="text-xs bg-green-600 text-white px-2 py-1 rounded"
+                                  >
+                                    Desbloquear
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={async () => {
+                                      const reason = prompt("Motivo do bloqueio:") || "Suspeita de fraude";
+                                      await setAffiliateBlocked(a.id!, true, reason);
+                                      toast.success("Afiliado bloqueado.");
+                                      loadAntifraud();
+                                    }}
+                                    className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+                                  >
+                                    Bloquear
+                                  </button>
+                                )}
                                 <button
                                   onClick={async () => {
-                                    await setAffiliateBlocked(a.id!, false, "");
-                                    toast.success("Afiliado desbloqueado.");
-                                    loadAntifraud();
+                                    if (!confirm("Excluir este afiliado permanentemente?")) return;
+                                    try {
+                                      await deleteAffiliate(a.id!);
+                                      toast.success("Afiliado excluído!");
+                                      loadAntifraud();
+                                    } catch {
+                                      toast.error("Erro ao excluir afiliado.");
+                                    }
                                   }}
-                                  className="text-xs bg-green-600 text-white px-2 py-1 rounded"
+                                  className="text-xs bg-red-800 text-white px-2 py-1 rounded"
                                 >
-                                  Desbloquear
+                                  Excluir
                                 </button>
-                              ) : (
-                                <button
-                                  onClick={async () => {
-                                    const reason = prompt("Motivo do bloqueio:") || "Suspeita de fraude";
-                                    await setAffiliateBlocked(a.id!, true, reason);
-                                    toast.success("Afiliado bloqueado.");
-                                    loadAntifraud();
-                                  }}
-                                  className="text-xs bg-red-600 text-white px-2 py-1 rounded"
-                                >
-                                  Bloquear
-                                </button>
-                              )}
+                              </div>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1912,50 +2047,76 @@ const Admin = () => {
                 </div>
               </div>
 
-              {/* Alterar Senha */}
+              {/* Configurações de Acesso Admin */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                  <Lock className="w-5 h-5" /> Alterar Senha do Admin
+                  <Lock className="w-5 h-5" /> Configurações de Acesso Admin
                 </h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  E-mail de recuperação: <strong>masterservicos.iub@gmail.com</strong>
-                </p>
-                <div className="space-y-3 max-w-md">
+                <div className="space-y-4 max-w-md">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Senha Atual</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Usuário de Acesso</label>
                     <input
-                      type="password"
-                      value={currentPw}
-                      onChange={(e) => setCurrentPw(e.target.value)}
+                      type="text"
+                      value={editAdminUser}
+                      onChange={(e) => setEditAdminUser(e.target.value.trim().toLowerCase())}
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Digite a senha atual"
+                      placeholder="Ex: admin"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Nova Senha</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">E-mail de Recuperação</label>
                     <input
-                      type="password"
-                      value={newPw}
-                      onChange={(e) => setNewPw(e.target.value)}
+                      type="email"
+                      value={editAdminEmail}
+                      onChange={(e) => setEditAdminEmail(e.target.value)}
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Digite a nova senha"
+                      placeholder="E-mail para recuperar senha"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Confirmar Nova Senha</label>
-                    <input
-                      type="password"
-                      value={confirmPw}
-                      onChange={(e) => setConfirmPw(e.target.value)}
-                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Confirme a nova senha"
-                    />
+                  
+                  <div className="pt-4 border-t border-border">
+                    <h3 className="text-sm font-semibold text-foreground mb-3">Alterar Senha</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">Senha Atual (Obrigatória para salvar alterações)</label>
+                        <input
+                          type="password"
+                          value={currentPw}
+                          onChange={(e) => setCurrentPw(e.target.value)}
+                          className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                          placeholder="Digite a senha atual"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-1">Nova Senha (Opcional)</label>
+                        <input
+                          type="password"
+                          value={newPw}
+                          onChange={(e) => setNewPw(e.target.value)}
+                          className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                          placeholder="Deixe em branco para não alterar"
+                        />
+                      </div>
+                      {newPw && (
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1">Confirmar Nova Senha</label>
+                          <input
+                            type="password"
+                            value={confirmPw}
+                            onChange={(e) => setConfirmPw(e.target.value)}
+                            className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="Confirme a nova senha"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  
                   <button
-                    onClick={handleChangePassword}
-                    className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                    onClick={handleUpdateAdminSettings}
+                    className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 mt-2 w-full justify-center"
                   >
-                    <Lock className="w-4 h-4" /> Alterar Senha
+                    <Save className="w-4 h-4" /> Salvar Configurações
                   </button>
                 </div>
               </div>
@@ -1964,6 +2125,64 @@ const Admin = () => {
         </div>
       </div>
       <Footer />
+      {viewingAffiliateId && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-2xl rounded-xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setViewingAffiliateId(null)}
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-bold text-card-foreground mb-4">Extrato de Comissões</h3>
+            {(() => {
+              const affiliate = afAffiliates.find(a => a.id === viewingAffiliateId);
+              if (!affiliate) return null;
+              const { released, pending, affiliateOrders } = getAffiliateCommissions(affiliate.referral_code);
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-green-500/10 p-4 rounded-lg border border-green-500/20">
+                      <p className="text-sm text-green-700 font-semibold mb-1">Saldo Liberado (A Pagar)</p>
+                      <p className="text-2xl font-bold text-green-600">R$ {released.toFixed(2)}</p>
+                    </div>
+                    <div className="bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/20">
+                      <p className="text-sm text-yellow-700 font-semibold mb-1">Saldo Pendente (Aguardando 7 dias)</p>
+                      <p className="text-2xl font-bold text-yellow-600">R$ {pending.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-foreground mt-6 mb-2">Pedidos que geraram comissão ({affiliateOrders.length})</h4>
+                  {affiliateOrders.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nenhum pedido pago encontrado.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {affiliateOrders.map(o => {
+                        const paidAt = o.paid_at ? new Date(o.paid_at) : new Date(o.created_at || "");
+                        const isReleased = (new Date().getTime() - paidAt.getTime()) >= (7 * 24 * 60 * 60 * 1000);
+                        const commission = (Number(o.total || 0) * 0.01).toFixed(2);
+                        return (
+                          <div key={o.id} className="p-3 border border-border rounded-lg bg-background flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-sm text-foreground">{o.name}</p>
+                              <p className="text-xs text-muted-foreground">Data do Pagamento: {paidAt.toLocaleDateString("pt-BR")}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-primary">R$ {commission}</p>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isReleased ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
+                                {isReleased ? "Liberado" : "Pendente"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

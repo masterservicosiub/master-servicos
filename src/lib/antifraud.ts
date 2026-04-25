@@ -208,3 +208,8 @@ export async function fetchSuspiciousOrders(): Promise<OrderRow[]> {
   if (error) throw error;
   return (data as OrderRow[]) || [];
 }
+
+export async function deleteAffiliate(id: string) {
+  const { error } = await supabase.from("affiliates").delete().eq("id", id);
+  if (error) throw error;
+}
