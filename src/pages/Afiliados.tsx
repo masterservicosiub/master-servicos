@@ -35,6 +35,8 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const PUBLIC_SITE_URL = "https://masterservicos.click";
+
 const Afiliados = () => {
   const [mode, setMode] = useState<"landing" | "register" | "login" | "dashboard">("landing");
   const [session, setSession] = useState<AffiliateRow | null>(null);
@@ -94,7 +96,7 @@ const Afiliados = () => {
   }, [orders]);
 
   const referralLink = session
-    ? `${window.location.origin}/orcamento?ref=${session.referral_code}`
+    ? `${PUBLIC_SITE_URL}/orcamento?ref=${session.referral_code}`
     : "";
 
   const handleCopy = () => {
