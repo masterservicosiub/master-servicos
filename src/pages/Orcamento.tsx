@@ -122,6 +122,12 @@ const Orcamento = () => {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
+    // capture affiliate referral code from URL ?ref=CODE and persist
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("ref");
+      if (ref) localStorage.setItem("affiliate_ref", ref.trim().toUpperCase());
+    } catch {}
     fetchBudgetServices()
       .then((data) => {
         if (data.length > 0) {
@@ -272,6 +278,7 @@ const Orcamento = () => {
         total,
         status: "Novo",
         notes: "",
+        affiliate_code: (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined,
       });
     } catch (err) {
       console.error("Erro ao salvar no Supabase:", err);
