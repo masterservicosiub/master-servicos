@@ -8,6 +8,7 @@ import Orcamento from "./pages/Orcamento.tsx";
 import Sobre from "./pages/Sobre.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
+import Afiliados from "./pages/Afiliados.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import AdminGear from "./components/AdminGear.tsx";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/orcamento" element={<Orcamento />} />
           <Route path="/sobre" element={<Sobre />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/afiliados" element={<Afiliados />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <AdminGear />
