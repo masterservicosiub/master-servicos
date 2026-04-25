@@ -790,6 +790,12 @@ const Admin = () => {
                 <Users className="w-4 h-4" /> Clientes
               </button>
               <button
+                onClick={() => setActiveTab("antifraude")}
+                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "antifraude" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <ShieldAlert className="w-4 h-4" /> Antifraude
+              </button>
+              <button
                 onClick={() => setActiveTab("config")}
                 className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "config" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
