@@ -1278,6 +1278,167 @@ const Admin = () => {
                 )}
               </div>
             </>
+          ) : activeTab === "antifraude" ? (
+            <>
+              {/* Painel Antifraude */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-2 flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-yellow-600" /> Pedidos suspeitos / bloqueados
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Pedidos vinculados a afiliados marcados pelo sistema antifraude. Você pode aprovar ou bloquear.
+                </p>
+                {afLoading ? (
+                  <p className="text-muted-foreground">Carregando...</p>
+                ) : afOrders.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhum pedido suspeito. ✅</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left border-b">
+                          <th className="py-2 pr-3">Data</th>
+                          <th className="py-2 pr-3">Cliente</th>
+                          <th className="py-2 pr-3">Afiliado</th>
+                          <th className="py-2 pr-3">Status</th>
+                          <th className="py-2 pr-3">Motivos</th>
+                          <th className="py-2 pr-3 text-right">Total</th>
+                          <th className="py-2 pr-3">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {afOrders.map((o) => (
+                          <tr key={o.id} className="border-b last:border-0 align-top">
+                            <td className="py-2 pr-3">
+                              {o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "-"}
+                            </td>
+                            <td className="py-2 pr-3">
+                              <div className="font-medium">{o.name}</div>
+                              <div className="text-xs text-muted-foreground">{o.phone}</div>
+                            </td>
+                            <td className="py-2 pr-3 font-mono text-xs">{o.affiliate_code || "-"}</td>
+                            <td className="py-2 pr-3">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  o.fraud_status === "blocked"
+                                    ? "bg-red-500/15 text-red-600"
+                                    : "bg-yellow-500/15 text-yellow-700"
+                                }`}
+                              >
+                                {o.fraud_status}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-3 text-xs max-w-xs">{o.fraud_reasons || "-"}</td>
+                            <td className="py-2 pr-3 text-right">R$ {Number(o.total || 0).toFixed(2)}</td>
+                            <td className="py-2 pr-3">
+                              <div className="flex flex-col gap-1">
+                                <button
+                                  onClick={async () => {
+                                    await setOrderFraudStatus(o.id!, "ok");
+                                    toast.success("Pedido aprovado.");
+                                    loadAntifraud();
+                                  }}
+                                  className="text-xs bg-green-600 text-white px-2 py-1 rounded"
+                                >
+                                  Aprovar
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    await setOrderFraudStatus(o.id!, "blocked", o.fraud_reasons || "Bloqueado pelo admin");
+                                    toast.success("Pedido bloqueado.");
+                                    loadAntifraud();
+                                  }}
+                                  className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+                                >
+                                  Bloquear
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Afiliados */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-2 flex items-center gap-2">
+                  <Users className="w-5 h-5" /> Afiliados cadastrados
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Bloqueie afiliados suspeitos. Bloqueio impede login e zera comissões futuras.
+                </p>
+                {afLoading ? (
+                  <p className="text-muted-foreground">Carregando...</p>
+                ) : afAffiliates.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhum afiliado cadastrado.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left border-b">
+                          <th className="py-2 pr-3">Nome</th>
+                          <th className="py-2 pr-3">Usuário</th>
+                          <th className="py-2 pr-3">Código</th>
+                          <th className="py-2 pr-3">CPF</th>
+                          <th className="py-2 pr-3">Status</th>
+                          <th className="py-2 pr-3">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {afAffiliates.map((a) => (
+                          <tr key={a.id} className="border-b last:border-0">
+                            <td className="py-2 pr-3">{a.full_name}</td>
+                            <td className="py-2 pr-3">{a.username}</td>
+                            <td className="py-2 pr-3 font-mono text-xs">{a.referral_code}</td>
+                            <td className="py-2 pr-3">{a.cpf}</td>
+                            <td className="py-2 pr-3">
+                              {a.blocked ? (
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/15 text-red-600">
+                                  Bloqueado
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/15 text-green-600">
+                                  Ativo
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2 pr-3">
+                              {a.blocked ? (
+                                <button
+                                  onClick={async () => {
+                                    await setAffiliateBlocked(a.id!, false, "");
+                                    toast.success("Afiliado desbloqueado.");
+                                    loadAntifraud();
+                                  }}
+                                  className="text-xs bg-green-600 text-white px-2 py-1 rounded"
+                                >
+                                  Desbloquear
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={async () => {
+                                    const reason = prompt("Motivo do bloqueio:") || "Suspeita de fraude";
+                                    await setAffiliateBlocked(a.id!, true, reason);
+                                    toast.success("Afiliado bloqueado.");
+                                    loadAntifraud();
+                                  }}
+                                  className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+                                >
+                                  Bloquear
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <>
               {/* Gerenciar Serviços de Orçamento */}
