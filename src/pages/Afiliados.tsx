@@ -81,17 +81,23 @@ const Afiliados = () => {
   }, [mode, session?.referral_code]);
 
   const stats = useMemo(() => {
-    const paid = orders.filter((o) => (o.status || "").toLowerCase() === "pago");
+    // Antifraude: ignora pedidos bloqueados; mostra suspeitos como pendentes de revisão
+    const valid = orders.filter((o) => (o.fraud_status || "ok") !== "blocked");
+    const trusted = valid.filter((o) => (o.fraud_status || "ok") === "ok");
+    const suspicious = valid.filter((o) => o.fraud_status === "suspicious");
+    const paid = trusted.filter((o) => (o.status || "").toLowerCase() === "pago");
     const totalPaid = paid.reduce((s, o) => s + Number(o.total || 0), 0);
-    const totalAll = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const totalAll = trusted.reduce((s, o) => s + Number(o.total || 0), 0);
     const earnings = totalPaid * COMMISSION_RATE;
     const pendingEarnings = (totalAll - totalPaid) * COMMISSION_RATE;
     return {
-      referrals: orders.length,
+      referrals: valid.length,
       paidCount: paid.length,
       totalPaid,
       earnings,
       pendingEarnings,
+      suspiciousCount: suspicious.length,
+      blockedCount: orders.length - valid.length,
     };
   }, [orders]);
 
@@ -166,6 +172,13 @@ const Afiliados = () => {
       setSession(af);
       setMode("dashboard");
       toast.success(`Bem-vindo, ${af.full_name.split(" ")[0]}!`);
+    } catch (err: any) {
+      const msg = String(err?.message || "");
+      if (msg.startsWith("AFFILIATE_BLOCKED:")) {
+        toast.error("Conta bloqueada: " + msg.replace("AFFILIATE_BLOCKED:", ""));
+      } else {
+        toast.error("Erro ao entrar.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -469,7 +482,10 @@ const Afiliados = () => {
                       <tbody>
                         {orders.map((o) => {
                           const isPaid = (o.status || "").toLowerCase() === "pago";
-                          const cb = Number(o.total || 0) * COMMISSION_RATE;
+                          const fraud = (o.fraud_status || "ok") as string;
+                          const isBlocked = fraud === "blocked";
+                          const isSuspicious = fraud === "suspicious";
+                          const cb = isBlocked ? 0 : Number(o.total || 0) * COMMISSION_RATE;
                           return (
                             <tr key={o.id} className="border-b last:border-0">
                               <td className="py-2 pr-3">
@@ -479,20 +495,36 @@ const Afiliados = () => {
                               </td>
                               <td className="py-2 pr-3">{o.name}</td>
                               <td className="py-2 pr-3">
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    isPaid
-                                      ? "bg-green-500/15 text-green-600"
-                                      : "bg-muted text-muted-foreground"
-                                  }`}
-                                >
-                                  {o.status}
-                                </span>
+                                <div className="flex flex-col gap-1">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-xs font-medium w-fit ${
+                                      isPaid
+                                        ? "bg-green-500/15 text-green-600"
+                                        : "bg-muted text-muted-foreground"
+                                    }`}
+                                  >
+                                    {o.status}
+                                  </span>
+                                  {isBlocked && (
+                                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/15 text-red-600 w-fit">
+                                      Bloqueado (fraude)
+                                    </span>
+                                  )}
+                                  {isSuspicious && (
+                                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-500/15 text-yellow-700 w-fit">
+                                      Em análise
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td className="py-2 pr-3 text-right">{formatBRL(Number(o.total || 0))}</td>
                               <td
                                 className={`py-2 pr-3 text-right font-semibold ${
-                                  isPaid ? "text-primary" : "text-muted-foreground"
+                                  isBlocked
+                                    ? "text-red-500 line-through"
+                                    : isPaid
+                                    ? "text-primary"
+                                    : "text-muted-foreground"
                                 }`}
                               >
                                 {formatBRL(cb)}
