@@ -7,6 +7,12 @@ import { sendToGoogleSheets } from "@/lib/googleSheets";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import { insertOrder, fetchBudgetServices, findCouponByCode, type CouponRow } from "@/lib/supabase";
 import { sendOrderEmailNotification } from "@/lib/emailNotification";
+import {
+  getDeviceFingerprint,
+  getClientIp,
+  trackAffiliateClick,
+  runFraudCheck,
+} from "@/lib/antifraud";
 
 type ServiceType = "fixed" | "area";
 
@@ -126,7 +132,12 @@ const Orcamento = () => {
     try {
       const params = new URLSearchParams(window.location.search);
       const ref = params.get("ref");
-      if (ref) localStorage.setItem("affiliate_ref", ref.trim().toUpperCase());
+      if (ref) {
+        const code = ref.trim().toUpperCase();
+        localStorage.setItem("affiliate_ref", code);
+        // track click for antifraud analytics (non-blocking)
+        trackAffiliateClick(code).catch(() => {});
+      }
     } catch {}
     fetchBudgetServices()
       .then((data) => {
@@ -269,6 +280,36 @@ const Orcamento = () => {
 
     // Save to Supabase
     try {
+      const affiliate_code =
+        (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined;
+      const fingerprint = getDeviceFingerprint();
+      const ip = await getClientIp();
+
+      let fraud_status = "ok";
+      let fraud_reasons = "";
+      let finalAffiliate = affiliate_code;
+
+      if (affiliate_code) {
+        try {
+          const result = await runFraudCheck({
+            affiliate_code,
+            client_phone: phone.trim(),
+            client_email: email.trim(),
+            client_name: name.trim(),
+            fingerprint,
+            ip,
+          });
+          fraud_status = result.status;
+          fraud_reasons = result.reasons.join("; ");
+          if (result.status === "blocked") {
+            // Drop the affiliate link entirely so the affiliate gets no credit
+            finalAffiliate = undefined;
+          }
+        } catch {
+          // antifraud failure should not block the order
+        }
+      }
+
       await insertOrder({
         name: name.trim(),
         phone: phone.trim(),
@@ -278,7 +319,11 @@ const Orcamento = () => {
         total,
         status: "Novo",
         notes: "",
-        affiliate_code: (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined,
+        affiliate_code: finalAffiliate,
+        fraud_status,
+        fraud_reasons,
+        client_fingerprint: fingerprint,
+        client_ip: ip || undefined,
       });
     } catch (err) {
       console.error("Erro ao salvar no Supabase:", err);
