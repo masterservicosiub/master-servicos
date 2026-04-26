@@ -9,8 +9,8 @@ const CARD_H_CM = 4.5;
 // Coordinates (in % of the template image) of the white "QR CODE" box
 // and the "LINK" box. Calibrated from the supplied template.
 // Template aspect ratio ≈ 1050x583 (the uploaded mockup).
-const QR_BOX = { xPct: 0.205, yPct: 0.46, wPct: 0.21, hPct: 0.42 };
-const LINK_BOX = { xPct: 0.10, yPct: 0.83, wPct: 0.42, hPct: 0.13 };
+const QR_BOX = { xPct: 0.2, yPct: 0.4, wPct: 0.21, hPct: 0.42 };
+const LINK_BOX = { xPct: 0.1, yPct: 0.83, wPct: 0.42, hPct: 0.13 };
 
 async function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
