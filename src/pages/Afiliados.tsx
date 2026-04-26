@@ -873,6 +873,77 @@ const Afiliados = () => {
         )}
       </main>
       <Footer />
+
+      <Dialog open={materialsOpen} onOpenChange={setMaterialsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5" /> Catálogo de Materiais
+            </DialogTitle>
+            <DialogDescription>
+              Escolha o material que deseja solicitar. Após a confirmação, entraremos em contato para combinar pagamento e entrega.
+            </DialogDescription>
+          </DialogHeader>
+          {materialsLoading ? (
+            <p className="text-muted-foreground py-6 text-center">Carregando catálogo...</p>
+          ) : materials.length === 0 ? (
+            <p className="text-muted-foreground py-6 text-center">
+              Nenhum material disponível no momento.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4 mt-2">
+              {materials.map((m) => {
+                const qty = materialQty[m.id] || 1;
+                const total = Number(m.price || 0) * qty;
+                return (
+                  <div key={m.id} className="border border-border rounded-lg p-4 flex flex-col">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-card-foreground">{m.name}</h3>
+                    </div>
+                    {m.description && (
+                      <p className="text-xs text-muted-foreground mb-3">{m.description}</p>
+                    )}
+                    <p className="text-2xl font-bold text-primary mb-3">{formatBRL(Number(m.price || 0))}</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Label className="text-xs">Qtd:</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={qty}
+                        onChange={(e) =>
+                          setMaterialQty((prev) => ({
+                            ...prev,
+                            [m.id]: Math.max(1, Number(e.target.value) || 1),
+                          }))
+                        }
+                        className="w-20 h-8"
+                      />
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        Total: <strong className="text-foreground">{formatBRL(total)}</strong>
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="mt-auto"
+                      disabled={orderingMaterial === m.id || Number(m.price) <= 0}
+                      onClick={() => handleOrderMaterial(m)}
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      {orderingMaterial === m.id ? "Enviando..." : "Solicitar"}
+                    </Button>
+                    {Number(m.price) <= 0 && (
+                      <p className="text-xs text-yellow-600 mt-2">
+                        Preço ainda não definido pelo administrador.
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
