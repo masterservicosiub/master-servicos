@@ -144,6 +144,11 @@ const Admin = () => {
   const [payPayload, setPayPayload] = useState("");
   const [payProcessing, setPayProcessing] = useState(false);
 
+  // Affiliate Materials state
+  const [materials, setMaterials] = useState<AffiliateMaterialRow[]>([]);
+  const [materialOrders, setMaterialOrders] = useState<AffiliateMaterialOrderRow[]>([]);
+  const [materialEdits, setMaterialEdits] = useState<Record<string, { name: string; description: string; price: string; active: boolean }>>({});
+
   // Manual order fields
   const [manualName, setManualName] = useState("");
   const [manualPhone, setManualPhone] = useState("");
