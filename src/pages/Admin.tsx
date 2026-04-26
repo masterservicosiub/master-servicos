@@ -35,6 +35,7 @@ import {
   updateClient,
   deleteClient,
   type ClientRow,
+  markAffiliateCommissionsPaid,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -89,6 +90,8 @@ import {
   syncEmailSettingsFromDB,
 } from "@/lib/googleSheets";
 import { sendTestEmail } from "@/lib/emailNotification";
+import { buildPixCpfPayload } from "@/lib/pixCpf";
+import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Todos", "Novo", "Em andamento", "Concluído", "Pago", "Cancelado"];
 
@@ -126,6 +129,13 @@ const Admin = () => {
   const [afOrders, setAfOrders] = useState<OrderRow[]>([]);
   const [afLoading, setAfLoading] = useState(false);
   const [viewingAffiliateId, setViewingAffiliateId] = useState<string | null>(null);
+
+  // Pix payout modal state
+  const [payingAffiliate, setPayingAffiliate] = useState<AffiliateRow | null>(null);
+  const [payAmount, setPayAmount] = useState(0);
+  const [payQrUrl, setPayQrUrl] = useState("");
+  const [payPayload, setPayPayload] = useState("");
+  const [payProcessing, setPayProcessing] = useState(false);
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -375,20 +385,26 @@ const Admin = () => {
 
     let released = 0;
     let pending = 0;
+    let paid = 0;
 
     affiliateOrders.forEach((o) => {
+      const commissionValue = Number(o.total || 0) * COMMISSION_RATE;
+      if (o.commission_paid_at) {
+        paid += commissionValue;
+        return;
+      }
       const dateToUse = o.paid_at || o.created_at;
       if (dateToUse) {
         const orderDate = new Date(dateToUse).getTime();
         if (now - orderDate >= SEVEN_DAYS) {
-          released += (Number(o.total || 0) * COMMISSION_RATE);
+          released += commissionValue;
         } else {
-          pending += (Number(o.total || 0) * COMMISSION_RATE);
+          pending += commissionValue;
         }
       }
     });
 
-    return { released, pending, affiliateOrders };
+    return { released, pending, paid, affiliateOrders };
   };
 
   // Dashboard calculations
@@ -1121,6 +1137,11 @@ const Admin = () => {
                       <p className="text-xs text-muted-foreground">
                         {order.created_at ? new Date(order.created_at).toLocaleString("pt-BR") : ""}
                       </p>
+                      {order.affiliate_code && (
+                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/15 text-purple-700 border border-purple-500/30">
+                          Afiliado: <span className="font-mono">{order.affiliate_code}</span>
+                        </span>
+                      )}
                     </div>
                     <select
                       value={order.status}
@@ -1523,6 +1544,31 @@ const Admin = () => {
                                   className="text-xs bg-blue-600 text-white px-2 py-1 rounded"
                                 >
                                   Extrato
+                                </button>
+                                <button
+                                  disabled={released <= 0}
+                                  onClick={async () => {
+                                    try {
+                                      const payload = buildPixCpfPayload({
+                                        cpf: a.cpf,
+                                        amount: Number(released.toFixed(2)),
+                                        merchantName: a.full_name,
+                                        merchantCity: "BRASIL",
+                                        txid: `AF${a.referral_code}`.slice(0, 25),
+                                      });
+                                      const url = await QRCode.toDataURL(payload, { width: 320, margin: 1 });
+                                      setPayPayload(payload);
+                                      setPayQrUrl(url);
+                                      setPayAmount(Number(released.toFixed(2)));
+                                      setPayingAffiliate(a);
+                                    } catch (err: any) {
+                                      toast.error(err.message || "Erro ao gerar QR Code Pix.");
+                                    }
+                                  }}
+                                  className="text-xs bg-emerald-600 text-white px-2 py-1 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+                                  title={released <= 0 ? "Sem saldo liberado" : "Gerar Pix e marcar como pago"}
+                                >
+                                  Pagar
                                 </button>
                                 {a.blocked ? (
                                   <button
@@ -2138,17 +2184,21 @@ const Admin = () => {
             {(() => {
               const affiliate = afAffiliates.find(a => a.id === viewingAffiliateId);
               if (!affiliate) return null;
-              const { released, pending, affiliateOrders } = getAffiliateCommissions(affiliate.referral_code);
+              const { released, pending, paid, affiliateOrders } = getAffiliateCommissions(affiliate.referral_code);
               return (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="bg-green-500/10 p-4 rounded-lg border border-green-500/20">
-                      <p className="text-sm text-green-700 font-semibold mb-1">Saldo Liberado (A Pagar)</p>
-                      <p className="text-2xl font-bold text-green-600">R$ {released.toFixed(2)}</p>
+                      <p className="text-xs text-green-700 font-semibold mb-1">A Pagar</p>
+                      <p className="text-xl font-bold text-green-600">R$ {released.toFixed(2)}</p>
                     </div>
                     <div className="bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/20">
-                      <p className="text-sm text-yellow-700 font-semibold mb-1">Saldo Pendente (Aguardando 7 dias)</p>
-                      <p className="text-2xl font-bold text-yellow-600">R$ {pending.toFixed(2)}</p>
+                      <p className="text-xs text-yellow-700 font-semibold mb-1">Pendente (7 dias)</p>
+                      <p className="text-xl font-bold text-yellow-600">R$ {pending.toFixed(2)}</p>
+                    </div>
+                    <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
+                      <p className="text-xs text-blue-700 font-semibold mb-1">Já Pago</p>
+                      <p className="text-xl font-bold text-blue-600">R$ {paid.toFixed(2)}</p>
                     </div>
                   </div>
                   <h4 className="font-semibold text-foreground mt-6 mb-2">Pedidos que geraram comissão ({affiliateOrders.length})</h4>
@@ -2160,6 +2210,7 @@ const Admin = () => {
                         const paidAt = o.paid_at ? new Date(o.paid_at) : new Date(o.created_at || "");
                         const isReleased = (new Date().getTime() - paidAt.getTime()) >= (7 * 24 * 60 * 60 * 1000);
                         const commission = (Number(o.total || 0) * 0.01).toFixed(2);
+                        const isPaidOut = !!o.commission_paid_at;
                         return (
                           <div key={o.id} className="p-3 border border-border rounded-lg bg-background flex justify-between items-center">
                             <div>
@@ -2168,9 +2219,15 @@ const Admin = () => {
                             </div>
                             <div className="text-right">
                               <p className="font-semibold text-primary">R$ {commission}</p>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isReleased ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
-                                {isReleased ? "Liberado" : "Pendente"}
-                              </span>
+                              {isPaidOut ? (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-500/15 text-blue-600">
+                                  Pago em {new Date(o.commission_paid_at!).toLocaleDateString("pt-BR")}
+                                </span>
+                              ) : (
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isReleased ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
+                                  {isReleased ? "Liberado" : "Pendente"}
+                                </span>
+                              )}
                             </div>
                           </div>
                         );
@@ -2180,6 +2237,106 @@ const Admin = () => {
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+      {payingAffiliate && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-md rounded-xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => {
+                if (payProcessing) return;
+                setPayingAffiliate(null);
+                setPayQrUrl("");
+                setPayPayload("");
+              }}
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-bold text-card-foreground mb-1">Pagar Afiliado</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {payingAffiliate.full_name} • CPF {payingAffiliate.cpf}
+            </p>
+
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-4 text-center">
+              <p className="text-xs text-emerald-700 font-medium">Valor a pagar</p>
+              <p className="text-2xl font-bold text-emerald-600">R$ {payAmount.toFixed(2)}</p>
+            </div>
+
+            {payQrUrl && (
+              <div className="flex flex-col items-center mb-4">
+                <img src={payQrUrl} alt="QR Code Pix" className="w-56 h-56 rounded-lg border border-border bg-white p-2" />
+                <p className="text-xs text-muted-foreground mt-2">Chave Pix CPF do afiliado</p>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-foreground mb-1">Pix Copia e Cola</label>
+              <textarea
+                readOnly
+                value={payPayload}
+                className="w-full text-[11px] font-mono rounded-lg border border-input bg-background px-2 py-2 text-foreground"
+                rows={4}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(payPayload);
+                    toast.success("Código Pix copiado!");
+                  } catch {
+                    toast.error("Não foi possível copiar.");
+                  }
+                }}
+                className="mt-2 text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-lg hover:opacity-90"
+              >
+                Copiar código
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                disabled={payProcessing}
+                onClick={() => {
+                  if (payProcessing) return;
+                  setPayingAffiliate(null);
+                  setPayQrUrl("");
+                  setPayPayload("");
+                }}
+                className="flex-1 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                disabled={payProcessing}
+                onClick={async () => {
+                  if (!payingAffiliate) return;
+                  setPayProcessing(true);
+                  try {
+                    const { ids, total } = await markAffiliateCommissionsPaid(payingAffiliate.referral_code);
+                    if (ids.length === 0) {
+                      toast.error("Nenhuma comissão liberada para baixar.");
+                    } else {
+                      toast.success(`Pagamento confirmado: R$ ${total.toFixed(2)} (${ids.length} pedido${ids.length > 1 ? "s" : ""}).`);
+                    }
+                    await loadOrders();
+                    await loadAntifraud();
+                    setPayingAffiliate(null);
+                    setPayQrUrl("");
+                    setPayPayload("");
+                  } catch (err: any) {
+                    toast.error(err.message || "Erro ao confirmar pagamento.");
+                  } finally {
+                    setPayProcessing(false);
+                  }
+                }}
+                className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                {payProcessing ? "Confirmando..." : "Confirmar pagamento"}
+              </button>
+            </div>
           </div>
         </div>
       )}

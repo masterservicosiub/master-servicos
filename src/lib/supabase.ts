@@ -22,6 +22,7 @@ export interface OrderRow {
   client_fingerprint?: string;
   client_ip?: string;
   paid_at?: string;
+  commission_paid_at?: string | null;
 }
 
 export async function insertOrder(order: OrderRow) {
@@ -397,6 +398,41 @@ export async function fetchAffiliateOrders(referral_code: string): Promise<Order
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data as OrderRow[]) || [];
+}
+
+/**
+ * Mark all currently-released (paid + 7d old, ok) commissions for an affiliate as paid out.
+ * Returns the list of order ids updated and total commission paid.
+ */
+export async function markAffiliateCommissionsPaid(referral_code: string): Promise<{ ids: string[]; total: number }> {
+  const COMMISSION_RATE = 0.01;
+  const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id, total, paid_at, created_at, fraud_status, status, commission_paid_at")
+    .eq("affiliate_code", referral_code)
+    .eq("status", "Pago")
+    .is("commission_paid_at", null);
+  if (error) throw error;
+
+  const eligible = (data || []).filter((o: any) => {
+    if ((o.fraud_status || "ok") !== "ok") return false;
+    const ref = o.paid_at || o.created_at;
+    if (!ref) return false;
+    return now - new Date(ref).getTime() >= SEVEN_DAYS;
+  });
+  if (eligible.length === 0) return { ids: [], total: 0 };
+
+  const ids = eligible.map((o: any) => o.id);
+  const total = eligible.reduce((s: number, o: any) => s + Number(o.total || 0) * COMMISSION_RATE, 0);
+  const { error: upErr } = await supabase
+    .from("orders")
+    .update({ commission_paid_at: new Date().toISOString() })
+    .in("id", ids);
+  if (upErr) throw upErr;
+  return { ids, total };
 }
 
 export async function recoverAffiliatePassword(email: string, cpf: string): Promise<string> {
