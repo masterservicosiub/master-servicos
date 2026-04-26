@@ -14,10 +14,12 @@ import {
   recoverAffiliatePassword,
   type AffiliateRow,
   type OrderRow,
+  fetchAffiliateMaterials,
+  insertAffiliateMaterialOrder,
+  type AffiliateMaterialRow,
 } from "@/lib/supabase";
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { downloadBusinessCardJPG, downloadBusinessCardPDF } from "@/lib/generateBusinessCard";
 import {
   DollarSign,
   Users,
@@ -29,9 +31,16 @@ import {
   Gift,
   Wallet,
   CheckCircle2,
-  FileImage,
-  FileText,
+  ShoppingCart,
+  Package,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const COMMISSION_RATE = 0.01; // 1%
 const STORAGE_KEY = "affiliate_session";
@@ -68,6 +77,13 @@ const Afiliados = () => {
   const [fEmail, setFEmail] = useState("");
   const [fCpf, setFCpf] = useState("");
 
+  // Material catalog
+  const [materialsOpen, setMaterialsOpen] = useState(false);
+  const [materials, setMaterials] = useState<AffiliateMaterialRow[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+  const [materialQty, setMaterialQty] = useState<Record<string, number>>({});
+  const [orderingMaterial, setOrderingMaterial] = useState<string | null>(null);
+
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -88,6 +104,48 @@ const Afiliados = () => {
         .finally(() => setLoadingOrders(false));
     }
   }, [mode, session?.referral_code]);
+
+  const openMaterialCatalog = async () => {
+    setMaterialsOpen(true);
+    setMaterialsLoading(true);
+    try {
+      const list = await fetchAffiliateMaterials();
+      setMaterials(list.filter((m) => m.active !== false));
+      const qty: Record<string, number> = {};
+      list.forEach((m) => (qty[m.id] = 1));
+      setMaterialQty(qty);
+    } catch {
+      toast.error("Erro ao carregar catálogo.");
+    } finally {
+      setMaterialsLoading(false);
+    }
+  };
+
+  const handleOrderMaterial = async (m: AffiliateMaterialRow) => {
+    if (!session) return;
+    const qty = Math.max(1, Number(materialQty[m.id] || 1));
+    setOrderingMaterial(m.id);
+    try {
+      await insertAffiliateMaterialOrder({
+        affiliate_id: session.id || null,
+        affiliate_code: session.referral_code,
+        affiliate_name: session.full_name,
+        material_id: m.id,
+        material_name: m.name,
+        quantity: qty,
+        unit_price: Number(m.price || 0),
+        total: Number((Number(m.price || 0) * qty).toFixed(2)),
+        status: "Pendente",
+        notes: "",
+      });
+      toast.success("Pedido enviado! Em breve entraremos em contato.");
+      setMaterialsOpen(false);
+    } catch {
+      toast.error("Erro ao enviar pedido.");
+    } finally {
+      setOrderingMaterial(null);
+    }
+  };
 
   const stats = useMemo(() => {
     // Antifraude: ignora pedidos bloqueados; mostra suspeitos como pendentes de revisão
@@ -677,41 +735,13 @@ const Afiliados = () => {
                   <Sparkles className="w-5 h-5" /> Material de Divulgação
                 </CardTitle>
                 <CardDescription>
-                  Gere o seu cartão de visita personalizado com o QR Code do seu link de afiliado.
-                  Tamanho oficial 8,5 cm × 4,5 cm, pronto para impressão.
+                  Solicite materiais impressos personalizados com o QR Code do seu link de afiliado para divulgar o seu trabalho.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    onClick={async () => {
-                      try {
-                        await downloadBusinessCardPDF(referralLink, `cartao-${session.referral_code}.pdf`);
-                        toast.success("Cartão em PDF gerado!");
-                      } catch (e) {
-                        toast.error("Erro ao gerar PDF.");
-                      }
-                    }}
-                  >
-                    <FileText className="w-4 h-4" /> Cartão de Visita (PDF)
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        await downloadBusinessCardJPG(referralLink, `cartao-${session.referral_code}.jpg`);
-                        toast.success("Cartão em JPEG gerado!");
-                      } catch (e) {
-                        toast.error("Erro ao gerar JPEG.");
-                      }
-                    }}
-                  >
-                    <FileImage className="w-4 h-4" /> Cartão de Visita (JPEG)
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  O panfleto estará disponível em breve.
-                </p>
+                <Button onClick={openMaterialCatalog}>
+                  <Package className="w-4 h-4" /> Pedir Material de Divulgação
+                </Button>
               </CardContent>
             </Card>
 
@@ -843,6 +873,77 @@ const Afiliados = () => {
         )}
       </main>
       <Footer />
+
+      <Dialog open={materialsOpen} onOpenChange={setMaterialsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5" /> Catálogo de Materiais
+            </DialogTitle>
+            <DialogDescription>
+              Escolha o material que deseja solicitar. Após a confirmação, entraremos em contato para combinar pagamento e entrega.
+            </DialogDescription>
+          </DialogHeader>
+          {materialsLoading ? (
+            <p className="text-muted-foreground py-6 text-center">Carregando catálogo...</p>
+          ) : materials.length === 0 ? (
+            <p className="text-muted-foreground py-6 text-center">
+              Nenhum material disponível no momento.
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4 mt-2">
+              {materials.map((m) => {
+                const qty = materialQty[m.id] || 1;
+                const total = Number(m.price || 0) * qty;
+                return (
+                  <div key={m.id} className="border border-border rounded-lg p-4 flex flex-col">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-card-foreground">{m.name}</h3>
+                    </div>
+                    {m.description && (
+                      <p className="text-xs text-muted-foreground mb-3">{m.description}</p>
+                    )}
+                    <p className="text-2xl font-bold text-primary mb-3">{formatBRL(Number(m.price || 0))}</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Label className="text-xs">Qtd:</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={qty}
+                        onChange={(e) =>
+                          setMaterialQty((prev) => ({
+                            ...prev,
+                            [m.id]: Math.max(1, Number(e.target.value) || 1),
+                          }))
+                        }
+                        className="w-20 h-8"
+                      />
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        Total: <strong className="text-foreground">{formatBRL(total)}</strong>
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="mt-auto"
+                      disabled={orderingMaterial === m.id || Number(m.price) <= 0}
+                      onClick={() => handleOrderMaterial(m)}
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      {orderingMaterial === m.id ? "Enviando..." : "Solicitar"}
+                    </Button>
+                    {Number(m.price) <= 0 && (
+                      <p className="text-xs text-yellow-600 mt-2">
+                        Preço ainda não definido pelo administrador.
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -36,6 +36,13 @@ import {
   deleteClient,
   type ClientRow,
   markAffiliateCommissionsPaid,
+  fetchAffiliateMaterials,
+  updateAffiliateMaterial,
+  fetchAffiliateMaterialOrders,
+  updateAffiliateMaterialOrderStatus,
+  deleteAffiliateMaterialOrder,
+  type AffiliateMaterialRow,
+  type AffiliateMaterialOrderRow,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -136,6 +143,11 @@ const Admin = () => {
   const [payQrUrl, setPayQrUrl] = useState("");
   const [payPayload, setPayPayload] = useState("");
   const [payProcessing, setPayProcessing] = useState(false);
+
+  // Affiliate Materials state
+  const [materials, setMaterials] = useState<AffiliateMaterialRow[]>([]);
+  const [materialOrders, setMaterialOrders] = useState<AffiliateMaterialOrderRow[]>([]);
+  const [materialEdits, setMaterialEdits] = useState<Record<string, { name: string; description: string; price: string; active: boolean }>>({});
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -360,9 +372,26 @@ const Admin = () => {
   const loadAntifraud = async () => {
     setAfLoading(true);
     try {
-      const [a, o] = await Promise.all([fetchAffiliatesAll(), fetchSuspiciousOrders()]);
+      const [a, o, mats, mOrders] = await Promise.all([
+        fetchAffiliatesAll(),
+        fetchSuspiciousOrders(),
+        fetchAffiliateMaterials(),
+        fetchAffiliateMaterialOrders(),
+      ]);
       setAfAffiliates(a);
       setAfOrders(o);
+      setMaterials(mats);
+      setMaterialOrders(mOrders);
+      const edits: Record<string, { name: string; description: string; price: string; active: boolean }> = {};
+      mats.forEach((m) => {
+        edits[m.id] = {
+          name: m.name,
+          description: m.description || "",
+          price: String(m.price ?? 0),
+          active: m.active !== false,
+        };
+      });
+      setMaterialEdits(edits);
     } catch (e) {
       toast.error("Erro ao carregar antifraude.");
     } finally {
@@ -1614,6 +1643,167 @@ const Admin = () => {
                           </tr>
                           );
                         })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Materiais de Divulgação - preços */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-2 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" /> Materiais de Divulgação — Preços
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Defina o preço dos materiais que os afiliados podem comprar pelo painel deles.
+                </p>
+                {materials.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhum material cadastrado.</p>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {materials.map((m) => {
+                      const ed = materialEdits[m.id] || { name: m.name, description: m.description || "", price: String(m.price || 0), active: m.active !== false };
+                      return (
+                        <div key={m.id} className="border border-border rounded-lg p-4 space-y-2">
+                          <input
+                            value={ed.name}
+                            onChange={(e) =>
+                              setMaterialEdits((p) => ({ ...p, [m.id]: { ...ed, name: e.target.value } }))
+                            }
+                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-semibold"
+                            placeholder="Nome"
+                          />
+                          <textarea
+                            value={ed.description}
+                            onChange={(e) =>
+                              setMaterialEdits((p) => ({ ...p, [m.id]: { ...ed, description: e.target.value } }))
+                            }
+                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                            placeholder="Descrição"
+                            rows={2}
+                          />
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">R$</span>
+                            <input
+                              type="number"
+                              min={0}
+                              step="0.01"
+                              value={ed.price}
+                              onChange={(e) =>
+                                setMaterialEdits((p) => ({ ...p, [m.id]: { ...ed, price: e.target.value } }))
+                              }
+                              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                            />
+                            <label className="flex items-center gap-1 text-xs">
+                              <input
+                                type="checkbox"
+                                checked={ed.active}
+                                onChange={(e) =>
+                                  setMaterialEdits((p) => ({ ...p, [m.id]: { ...ed, active: e.target.checked } }))
+                                }
+                              />
+                              Ativo
+                            </label>
+                          </div>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await updateAffiliateMaterial(m.id, {
+                                  name: ed.name,
+                                  description: ed.description,
+                                  price: Number(ed.price) || 0,
+                                  active: ed.active,
+                                });
+                                toast.success("Material atualizado!");
+                                loadAntifraud();
+                              } catch {
+                                toast.error("Erro ao salvar.");
+                              }
+                            }}
+                            className="w-full text-xs bg-primary text-primary-foreground px-3 py-2 rounded font-medium"
+                          >
+                            Salvar
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Pedidos de Materiais */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-2 flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5" /> Pedidos de Material de Afiliados
+                </h2>
+                {materialOrders.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhum pedido de material recebido.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left border-b">
+                          <th className="py-2 pr-3">Data</th>
+                          <th className="py-2 pr-3">Afiliado</th>
+                          <th className="py-2 pr-3">Código</th>
+                          <th className="py-2 pr-3">Material</th>
+                          <th className="py-2 pr-3">Qtd</th>
+                          <th className="py-2 pr-3">Total</th>
+                          <th className="py-2 pr-3">Status</th>
+                          <th className="py-2 pr-3">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {materialOrders.map((mo) => (
+                          <tr key={mo.id} className="border-b last:border-0">
+                            <td className="py-2 pr-3 text-xs">
+                              {mo.created_at ? new Date(mo.created_at).toLocaleDateString("pt-BR") : "-"}
+                            </td>
+                            <td className="py-2 pr-3">{mo.affiliate_name}</td>
+                            <td className="py-2 pr-3 font-mono text-xs">{mo.affiliate_code}</td>
+                            <td className="py-2 pr-3">{mo.material_name}</td>
+                            <td className="py-2 pr-3">{mo.quantity}</td>
+                            <td className="py-2 pr-3 font-semibold">R$ {Number(mo.total).toFixed(2)}</td>
+                            <td className="py-2 pr-3">
+                              <select
+                                value={mo.status || "Pendente"}
+                                onChange={async (e) => {
+                                  try {
+                                    await updateAffiliateMaterialOrderStatus(mo.id!, e.target.value);
+                                    toast.success("Status atualizado.");
+                                    loadAntifraud();
+                                  } catch {
+                                    toast.error("Erro ao atualizar.");
+                                  }
+                                }}
+                                className="text-xs rounded border border-input bg-background px-2 py-1"
+                              >
+                                <option value="Pendente">Pendente</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Produção">Produção</option>
+                                <option value="Entregue">Entregue</option>
+                                <option value="Cancelado">Cancelado</option>
+                              </select>
+                            </td>
+                            <td className="py-2 pr-3">
+                              <button
+                                onClick={async () => {
+                                  if (!confirm("Excluir pedido?")) return;
+                                  try {
+                                    await deleteAffiliateMaterialOrder(mo.id!);
+                                    toast.success("Pedido excluído.");
+                                    loadAntifraud();
+                                  } catch {
+                                    toast.error("Erro ao excluir.");
+                                  }
+                                }}
+                                className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+                              >
+                                Excluir
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>

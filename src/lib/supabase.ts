@@ -462,3 +462,79 @@ export async function recoverAffiliatePassword(email: string, cpf: string): Prom
 
   return newPassword;
 }
+
+// ---------------- Affiliate Materials ----------------
+export interface AffiliateMaterialRow {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  active: boolean;
+  updated_at?: string;
+}
+
+export async function fetchAffiliateMaterials(): Promise<AffiliateMaterialRow[]> {
+  const { data, error } = await supabase
+    .from("affiliate_materials")
+    .select("*")
+    .order("id", { ascending: true });
+  if (error) throw error;
+  return (data as AffiliateMaterialRow[]) || [];
+}
+
+export async function updateAffiliateMaterial(id: string, updates: Partial<AffiliateMaterialRow>) {
+  const { error } = await supabase
+    .from("affiliate_materials")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export interface AffiliateMaterialOrderRow {
+  id?: string;
+  created_at?: string;
+  affiliate_id?: string | null;
+  affiliate_code: string;
+  affiliate_name: string;
+  material_id: string;
+  material_name: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+  status?: string;
+  notes?: string;
+}
+
+export async function insertAffiliateMaterialOrder(order: AffiliateMaterialOrderRow) {
+  const { data, error } = await supabase
+    .from("affiliate_material_orders")
+    .insert([order])
+    .select();
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchAffiliateMaterialOrders(): Promise<AffiliateMaterialOrderRow[]> {
+  const { data, error } = await supabase
+    .from("affiliate_material_orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as AffiliateMaterialOrderRow[]) || [];
+}
+
+export async function updateAffiliateMaterialOrderStatus(id: string, status: string) {
+  const { error } = await supabase
+    .from("affiliate_material_orders")
+    .update({ status })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteAffiliateMaterialOrder(id: string) {
+  const { error } = await supabase
+    .from("affiliate_material_orders")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
