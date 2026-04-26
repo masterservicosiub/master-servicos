@@ -17,6 +17,7 @@ import {
 } from "@/lib/supabase";
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
+import { downloadBusinessCardJPG, downloadBusinessCardPDF } from "@/lib/generateBusinessCard";
 import {
   DollarSign,
   Users,
@@ -28,6 +29,8 @@ import {
   Gift,
   Wallet,
   CheckCircle2,
+  FileImage,
+  FileText,
 } from "lucide-react";
 
 const COMMISSION_RATE = 0.01; // 1%
