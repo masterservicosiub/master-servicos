@@ -372,9 +372,26 @@ const Admin = () => {
   const loadAntifraud = async () => {
     setAfLoading(true);
     try {
-      const [a, o] = await Promise.all([fetchAffiliatesAll(), fetchSuspiciousOrders()]);
+      const [a, o, mats, mOrders] = await Promise.all([
+        fetchAffiliatesAll(),
+        fetchSuspiciousOrders(),
+        fetchAffiliateMaterials(),
+        fetchAffiliateMaterialOrders(),
+      ]);
       setAfAffiliates(a);
       setAfOrders(o);
+      setMaterials(mats);
+      setMaterialOrders(mOrders);
+      const edits: Record<string, { name: string; description: string; price: string; active: boolean }> = {};
+      mats.forEach((m) => {
+        edits[m.id] = {
+          name: m.name,
+          description: m.description || "",
+          price: String(m.price ?? 0),
+          active: m.active !== false,
+        };
+      });
+      setMaterialEdits(edits);
     } catch (e) {
       toast.error("Erro ao carregar antifraude.");
     } finally {
