@@ -36,6 +36,13 @@ import {
   deleteClient,
   type ClientRow,
   markAffiliateCommissionsPaid,
+  fetchAffiliateMaterials,
+  updateAffiliateMaterial,
+  fetchAffiliateMaterialOrders,
+  updateAffiliateMaterialOrderStatus,
+  deleteAffiliateMaterialOrder,
+  type AffiliateMaterialRow,
+  type AffiliateMaterialOrderRow,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
