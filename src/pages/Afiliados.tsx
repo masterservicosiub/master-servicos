@@ -735,41 +735,13 @@ const Afiliados = () => {
                   <Sparkles className="w-5 h-5" /> Material de Divulgação
                 </CardTitle>
                 <CardDescription>
-                  Gere o seu cartão de visita personalizado com o QR Code do seu link de afiliado.
-                  Tamanho oficial 8,5 cm × 4,5 cm, pronto para impressão.
+                  Solicite materiais impressos personalizados com o QR Code do seu link de afiliado para divulgar o seu trabalho.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    onClick={async () => {
-                      try {
-                        await downloadBusinessCardPDF(referralLink, `cartao-${session.referral_code}.pdf`);
-                        toast.success("Cartão em PDF gerado!");
-                      } catch (e) {
-                        toast.error("Erro ao gerar PDF.");
-                      }
-                    }}
-                  >
-                    <FileText className="w-4 h-4" /> Cartão de Visita (PDF)
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        await downloadBusinessCardJPG(referralLink, `cartao-${session.referral_code}.jpg`);
-                        toast.success("Cartão em JPEG gerado!");
-                      } catch (e) {
-                        toast.error("Erro ao gerar JPEG.");
-                      }
-                    }}
-                  >
-                    <FileImage className="w-4 h-4" /> Cartão de Visita (JPEG)
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  O panfleto estará disponível em breve.
-                </p>
+                <Button onClick={openMaterialCatalog}>
+                  <Package className="w-4 h-4" /> Pedir Material de Divulgação
+                </Button>
               </CardContent>
             </Card>
 
