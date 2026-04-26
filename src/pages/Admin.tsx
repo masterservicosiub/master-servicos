@@ -1540,6 +1540,31 @@ const Admin = () => {
                                 >
                                   Extrato
                                 </button>
+                                <button
+                                  disabled={released <= 0}
+                                  onClick={async () => {
+                                    try {
+                                      const payload = buildPixCpfPayload({
+                                        cpf: a.cpf,
+                                        amount: Number(released.toFixed(2)),
+                                        merchantName: a.full_name,
+                                        merchantCity: "BRASIL",
+                                        txid: `AF${a.referral_code}`.slice(0, 25),
+                                      });
+                                      const url = await QRCode.toDataURL(payload, { width: 320, margin: 1 });
+                                      setPayPayload(payload);
+                                      setPayQrUrl(url);
+                                      setPayAmount(Number(released.toFixed(2)));
+                                      setPayingAffiliate(a);
+                                    } catch (err: any) {
+                                      toast.error(err.message || "Erro ao gerar QR Code Pix.");
+                                    }
+                                  }}
+                                  className="text-xs bg-emerald-600 text-white px-2 py-1 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+                                  title={released <= 0 ? "Sem saldo liberado" : "Gerar Pix e marcar como pago"}
+                                >
+                                  Pagar
+                                </button>
                                 {a.blocked ? (
                                   <button
                                     onClick={async () => {
