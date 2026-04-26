@@ -77,6 +77,13 @@ const Afiliados = () => {
   const [fEmail, setFEmail] = useState("");
   const [fCpf, setFCpf] = useState("");
 
+  // Material catalog
+  const [materialsOpen, setMaterialsOpen] = useState(false);
+  const [materials, setMaterials] = useState<AffiliateMaterialRow[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+  const [materialQty, setMaterialQty] = useState<Record<string, number>>({});
+  const [orderingMaterial, setOrderingMaterial] = useState<string | null>(null);
+
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -97,6 +104,48 @@ const Afiliados = () => {
         .finally(() => setLoadingOrders(false));
     }
   }, [mode, session?.referral_code]);
+
+  const openMaterialCatalog = async () => {
+    setMaterialsOpen(true);
+    setMaterialsLoading(true);
+    try {
+      const list = await fetchAffiliateMaterials();
+      setMaterials(list.filter((m) => m.active !== false));
+      const qty: Record<string, number> = {};
+      list.forEach((m) => (qty[m.id] = 1));
+      setMaterialQty(qty);
+    } catch {
+      toast.error("Erro ao carregar catálogo.");
+    } finally {
+      setMaterialsLoading(false);
+    }
+  };
+
+  const handleOrderMaterial = async (m: AffiliateMaterialRow) => {
+    if (!session) return;
+    const qty = Math.max(1, Number(materialQty[m.id] || 1));
+    setOrderingMaterial(m.id);
+    try {
+      await insertAffiliateMaterialOrder({
+        affiliate_id: session.id || null,
+        affiliate_code: session.referral_code,
+        affiliate_name: session.full_name,
+        material_id: m.id,
+        material_name: m.name,
+        quantity: qty,
+        unit_price: Number(m.price || 0),
+        total: Number((Number(m.price || 0) * qty).toFixed(2)),
+        status: "Pendente",
+        notes: "",
+      });
+      toast.success("Pedido enviado! Em breve entraremos em contato.");
+      setMaterialsOpen(false);
+    } catch {
+      toast.error("Erro ao enviar pedido.");
+    } finally {
+      setOrderingMaterial(null);
+    }
+  };
 
   const stats = useMemo(() => {
     // Antifraude: ignora pedidos bloqueados; mostra suspeitos como pendentes de revisão
