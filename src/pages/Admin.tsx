@@ -1137,6 +1137,11 @@ const Admin = () => {
                       <p className="text-xs text-muted-foreground">
                         {order.created_at ? new Date(order.created_at).toLocaleString("pt-BR") : ""}
                       </p>
+                      {order.affiliate_code && (
+                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/15 text-purple-700 border border-purple-500/30">
+                          Afiliado: <span className="font-mono">{order.affiliate_code}</span>
+                        </span>
+                      )}
                     </div>
                     <select
                       value={order.status}
