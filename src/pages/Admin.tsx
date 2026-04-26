@@ -2229,6 +2229,106 @@ const Admin = () => {
           </div>
         </div>
       )}
+      {payingAffiliate && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-md rounded-xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => {
+                if (payProcessing) return;
+                setPayingAffiliate(null);
+                setPayQrUrl("");
+                setPayPayload("");
+              }}
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-bold text-card-foreground mb-1">Pagar Afiliado</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {payingAffiliate.full_name} • CPF {payingAffiliate.cpf}
+            </p>
+
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 mb-4 text-center">
+              <p className="text-xs text-emerald-700 font-medium">Valor a pagar</p>
+              <p className="text-2xl font-bold text-emerald-600">R$ {payAmount.toFixed(2)}</p>
+            </div>
+
+            {payQrUrl && (
+              <div className="flex flex-col items-center mb-4">
+                <img src={payQrUrl} alt="QR Code Pix" className="w-56 h-56 rounded-lg border border-border bg-white p-2" />
+                <p className="text-xs text-muted-foreground mt-2">Chave Pix CPF do afiliado</p>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-foreground mb-1">Pix Copia e Cola</label>
+              <textarea
+                readOnly
+                value={payPayload}
+                className="w-full text-[11px] font-mono rounded-lg border border-input bg-background px-2 py-2 text-foreground"
+                rows={4}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(payPayload);
+                    toast.success("Código Pix copiado!");
+                  } catch {
+                    toast.error("Não foi possível copiar.");
+                  }
+                }}
+                className="mt-2 text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-lg hover:opacity-90"
+              >
+                Copiar código
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                disabled={payProcessing}
+                onClick={() => {
+                  if (payProcessing) return;
+                  setPayingAffiliate(null);
+                  setPayQrUrl("");
+                  setPayPayload("");
+                }}
+                className="flex-1 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                disabled={payProcessing}
+                onClick={async () => {
+                  if (!payingAffiliate) return;
+                  setPayProcessing(true);
+                  try {
+                    const { ids, total } = await markAffiliateCommissionsPaid(payingAffiliate.referral_code);
+                    if (ids.length === 0) {
+                      toast.error("Nenhuma comissão liberada para baixar.");
+                    } else {
+                      toast.success(`Pagamento confirmado: R$ ${total.toFixed(2)} (${ids.length} pedido${ids.length > 1 ? "s" : ""}).`);
+                    }
+                    await loadOrders();
+                    await loadAntifraud();
+                    setPayingAffiliate(null);
+                    setPayQrUrl("");
+                    setPayPayload("");
+                  } catch (err: any) {
+                    toast.error(err.message || "Erro ao confirmar pagamento.");
+                  } finally {
+                    setPayProcessing(false);
+                  }
+                }}
+                className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                {payProcessing ? "Confirmando..." : "Confirmar pagamento"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
