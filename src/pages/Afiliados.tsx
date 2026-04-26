@@ -14,10 +14,12 @@ import {
   recoverAffiliatePassword,
   type AffiliateRow,
   type OrderRow,
+  fetchAffiliateMaterials,
+  insertAffiliateMaterialOrder,
+  type AffiliateMaterialRow,
 } from "@/lib/supabase";
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { downloadBusinessCardJPG, downloadBusinessCardPDF } from "@/lib/generateBusinessCard";
 import {
   DollarSign,
   Users,
@@ -29,9 +31,16 @@ import {
   Gift,
   Wallet,
   CheckCircle2,
-  FileImage,
-  FileText,
+  ShoppingCart,
+  Package,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const COMMISSION_RATE = 0.01; // 1%
 const STORAGE_KEY = "affiliate_session";
