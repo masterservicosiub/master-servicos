@@ -2184,17 +2184,21 @@ const Admin = () => {
             {(() => {
               const affiliate = afAffiliates.find(a => a.id === viewingAffiliateId);
               if (!affiliate) return null;
-              const { released, pending, affiliateOrders } = getAffiliateCommissions(affiliate.referral_code);
+              const { released, pending, paid, affiliateOrders } = getAffiliateCommissions(affiliate.referral_code);
               return (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="bg-green-500/10 p-4 rounded-lg border border-green-500/20">
-                      <p className="text-sm text-green-700 font-semibold mb-1">Saldo Liberado (A Pagar)</p>
-                      <p className="text-2xl font-bold text-green-600">R$ {released.toFixed(2)}</p>
+                      <p className="text-xs text-green-700 font-semibold mb-1">A Pagar</p>
+                      <p className="text-xl font-bold text-green-600">R$ {released.toFixed(2)}</p>
                     </div>
                     <div className="bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/20">
-                      <p className="text-sm text-yellow-700 font-semibold mb-1">Saldo Pendente (Aguardando 7 dias)</p>
-                      <p className="text-2xl font-bold text-yellow-600">R$ {pending.toFixed(2)}</p>
+                      <p className="text-xs text-yellow-700 font-semibold mb-1">Pendente (7 dias)</p>
+                      <p className="text-xl font-bold text-yellow-600">R$ {pending.toFixed(2)}</p>
+                    </div>
+                    <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
+                      <p className="text-xs text-blue-700 font-semibold mb-1">Já Pago</p>
+                      <p className="text-xl font-bold text-blue-600">R$ {paid.toFixed(2)}</p>
                     </div>
                   </div>
                   <h4 className="font-semibold text-foreground mt-6 mb-2">Pedidos que geraram comissão ({affiliateOrders.length})</h4>
@@ -2206,6 +2210,7 @@ const Admin = () => {
                         const paidAt = o.paid_at ? new Date(o.paid_at) : new Date(o.created_at || "");
                         const isReleased = (new Date().getTime() - paidAt.getTime()) >= (7 * 24 * 60 * 60 * 1000);
                         const commission = (Number(o.total || 0) * 0.01).toFixed(2);
+                        const isPaidOut = !!o.commission_paid_at;
                         return (
                           <div key={o.id} className="p-3 border border-border rounded-lg bg-background flex justify-between items-center">
                             <div>
@@ -2214,9 +2219,15 @@ const Admin = () => {
                             </div>
                             <div className="text-right">
                               <p className="font-semibold text-primary">R$ {commission}</p>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isReleased ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
-                                {isReleased ? "Liberado" : "Pendente"}
-                              </span>
+                              {isPaidOut ? (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-500/15 text-blue-600">
+                                  Pago em {new Date(o.commission_paid_at!).toLocaleDateString("pt-BR")}
+                                </span>
+                              ) : (
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isReleased ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}>
+                                  {isReleased ? "Liberado" : "Pendente"}
+                                </span>
+                              )}
                             </div>
                           </div>
                         );
