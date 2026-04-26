@@ -35,6 +35,7 @@ import {
   updateClient,
   deleteClient,
   type ClientRow,
+  markAffiliateCommissionsPaid,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -89,6 +90,8 @@ import {
   syncEmailSettingsFromDB,
 } from "@/lib/googleSheets";
 import { sendTestEmail } from "@/lib/emailNotification";
+import { buildPixCpfPayload } from "@/lib/pixCpf";
+import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Todos", "Novo", "Em andamento", "Concluído", "Pago", "Cancelado"];
 
@@ -126,6 +129,13 @@ const Admin = () => {
   const [afOrders, setAfOrders] = useState<OrderRow[]>([]);
   const [afLoading, setAfLoading] = useState(false);
   const [viewingAffiliateId, setViewingAffiliateId] = useState<string | null>(null);
+
+  // Pix payout modal state
+  const [payingAffiliate, setPayingAffiliate] = useState<AffiliateRow | null>(null);
+  const [payAmount, setPayAmount] = useState(0);
+  const [payQrUrl, setPayQrUrl] = useState("");
+  const [payPayload, setPayPayload] = useState("");
+  const [payProcessing, setPayProcessing] = useState(false);
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -375,20 +385,26 @@ const Admin = () => {
 
     let released = 0;
     let pending = 0;
+    let paid = 0;
 
     affiliateOrders.forEach((o) => {
+      const commissionValue = Number(o.total || 0) * COMMISSION_RATE;
+      if (o.commission_paid_at) {
+        paid += commissionValue;
+        return;
+      }
       const dateToUse = o.paid_at || o.created_at;
       if (dateToUse) {
         const orderDate = new Date(dateToUse).getTime();
         if (now - orderDate >= SEVEN_DAYS) {
-          released += (Number(o.total || 0) * COMMISSION_RATE);
+          released += commissionValue;
         } else {
-          pending += (Number(o.total || 0) * COMMISSION_RATE);
+          pending += commissionValue;
         }
       }
     });
 
-    return { released, pending, affiliateOrders };
+    return { released, pending, paid, affiliateOrders };
   };
 
   // Dashboard calculations
