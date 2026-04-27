@@ -126,6 +126,7 @@ const Orcamento = () => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<CouponRow | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [clientSession, setClientSession] = useState<{ name: string; email: string; phone: string; address: string } | null>(null);
 
   useEffect(() => {
     // capture affiliate referral code from URL ?ref=CODE and persist
@@ -137,6 +138,17 @@ const Orcamento = () => {
         localStorage.setItem("affiliate_ref", code);
         // track click for antifraud analytics (non-blocking)
         trackAffiliateClick(code).catch(() => {});
+      }
+    } catch {}
+    try {
+      const raw = localStorage.getItem("client_session");
+      if (raw) {
+        const c = JSON.parse(raw);
+        setClientSession(c);
+        if (c.name && !name) setName(c.name);
+        if (c.phone && !phone) setPhone(c.phone);
+        if (c.email && !email) setEmail(c.email);
+        if (c.address && !address) setAddress(c.address);
       }
     } catch {}
     fetchBudgetServices()
@@ -212,6 +224,13 @@ const Orcamento = () => {
   }, [appliedCoupon, subtotal, selectedServices, availableServices]);
 
   const total = Math.max(0, subtotal - discount);
+
+  const clientDiscount = useMemo(() => {
+    if (!clientSession) return 0;
+    return Math.max(0, (subtotal - discount) * 0.03);
+  }, [clientSession, subtotal, discount]);
+
+  const finalTotal = Math.max(0, total - clientDiscount);
 
   const handleApplyCoupon = async () => {
     const code = couponCode.trim();
