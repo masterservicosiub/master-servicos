@@ -1,11 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const [hasClient, setHasClient] = useState(false);
+
+  useEffect(() => {
+    const check = () => setHasClient(!!localStorage.getItem("client_session"));
+    check();
+    window.addEventListener("storage", check);
+    return () => window.removeEventListener("storage", check);
+  }, [location.pathname]);
 
   const links = [
     { to: "/", label: "Início" },
@@ -33,6 +41,14 @@ const Header = () => {
             </Link>
           ))}
           <Link
+            to="/cliente"
+            className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
+              location.pathname === "/cliente" ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <User className="w-4 h-4" /> {hasClient ? "Minha Conta" : "Entrar"}
+          </Link>
+          <Link
             to="/orcamento"
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
           >
@@ -55,6 +71,13 @@ const Header = () => {
               {link.label}
             </Link>
           ))}
+          <Link
+            to="/cliente"
+            onClick={() => setMenuOpen(false)}
+            className="block text-sm font-medium text-muted-foreground hover:text-primary"
+          >
+            {hasClient ? "Minha Conta" : "Entrar / Cadastrar"}
+          </Link>
           <Link
             to="/orcamento"
             onClick={() => setMenuOpen(false)}
