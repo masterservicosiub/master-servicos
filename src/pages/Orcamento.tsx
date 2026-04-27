@@ -684,9 +684,15 @@ const Orcamento = () => {
                           <span>-{formatBRL(discount)}</span>
                         </div>
                       )}
+                      {clientSession && clientDiscount > 0 && (
+                        <div className="flex items-center justify-between text-sm text-accent">
+                          <span>Desconto Cliente (3%):</span>
+                          <span>-{formatBRL(clientDiscount)}</span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
-                        <span className="text-xl font-bold text-primary">{formatBRL(total)}</span>
+                        <span className="text-xl font-bold text-primary">{formatBRL(finalTotal)}</span>
                       </div>
                     </div>
                   </div>
