@@ -2635,6 +2635,125 @@ const Admin = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Order Modal */}
+      {editingOrder && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto"
+          onClick={closeEditOrder}
+        >
+          <div
+            className="bg-card border border-border rounded-xl p-6 w-full max-w-2xl my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                <Edit2 className="w-5 h-5" /> Editar Pedido
+              </h3>
+              <button
+                onClick={closeEditOrder}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3 mb-3">
+              <input
+                value={editOrderName}
+                onChange={(e) => setEditOrderName(e.target.value)}
+                placeholder="Nome do cliente *"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <input
+                value={editOrderPhone}
+                onChange={(e) => setEditOrderPhone(applyPhoneMask(e.target.value))}
+                placeholder="Telefone"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <input
+                value={editOrderEmail}
+                onChange={(e) => setEditOrderEmail(e.target.value)}
+                placeholder="E-mail"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <input
+                value={editOrderAddress}
+                onChange={(e) => setEditOrderAddress(e.target.value)}
+                placeholder="Endereço"
+                className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-foreground">Serviços</h4>
+                <button
+                  type="button"
+                  onClick={addEditItem}
+                  className="text-sm bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md hover:opacity-80 flex items-center gap-1"
+                >
+                  <Plus className="w-4 h-4" /> Adicionar serviço
+                </button>
+              </div>
+              {editOrderItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-1 sm:grid-cols-[1fr,140px,auto] gap-2 items-center p-3 rounded-lg bg-secondary/40 border border-border"
+                >
+                  <input
+                    value={item.description}
+                    onChange={(e) => updateEditItem(idx, "description", e.target.value)}
+                    placeholder="Descrição do serviço *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={item.value}
+                    onChange={(e) => updateEditItem(idx, "value", e.target.value)}
+                    placeholder="Valor (R$) *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeEditItem(idx)}
+                    className="text-destructive hover:opacity-70 p-2 justify-self-end"
+                    aria-label="Remover"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <span className="text-sm font-semibold text-foreground">Total:</span>
+                <span className="text-lg font-bold text-primary">
+                  {editOrderItems
+                    .reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0)
+                    .toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={closeEditOrder}
+                className="px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveEditOrder}
+                disabled={editOrderSaving}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" /> {editOrderSaving ? "Salvando..." : "Salvar alterações"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
