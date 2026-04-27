@@ -280,6 +280,8 @@ export interface ClientRow {
   email: string;
   address: string;
   notes: string;
+  cpf?: string;
+  password_hash?: string;
 }
 
 export async function fetchClients(): Promise<ClientRow[]> {
@@ -305,6 +307,92 @@ export async function updateClient(id: string, client: Partial<ClientRow>) {
 export async function deleteClient(id: string) {
   const { error } = await supabase.from("clients").delete().eq("id", id);
   if (error) throw error;
+}
+
+// ---------- Client self-service accounts ----------
+async function hashClientPassword(pw: string): Promise<string> {
+  const buf = new TextEncoder().encode(`master-client::${pw}`);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export async function registerClient(input: {
+  name: string;
+  cpf: string;
+  address: string;
+  phone: string;
+  email: string;
+  password: string;
+}): Promise<ClientRow> {
+  const password_hash = await hashClientPassword(input.password);
+  // check duplicates
+  const { data: dupEmail } = await supabase
+    .from("clients")
+    .select("id")
+    .ilike("email", input.email.trim())
+    .maybeSingle();
+  if (dupEmail) throw new Error("Já existe uma conta com este e-mail.");
+  const { data: dupCpf } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("cpf", input.cpf.trim())
+    .maybeSingle();
+  if (dupCpf) throw new Error("Já existe uma conta com este CPF.");
+
+  const row = {
+    name: input.name.trim(),
+    cpf: input.cpf.trim(),
+    address: input.address.trim(),
+    phone: input.phone.trim(),
+    email: input.email.trim(),
+    notes: "",
+    password_hash,
+  };
+  const { data, error } = await supabase.from("clients").insert([row]).select().single();
+  if (error) throw error;
+  return data as ClientRow;
+}
+
+export async function loginClient(email: string, password: string): Promise<ClientRow | null> {
+  const password_hash = await hashClientPassword(password);
+  const { data, error } = await supabase
+    .from("clients")
+    .select("*")
+    .ilike("email", email.trim())
+    .eq("password_hash", password_hash)
+    .maybeSingle();
+  if (error) return null;
+  return (data as ClientRow) || null;
+}
+
+export async function recoverClientPassword(email: string, cpf: string): Promise<string> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("id")
+    .ilike("email", email.trim())
+    .eq("cpf", cpf.trim())
+    .maybeSingle();
+  if (error || !data) throw new Error("Cliente não encontrado com estes dados.");
+  const newPassword = Math.floor(100000 + Math.random() * 900000).toString();
+  const password_hash = await hashClientPassword(newPassword);
+  const { error: upErr } = await supabase
+    .from("clients")
+    .update({ password_hash })
+    .eq("id", data.id);
+  if (upErr) throw new Error("Erro ao atualizar a senha.");
+  return newPassword;
+}
+
+export async function fetchClientOrders(email: string): Promise<OrderRow[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .ilike("email", email.trim())
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as OrderRow[]) || [];
 }
 
 // ---------------- Affiliates ----------------
