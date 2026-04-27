@@ -7,6 +7,7 @@ import {
   updateOrderNotes,
   deleteOrderById,
   insertOrder,
+  updateOrder,
   type OrderRow,
   fetchServicesAdmin,
   insertService,
@@ -88,6 +89,7 @@ import {
 import type { AffiliateRow } from "@/lib/supabase";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateReceipt } from "@/lib/generateReceipt";
+import { generateBudget } from "@/lib/generateBudget";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
 import {
   setGoogleScriptUrl,
