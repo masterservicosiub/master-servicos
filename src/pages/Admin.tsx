@@ -581,6 +581,78 @@ const Admin = () => {
   const updateManualItem = (idx: number, field: "description" | "value", val: string) =>
     setManualItems(manualItems.map((it, i) => (i === idx ? { ...it, [field]: val } : it)));
 
+  // ===== Edit order helpers =====
+  const openEditOrder = (order: OrderRow) => {
+    setEditingOrder(order);
+    setEditOrderName(order.name || "");
+    setEditOrderPhone(order.phone || "");
+    setEditOrderEmail(order.email || "");
+    setEditOrderAddress(order.address || "");
+    const parsed = (order.services || "")
+      .split("|")
+      .map((part) => {
+        const trimmed = part.trim();
+        const m = trimmed.match(/^(.*?)-\s*R\$\s*([\d.,]+)\s*$/i);
+        if (m) {
+          const desc = m[1].trim();
+          const v = parseFloat(m[2].replace(/\./g, "").replace(",", "."));
+          return { description: desc, value: isNaN(v) ? "" : v.toFixed(2) };
+        }
+        return { description: trimmed, value: "" };
+      })
+      .filter((it) => it.description || it.value);
+    setEditOrderItems(parsed.length ? parsed : [{ description: "", value: "" }]);
+  };
+
+  const closeEditOrder = () => {
+    setEditingOrder(null);
+    setEditOrderItems([{ description: "", value: "" }]);
+  };
+
+  const addEditItem = () => setEditOrderItems([...editOrderItems, { description: "", value: "" }]);
+  const removeEditItem = (idx: number) =>
+    setEditOrderItems(
+      editOrderItems.length === 1 ? [{ description: "", value: "" }] : editOrderItems.filter((_, i) => i !== idx),
+    );
+  const updateEditItem = (idx: number, field: "description" | "value", val: string) =>
+    setEditOrderItems(editOrderItems.map((it, i) => (i === idx ? { ...it, [field]: val } : it)));
+
+  const handleSaveEditOrder = async () => {
+    if (!editingOrder?.id) return;
+    if (!editOrderName.trim()) {
+      toast.error("Preencha o nome do cliente");
+      return;
+    }
+    const validItems = editOrderItems.filter((it) => it.description.trim() && it.value.toString().trim());
+    if (validItems.length === 0) {
+      toast.error("Adicione pelo menos um serviço com descrição e valor");
+      return;
+    }
+    const total = validItems.reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0);
+    const servicesText = validItems
+      .map((it) => `${it.description.trim()} - R$ ${(parseFloat(it.value) || 0).toFixed(2)}`)
+      .join(" | ");
+    setEditOrderSaving(true);
+    try {
+      await updateOrder(editingOrder.id, {
+        name: editOrderName.trim(),
+        phone: editOrderPhone.trim(),
+        email: editOrderEmail.trim(),
+        address: editOrderAddress.trim(),
+        services: servicesText,
+        total,
+      });
+      toast.success("Pedido atualizado!");
+      closeEditOrder();
+      loadOrders();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao atualizar pedido");
+    } finally {
+      setEditOrderSaving(false);
+    }
+  };
+
   const handleAddService = async () => {
     if (!svcTitle.trim() || !svcDesc.trim()) {
       toast.error("Preencha título e descrição do serviço");
