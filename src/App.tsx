@@ -9,6 +9,7 @@ import Sobre from "./pages/Sobre.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
 import Afiliados from "./pages/Afiliados.tsx";
+import Cliente from "./pages/Cliente.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import AdminGear from "./components/AdminGear.tsx";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/sobre" element={<Sobre />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/afiliados" element={<Afiliados />} />
+          <Route path="/cliente" element={<Cliente />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <AdminGear />
