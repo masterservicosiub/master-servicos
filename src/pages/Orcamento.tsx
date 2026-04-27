@@ -126,6 +126,7 @@ const Orcamento = () => {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<CouponRow | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [clientSession, setClientSession] = useState<{ name: string; email: string; phone: string; address: string } | null>(null);
 
   useEffect(() => {
     // capture affiliate referral code from URL ?ref=CODE and persist
@@ -137,6 +138,17 @@ const Orcamento = () => {
         localStorage.setItem("affiliate_ref", code);
         // track click for antifraud analytics (non-blocking)
         trackAffiliateClick(code).catch(() => {});
+      }
+    } catch {}
+    try {
+      const raw = localStorage.getItem("client_session");
+      if (raw) {
+        const c = JSON.parse(raw);
+        setClientSession(c);
+        if (c.name && !name) setName(c.name);
+        if (c.phone && !phone) setPhone(c.phone);
+        if (c.email && !email) setEmail(c.email);
+        if (c.address && !address) setAddress(c.address);
       }
     } catch {}
     fetchBudgetServices()
@@ -213,6 +225,13 @@ const Orcamento = () => {
 
   const total = Math.max(0, subtotal - discount);
 
+  const clientDiscount = useMemo(() => {
+    if (!clientSession) return 0;
+    return Math.max(0, (subtotal - discount) * 0.03);
+  }, [clientSession, subtotal, discount]);
+
+  const finalTotal = Math.max(0, total - clientDiscount);
+
   const handleApplyCoupon = async () => {
     const code = couponCode.trim();
     if (!code) {
@@ -276,6 +295,9 @@ const Orcamento = () => {
     if (appliedCoupon && discount > 0) {
       servicesLines.push(`Cupom ${appliedCoupon.code} (-${formatBRL(discount)})`);
     }
+    if (clientSession && clientDiscount > 0) {
+      servicesLines.push(`Desconto Cliente 3% (-${formatBRL(clientDiscount)})`);
+    }
     const servicesText = servicesLines.join(" | ");
 
     // Save to Supabase
@@ -316,7 +338,7 @@ const Orcamento = () => {
         email: email.trim(),
         address: address.trim(),
         services: servicesText,
-        total,
+        total: finalTotal,
         status: "Novo",
         notes: "",
         affiliate_code: finalAffiliate,
@@ -341,7 +363,7 @@ const Orcamento = () => {
         const def = availableServices.find((d) => d.id === svc.id)!;
         return { ...svc, price: calcPrice(def, svc) };
       }),
-      total,
+      total: finalTotal,
       status: "Novo",
       notes: "",
     };
@@ -354,7 +376,7 @@ const Orcamento = () => {
       email: email.trim(),
       address: address.trim(),
       services: servicesText,
-      total,
+      total: finalTotal,
     }).catch(console.error);
 
     // Enviar pedido por WhatsApp
@@ -381,8 +403,9 @@ const Orcamento = () => {
         return detail;
       }),
       appliedCoupon && discount > 0 ? `\n*Cupom:* ${appliedCoupon.code} (-${formatBRL(discount)})` : null,
+      clientSession && clientDiscount > 0 ? `*Desconto Cliente 3%:* -${formatBRL(clientDiscount)}` : null,
       ``,
-      `*Total: ${formatBRL(total)}*`,
+      `*Total: ${formatBRL(finalTotal)}*`,
     ].filter(Boolean);
     const whatsappMessage = encodeURIComponent(whatsappLines.join("\n"));
     window.open(`https://wa.me/5564992642950?text=${whatsappMessage}`, "_blank");
@@ -440,6 +463,24 @@ const Orcamento = () => {
 
         <div className="container mx-auto px-4 py-12">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
+            {!clientSession && (
+              <div className="bg-accent/10 border border-accent/40 rounded-xl p-4 text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <span>
+                  💡 <strong>Cadastre-se</strong> e ganhe <strong className="text-accent">3% de desconto</strong> automático em todos os serviços.
+                </span>
+                <a
+                  href="/cliente"
+                  className="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 whitespace-nowrap"
+                >
+                  Criar conta grátis
+                </a>
+              </div>
+            )}
+            {clientSession && (
+              <div className="bg-green-50 border border-green-300 rounded-xl p-4 text-sm text-foreground">
+                ✅ Você está logado como <strong>{clientSession.name}</strong> — desconto de <strong>3%</strong> aplicado automaticamente.
+              </div>
+            )}
             {/* Client Info */}
             <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
               <h2 className="text-xl font-semibold text-card-foreground mb-4">Seus Dados</h2>
@@ -661,9 +702,15 @@ const Orcamento = () => {
                           <span>-{formatBRL(discount)}</span>
                         </div>
                       )}
+                      {clientSession && clientDiscount > 0 && (
+                        <div className="flex items-center justify-between text-sm text-accent">
+                          <span>Desconto Cliente (3%):</span>
+                          <span>-{formatBRL(clientDiscount)}</span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
-                        <span className="text-xl font-bold text-primary">{formatBRL(total)}</span>
+                        <span className="text-xl font-bold text-primary">{formatBRL(finalTotal)}</span>
                       </div>
                     </div>
                   </div>
