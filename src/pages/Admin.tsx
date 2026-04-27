@@ -158,6 +158,17 @@ const Admin = () => {
     { description: "", value: "" },
   ]);
 
+  // Edit order modal
+  const [editingOrder, setEditingOrder] = useState<OrderRow | null>(null);
+  const [editOrderName, setEditOrderName] = useState("");
+  const [editOrderPhone, setEditOrderPhone] = useState("");
+  const [editOrderEmail, setEditOrderEmail] = useState("");
+  const [editOrderAddress, setEditOrderAddress] = useState("");
+  const [editOrderItems, setEditOrderItems] = useState<{ description: string; value: string }[]>([
+    { description: "", value: "" },
+  ]);
+  const [editOrderSaving, setEditOrderSaving] = useState(false);
+
   // Services management
   const [services, setServices] = useState<ServiceRow[]>([]);
   const [svcTitle, setSvcTitle] = useState("");
