@@ -1331,6 +1331,12 @@ const Admin = () => {
                       <Trash2 className="w-4 h-4" /> Excluir
                     </button>
                     <button
+                      onClick={() => openEditOrder(order)}
+                      className="bg-secondary text-secondary-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90 border border-border"
+                    >
+                      <Edit2 className="w-4 h-4" /> Editar
+                    </button>
+                    <button
                       onClick={async () => {
                         try {
                           await generateReceipt(order);
@@ -1343,6 +1349,20 @@ const Admin = () => {
                       className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:opacity-90"
                     >
                       <Receipt className="w-4 h-4" /> Gerar Recibo PDF
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await generateBudget(order);
+                          toast.success("Orçamento gerado!");
+                        } catch (err) {
+                          console.error("Erro ao gerar orçamento:", err);
+                          toast.error("Erro ao gerar orçamento");
+                        }
+                      }}
+                      className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-orange-600"
+                    >
+                      <FileText className="w-4 h-4" /> Gerar Orçamento PDF
                     </button>
                   </div>
                 </div>
