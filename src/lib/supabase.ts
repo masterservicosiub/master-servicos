@@ -65,6 +65,14 @@ export async function updateOrderNotes(id: string, notes: string) {
   if (error) throw error;
 }
 
+export async function updateOrder(id: string, updates: Partial<OrderRow>) {
+  const { error } = await supabase
+    .from("orders")
+    .update(updates)
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteOrderById(id: string) {
   const { error } = await supabase
     .from("orders")
