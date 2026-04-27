@@ -363,7 +363,7 @@ const Orcamento = () => {
         const def = availableServices.find((d) => d.id === svc.id)!;
         return { ...svc, price: calcPrice(def, svc) };
       }),
-      total,
+      total: finalTotal,
       status: "Novo",
       notes: "",
     };
@@ -376,7 +376,7 @@ const Orcamento = () => {
       email: email.trim(),
       address: address.trim(),
       services: servicesText,
-      total,
+      total: finalTotal,
     }).catch(console.error);
 
     // Enviar pedido por WhatsApp
@@ -403,8 +403,9 @@ const Orcamento = () => {
         return detail;
       }),
       appliedCoupon && discount > 0 ? `\n*Cupom:* ${appliedCoupon.code} (-${formatBRL(discount)})` : null,
+      clientSession && clientDiscount > 0 ? `*Desconto Cliente 3%:* -${formatBRL(clientDiscount)}` : null,
       ``,
-      `*Total: ${formatBRL(total)}*`,
+      `*Total: ${formatBRL(finalTotal)}*`,
     ].filter(Boolean);
     const whatsappMessage = encodeURIComponent(whatsappLines.join("\n"));
     window.open(`https://wa.me/5564992642950?text=${whatsappMessage}`, "_blank");
