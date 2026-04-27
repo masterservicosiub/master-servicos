@@ -295,6 +295,9 @@ const Orcamento = () => {
     if (appliedCoupon && discount > 0) {
       servicesLines.push(`Cupom ${appliedCoupon.code} (-${formatBRL(discount)})`);
     }
+    if (clientSession && clientDiscount > 0) {
+      servicesLines.push(`Desconto Cliente 3% (-${formatBRL(clientDiscount)})`);
+    }
     const servicesText = servicesLines.join(" | ");
 
     // Save to Supabase
@@ -335,7 +338,7 @@ const Orcamento = () => {
         email: email.trim(),
         address: address.trim(),
         services: servicesText,
-        total,
+        total: finalTotal,
         status: "Novo",
         notes: "",
         affiliate_code: finalAffiliate,
