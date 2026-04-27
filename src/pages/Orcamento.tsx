@@ -463,6 +463,24 @@ const Orcamento = () => {
 
         <div className="container mx-auto px-4 py-12">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
+            {!clientSession && (
+              <div className="bg-accent/10 border border-accent/40 rounded-xl p-4 text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <span>
+                  💡 <strong>Cadastre-se</strong> e ganhe <strong className="text-accent">3% de desconto</strong> automático em todos os serviços.
+                </span>
+                <a
+                  href="/cliente"
+                  className="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 whitespace-nowrap"
+                >
+                  Criar conta grátis
+                </a>
+              </div>
+            )}
+            {clientSession && (
+              <div className="bg-green-50 border border-green-300 rounded-xl p-4 text-sm text-foreground">
+                ✅ Você está logado como <strong>{clientSession.name}</strong> — desconto de <strong>3%</strong> aplicado automaticamente.
+              </div>
+            )}
             {/* Client Info */}
             <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
               <h2 className="text-xl font-semibold text-card-foreground mb-4">Seus Dados</h2>
