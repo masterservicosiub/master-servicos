@@ -25,6 +25,7 @@ interface ServiceDef {
   minPrice?: number;
   imageUrl?: string;
   description?: string;
+  category?: string;
 }
 
 const defaultServices: ServiceDef[] = [
@@ -166,6 +167,7 @@ const Orcamento = () => {
             minPrice: bs.min_price,
             imageUrl: bs.image_url || "",
             description: bs.description || "",
+            category: bs.category || "",
           }));
           setAvailableServices(mapped);
         }
