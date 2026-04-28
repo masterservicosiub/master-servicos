@@ -190,6 +190,7 @@ const Admin = () => {
   const [bsTier3, setBsTier3] = useState("");
   const [bsImage, setBsImage] = useState("");
   const [bsDescription, setBsDescription] = useState("");
+  const [bsCategory, setBsCategory] = useState("");
   const [editingBsId, setEditingBsId] = useState<string | null>(null);
   const [editBsName, setEditBsName] = useState("");
   const [editBsType, setEditBsType] = useState<"fixed" | "area">("fixed");
@@ -200,6 +201,7 @@ const Admin = () => {
   const [editBsTier3, setEditBsTier3] = useState("");
   const [editBsImage, setEditBsImage] = useState("");
   const [editBsDescription, setEditBsDescription] = useState("");
+  const [editBsCategory, setEditBsCategory] = useState("");
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
@@ -715,6 +717,7 @@ const Admin = () => {
         sort_order: budgetServices.length,
         image_url: bsImage.trim(),
         description: bsDescription.trim(),
+        category: bsCategory.trim(),
       });
       setBsName("");
       setBsFixedPrice("");
@@ -725,6 +728,7 @@ const Admin = () => {
       setBsType("fixed");
       setBsImage("");
       setBsDescription("");
+      setBsCategory("");
       toast.success("Serviço de orçamento adicionado!");
       loadBudgetServices();
     } catch {
@@ -750,6 +754,7 @@ const Admin = () => {
         min_price: parseFloat(editBsMinPrice) || 0,
         image_url: editBsImage.trim(),
         description: editBsDescription.trim(),
+        category: editBsCategory.trim(),
       });
       setEditingBsId(null);
       toast.success("Serviço atualizado!");
