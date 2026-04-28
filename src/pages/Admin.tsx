@@ -190,6 +190,7 @@ const Admin = () => {
   const [bsTier3, setBsTier3] = useState("");
   const [bsImage, setBsImage] = useState("");
   const [bsDescription, setBsDescription] = useState("");
+  const [bsCategory, setBsCategory] = useState("");
   const [editingBsId, setEditingBsId] = useState<string | null>(null);
   const [editBsName, setEditBsName] = useState("");
   const [editBsType, setEditBsType] = useState<"fixed" | "area">("fixed");
@@ -200,6 +201,7 @@ const Admin = () => {
   const [editBsTier3, setEditBsTier3] = useState("");
   const [editBsImage, setEditBsImage] = useState("");
   const [editBsDescription, setEditBsDescription] = useState("");
+  const [editBsCategory, setEditBsCategory] = useState("");
 
   // Password change
   const [currentPw, setCurrentPw] = useState("");
@@ -237,6 +239,7 @@ const Admin = () => {
   const [editClEmail, setEditClEmail] = useState("");
   const [editClAddress, setEditClAddress] = useState("");
   const [editClNotes, setEditClNotes] = useState("");
+  const [expandedClientId, setExpandedClientId] = useState<string | null>(null);
 
   // Load admin auth from DB on mount
   useEffect(() => {
@@ -715,6 +718,7 @@ const Admin = () => {
         sort_order: budgetServices.length,
         image_url: bsImage.trim(),
         description: bsDescription.trim(),
+        category: bsCategory.trim(),
       });
       setBsName("");
       setBsFixedPrice("");
@@ -725,6 +729,7 @@ const Admin = () => {
       setBsType("fixed");
       setBsImage("");
       setBsDescription("");
+      setBsCategory("");
       toast.success("Serviço de orçamento adicionado!");
       loadBudgetServices();
     } catch {
@@ -750,6 +755,7 @@ const Admin = () => {
         min_price: parseFloat(editBsMinPrice) || 0,
         image_url: editBsImage.trim(),
         description: editBsDescription.trim(),
+        category: editBsCategory.trim(),
       });
       setEditingBsId(null);
       toast.success("Serviço atualizado!");
@@ -1513,6 +1519,82 @@ const Admin = () => {
                                 )}
                                 {c.notes && <p className="italic mt-1">{c.notes}</p>}
                               </div>
+                              {(() => {
+                                const clEmail = (c.email || "").trim().toLowerCase();
+                                const clPhone = (c.phone || "").replace(/\D/g, "");
+                                const clientOrders = orders.filter((o) => {
+                                  const oEmail = (o.email || "").trim().toLowerCase();
+                                  const oPhone = (o.phone || "").replace(/\D/g, "");
+                                  return (
+                                    (clEmail && oEmail === clEmail) ||
+                                    (clPhone && oPhone && oPhone === clPhone)
+                                  );
+                                });
+                                const totalSpent = clientOrders
+                                  .filter((o) => o.status === "Pago")
+                                  .reduce((s, o) => s + Number(o.total || 0), 0);
+                                const isOpen = expandedClientId === c.id;
+                                return (
+                                  <div className="mt-3">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setExpandedClientId(isOpen ? null : c.id || null)
+                                      }
+                                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                                    >
+                                      <ClipboardList className="w-3.5 h-3.5" />
+                                      Histórico de Serviços ({clientOrders.length})
+                                      {totalSpent > 0 && (
+                                        <span className="text-muted-foreground font-normal">
+                                          • Pago: R$ {totalSpent.toFixed(2)}
+                                        </span>
+                                      )}
+                                    </button>
+                                    {isOpen && (
+                                      <div className="mt-2 space-y-2 bg-background border border-border rounded-md p-3">
+                                        {clientOrders.length === 0 ? (
+                                          <p className="text-xs text-muted-foreground">
+                                            Nenhum serviço registrado para este cliente.
+                                          </p>
+                                        ) : (
+                                          clientOrders.map((o) => (
+                                            <div
+                                              key={o.id}
+                                              className="text-xs border-b border-border last:border-0 pb-2 last:pb-0"
+                                            >
+                                              <div className="flex items-center justify-between gap-2">
+                                                <span className="font-medium text-foreground">
+                                                  {o.created_at
+                                                    ? new Date(o.created_at).toLocaleDateString("pt-BR")
+                                                    : "—"}
+                                                </span>
+                                                <span
+                                                  className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                                                    o.status === "Pago"
+                                                      ? "bg-green-100 text-green-700"
+                                                      : o.status === "Cancelado"
+                                                      ? "bg-red-100 text-red-700"
+                                                      : "bg-yellow-100 text-yellow-700"
+                                                  }`}
+                                                >
+                                                  {o.status}
+                                                </span>
+                                                <span className="font-semibold text-primary">
+                                                  R$ {Number(o.total || 0).toFixed(2)}
+                                                </span>
+                                              </div>
+                                              <p className="text-muted-foreground mt-0.5 line-clamp-2">
+                                                {o.services}
+                                              </p>
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                             </div>
                             <div className="flex items-center gap-2">
                               <button
@@ -1944,6 +2026,18 @@ const Admin = () => {
                   placeholder="URL da imagem (catálogo)"
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                 />
+                <input
+                  value={bsCategory}
+                  onChange={(e) => setBsCategory(e.target.value)}
+                  placeholder="Categoria (ex: Hidráulica, Limpeza, Jardinagem)"
+                  list="bs-categories-list"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
+                <datalist id="bs-categories-list">
+                  {Array.from(new Set(budgetServices.map((b) => b.category).filter(Boolean))).map((c) => (
+                    <option key={c} value={c as string} />
+                  ))}
+                </datalist>
                 <textarea
                   value={bsDescription}
                   onChange={(e) => setBsDescription(e.target.value)}
@@ -2024,6 +2118,13 @@ const Admin = () => {
                               value={editBsImage}
                               onChange={(e) => setEditBsImage(e.target.value)}
                               placeholder="URL da imagem"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <input
+                              value={editBsCategory}
+                              onChange={(e) => setEditBsCategory(e.target.value)}
+                              placeholder="Categoria"
+                              list="bs-categories-list"
                               className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                             <textarea
@@ -2130,6 +2231,11 @@ const Admin = () => {
                                     ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}`
                                     : `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
+                                {bs.category && (
+                                  <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                    {bs.category}
+                                  </span>
+                                )}
                               </div>
                               {bs.image_url && (
                                 <img
@@ -2153,6 +2259,7 @@ const Admin = () => {
                                   setEditBsTier3(String(t[2]?.pricePerM2 || ""));
                                   setEditBsImage(bs.image_url || "");
                                   setEditBsDescription(bs.description || "");
+                                  setEditBsCategory(bs.category || "");
                                 }}
                                 className="text-primary hover:opacity-70"
                               >

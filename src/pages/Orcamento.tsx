@@ -25,6 +25,7 @@ interface ServiceDef {
   minPrice?: number;
   imageUrl?: string;
   description?: string;
+  category?: string;
 }
 
 const defaultServices: ServiceDef[] = [
@@ -127,6 +128,7 @@ const Orcamento = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<CouponRow | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [clientSession, setClientSession] = useState<{ name: string; email: string; phone: string; address: string } | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("Todos");
 
   useEffect(() => {
     // capture affiliate referral code from URL ?ref=CODE and persist
@@ -166,6 +168,7 @@ const Orcamento = () => {
             minPrice: bs.min_price,
             imageUrl: bs.image_url || "",
             description: bs.description || "",
+            category: bs.category || "",
           }));
           setAvailableServices(mapped);
         }
@@ -541,8 +544,39 @@ const Orcamento = () => {
               <p className="text-sm text-muted-foreground mb-5">
                 Toque em um serviço para adicioná-lo ao seu orçamento.
               </p>
+              {(() => {
+                const cats = Array.from(
+                  new Set(availableServices.map((s) => (s.category || "").trim()).filter(Boolean)),
+                );
+                if (cats.length === 0) return null;
+                const tabs = ["Todos", ...cats];
+                return (
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {tabs.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setActiveCategory(c)}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                          activeCategory === c
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-white text-foreground border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {availableServices.map((s) => {
+                {availableServices
+                  .filter(
+                    (s) =>
+                      activeCategory === "Todos" ||
+                      (s.category || "").trim() === activeCategory,
+                  )
+                  .map((s) => {
                   const added = !!selectedServices.find((sel) => sel.id === s.id);
                   return (
                     <div
@@ -565,6 +599,11 @@ const Orcamento = () => {
                       </div>
                       <div className="p-4 flex flex-col flex-1">
                         <h3 className="font-semibold text-foreground leading-tight">{s.name}</h3>
+                        {s.category && (
+                          <span className="inline-block self-start mt-1 text-[10px] uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded">
+                            {s.category}
+                          </span>
+                        )}
                         {s.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{s.description}</p>
                         )}
