@@ -127,6 +127,7 @@ export interface BudgetServiceRow {
   sort_order: number;
   image_url?: string;
   description?: string;
+  category?: string;
 }
 
 export async function fetchBudgetServices(): Promise<BudgetServiceRow[]> {
