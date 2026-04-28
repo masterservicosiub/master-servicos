@@ -33,6 +33,11 @@ import {
   CheckCircle2,
   ShoppingCart,
   Package,
+  Zap,
+  Star,
+  ArrowRight,
+  ShieldCheck,
+  Clock,
 } from "lucide-react";
 import {
   Dialog,
@@ -300,53 +305,142 @@ const Afiliados = () => {
         {mode === "landing" && (
           <>
             {/* Hero */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
-              <div className="container mx-auto px-4 text-center">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <section className="relative overflow-hidden py-24 md:py-32 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground">
+              {/* Animated gradient blobs */}
+              <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-white/20 blur-3xl animate-blob" />
+                <div className="absolute top-20 -right-32 w-[26rem] h-[26rem] rounded-full bg-accent/40 blur-3xl animate-blob [animation-delay:2s]" />
+                <div className="absolute -bottom-32 left-1/3 w-[30rem] h-[30rem] rounded-full bg-primary-foreground/10 blur-3xl animate-blob [animation-delay:4s]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.15),transparent_60%)]" />
+              </div>
+
+              <div className="relative container mx-auto px-4 text-center">
+                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-8 animate-fade-in-up">
                   <Sparkles className="w-4 h-4" /> Programa de Afiliados Master
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-yellow-400 text-yellow-950 text-[10px] font-bold animate-pulse">
+                    NOVO
+                  </span>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                  Indique e ganhe <span className="text-primary">CashBack</span> de verdade
+                <h1 className="text-4xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight animate-fade-in-up [animation-delay:120ms]">
+                  Indique. Receba.<br />
+                  <span className="bg-gradient-to-r from-yellow-300 via-orange-200 to-yellow-300 bg-clip-text text-transparent bg-[length:200%_100%] animate-shine">
+                    Cresça com a gente.
+                  </span>
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-                  Receba <span className="font-bold text-foreground">1% de retorno</span> sobre todos os
-                  serviços pagos por clientes que você indicar. Sem limites, sem letras miúdas.
+                <p className="text-lg md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto mb-10 animate-fade-in-up [animation-delay:240ms]">
+                  Ganhe <span className="font-bold text-yellow-300">1% de cashback</span> sobre cada serviço pago
+                  pelos seus indicados. Direto no seu Pix, sem burocracia.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" onClick={() => setMode("register")} className="text-base">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
+                  <Button
+                    size="lg"
+                    onClick={() => setMode("register")}
+                    className="text-base bg-yellow-400 text-yellow-950 hover:bg-yellow-300 shadow-2xl shadow-yellow-500/30 hover:scale-105 transition-transform font-bold"
+                  >
                     <Gift className="w-5 h-5" /> Quero ser Afiliado
+                    <ArrowRight className="w-5 h-5" />
                   </Button>
-                  <Button size="lg" variant="outline" onClick={() => setMode("login")} className="text-base">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => setMode("login")}
+                    className="text-base bg-white/10 backdrop-blur-md border-white/40 text-white hover:bg-white/20 hover:text-white"
+                  >
                     Já sou afiliado
                   </Button>
                 </div>
+
+                {/* Trust badges */}
+                <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-primary-foreground/80 animate-fade-in-up [animation-delay:480ms]">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-yellow-300" /> 100% gratuito
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-yellow-300" /> Cadastro em 2 min
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-5 h-5 text-yellow-300" /> Pagamento via Pix
+                  </div>
+                </div>
+              </div>
+
+              {/* Wave divider */}
+              <svg
+                className="absolute bottom-0 left-0 w-full h-16 text-background"
+                viewBox="0 0 1440 80"
+                preserveAspectRatio="none"
+                fill="currentColor"
+              >
+                <path d="M0,40 C360,100 1080,0 1440,40 L1440,80 L0,80 Z" />
+              </svg>
+            </section>
+
+            {/* Stats bar */}
+            <section className="container mx-auto px-4 -mt-10 relative z-10">
+              <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto bg-card border border-border rounded-2xl shadow-xl p-6 md:p-8">
+                {[
+                  { value: "1%", label: "Cashback por venda" },
+                  { value: "7d", label: "Liberação rápida" },
+                  { value: "∞", label: "Indicações ilimitadas" },
+                ].map((s, i) => (
+                  <div
+                    key={s.label}
+                    className="text-center animate-fade-in-up"
+                    style={{ animationDelay: `${i * 120}ms` }}
+                  >
+                    <div className="text-3xl md:text-5xl font-extrabold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+                      {s.value}
+                    </div>
+                    <div className="text-xs md:text-sm text-muted-foreground mt-1">{s.label}</div>
+                  </div>
+                ))}
               </div>
             </section>
 
             {/* Benefits */}
-            <section className="py-16 container mx-auto px-4">
+            <section className="py-20 container mx-auto px-4">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-3">
+                  Por que ser um <span className="text-primary">Afiliado Master?</span>
+                </h2>
+                <p className="text-muted-foreground max-w-xl mx-auto">
+                  Tudo que você precisa para transformar suas indicações em renda extra.
+                </p>
+              </div>
               <div className="grid md:grid-cols-3 gap-6">
                 {[
                   {
                     icon: Share2,
                     title: "Link exclusivo",
-                    desc: "Receba um link único para compartilhar com amigos, familiares e nas redes sociais.",
+                    desc: "Compartilhe um link único com amigos, familiares e nas redes sociais.",
+                    gradient: "from-blue-500 to-cyan-500",
                   },
                   {
                     icon: Wallet,
                     title: "1% de cashback",
-                    desc: "Ganhe 1% sobre todo serviço marcado como pago — direto na sua chave Pix.",
+                    desc: "Ganhe 1% sobre todo serviço pago — direto na sua chave Pix.",
+                    gradient: "from-emerald-500 to-teal-500",
                   },
                   {
                     icon: TrendingUp,
                     title: "Painel em tempo real",
                     desc: "Acompanhe indicações, conversões e ganhos em um dashboard simples.",
+                    gradient: "from-orange-500 to-pink-500",
                   },
-                ].map((b) => (
-                  <Card key={b.title} className="border-2 hover:border-primary/40 transition-colors">
+                ].map((b, i) => (
+                  <Card
+                    key={b.title}
+                    className="group relative overflow-hidden border-2 hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up"
+                    style={{ animationDelay: `${i * 120}ms` }}
+                  >
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${b.gradient} opacity-0 group-hover:opacity-5 transition-opacity`}
+                    />
                     <CardHeader>
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-3">
-                        <b.icon className="w-6 h-6" />
+                      <div
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${b.gradient} text-white flex items-center justify-center mb-3 shadow-lg group-hover:scale-110 transition-transform`}
+                      >
+                        <b.icon className="w-7 h-7" />
                       </div>
                       <CardTitle className="text-xl">{b.title}</CardTitle>
                     </CardHeader>
@@ -359,29 +453,92 @@ const Afiliados = () => {
             </section>
 
             {/* How it works */}
-            <section className="py-16 bg-muted/30">
+            <section className="py-20 relative overflow-hidden bg-gradient-to-br from-muted/40 via-background to-primary/5">
               <div className="container mx-auto px-4">
-                <h2 className="text-3xl font-bold text-center mb-12">Como funciona</h2>
-                <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                <div className="text-center mb-14">
+                  <span className="inline-block text-xs font-bold tracking-widest text-primary uppercase mb-3">
+                    Simples assim
+                  </span>
+                  <h2 className="text-3xl md:text-4xl font-bold">Como funciona</h2>
+                </div>
+                <div className="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto relative">
+                  {/* Connecting line */}
+                  <div className="hidden md:block absolute top-7 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
                   {[
-                    "Cadastre-se gratuitamente como afiliado",
-                    "Receba seu link exclusivo de indicação",
-                    "Compartilhe com clientes em potencial",
-                    "Receba 1% via Pix de cada serviço pago",
+                    { text: "Cadastre-se gratuitamente como afiliado", icon: Users },
+                    { text: "Receba seu link exclusivo de indicação", icon: Share2 },
+                    { text: "Compartilhe com clientes em potencial", icon: Zap },
+                    { text: "Receba 1% via Pix de cada serviço pago", icon: Wallet },
                   ].map((step, i) => (
-                    <div key={i} className="text-center">
-                      <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center mx-auto mb-4 text-lg">
+                    <div
+                      key={i}
+                      className="relative text-center animate-fade-in-up"
+                      style={{ animationDelay: `${i * 150}ms` }}
+                    >
+                      <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground font-bold flex items-center justify-center mx-auto mb-4 text-lg shadow-lg shadow-primary/30 animate-float">
                         {i + 1}
+                        <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-primary">
+                          <step.icon className="w-3 h-3" />
+                        </span>
                       </div>
-                      <p className="text-muted-foreground">{step}</p>
+                      <p className="text-muted-foreground text-sm md:text-base">{step.text}</p>
                     </div>
                   ))}
                 </div>
-                <div className="text-center mt-12">
-                  <Button size="lg" onClick={() => setMode("register")}>
-                    <Sparkles className="w-5 h-5" /> Começar agora
-                  </Button>
+
+                {/* Testimonial / social proof */}
+                <div className="mt-16 max-w-2xl mx-auto bg-card border border-border rounded-2xl p-6 md:p-8 shadow-lg">
+                  <div className="flex items-center gap-1 text-yellow-400 mb-3 justify-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-center text-foreground italic">
+                    "Em poucas semanas já tinha indicado vários amigos e recebi minha primeira comissão via Pix.
+                    Super fácil de usar!"
+                  </p>
+                  <p className="text-center text-sm text-muted-foreground mt-3">
+                    — Afiliado Master Serviços
+                  </p>
                 </div>
+
+                <div className="text-center mt-12">
+                  <Button
+                    size="lg"
+                    onClick={() => setMode("register")}
+                    className="bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-xl shadow-primary/30 hover:scale-105 transition-transform text-base font-bold"
+                  >
+                    <Sparkles className="w-5 h-5" /> Começar agora — É grátis
+                    <ArrowRight className="w-5 h-5" />
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Sem mensalidades • Sem taxas escondidas • Cancele quando quiser
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Final CTA */}
+            <section className="relative py-20 overflow-hidden bg-gradient-to-br from-accent via-primary to-primary/80 text-primary-foreground">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-blob" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-blob [animation-delay:3s]" />
+              </div>
+              <div className="relative container mx-auto px-4 text-center">
+                <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+                  Pronto para começar a ganhar?
+                </h2>
+                <p className="text-lg text-primary-foreground/90 mb-8 max-w-xl mx-auto">
+                  Junte-se ao programa de afiliados e transforme suas conexões em renda real.
+                </p>
+                <Button
+                  size="lg"
+                  onClick={() => setMode("register")}
+                  className="bg-yellow-400 text-yellow-950 hover:bg-yellow-300 hover:scale-105 transition-transform shadow-2xl font-bold text-base"
+                >
+                  <Gift className="w-5 h-5" /> Cadastre-se grátis agora
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
               </div>
             </section>
           </>
