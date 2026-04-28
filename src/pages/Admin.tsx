@@ -1949,6 +1949,18 @@ const Admin = () => {
                   placeholder="URL da imagem (catálogo)"
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                 />
+                <input
+                  value={bsCategory}
+                  onChange={(e) => setBsCategory(e.target.value)}
+                  placeholder="Categoria (ex: Hidráulica, Limpeza, Jardinagem)"
+                  list="bs-categories-list"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
+                <datalist id="bs-categories-list">
+                  {Array.from(new Set(budgetServices.map((b) => b.category).filter(Boolean))).map((c) => (
+                    <option key={c} value={c as string} />
+                  ))}
+                </datalist>
                 <textarea
                   value={bsDescription}
                   onChange={(e) => setBsDescription(e.target.value)}
@@ -2029,6 +2041,13 @@ const Admin = () => {
                               value={editBsImage}
                               onChange={(e) => setEditBsImage(e.target.value)}
                               placeholder="URL da imagem"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <input
+                              value={editBsCategory}
+                              onChange={(e) => setEditBsCategory(e.target.value)}
+                              placeholder="Categoria"
+                              list="bs-categories-list"
                               className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                             <textarea
@@ -2135,6 +2154,11 @@ const Admin = () => {
                                     ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}`
                                     : `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
+                                {bs.category && (
+                                  <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                    {bs.category}
+                                  </span>
+                                )}
                               </div>
                               {bs.image_url && (
                                 <img
@@ -2158,6 +2182,7 @@ const Admin = () => {
                                   setEditBsTier3(String(t[2]?.pricePerM2 || ""));
                                   setEditBsImage(bs.image_url || "");
                                   setEditBsDescription(bs.description || "");
+                                  setEditBsCategory(bs.category || "");
                                 }}
                                 className="text-primary hover:opacity-70"
                               >
