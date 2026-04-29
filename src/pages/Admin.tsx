@@ -1034,30 +1034,38 @@ const Admin = () => {
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl font-bold text-primary-foreground">Painel Admin</h1>
             <p className="text-primary-foreground/80">{orders.length} pedidos</p>
-            <div className="flex justify-center gap-4 mt-4">
+            <div className="flex justify-center gap-3 mt-4">
               <button
                 onClick={() => setActiveTab("pedidos")}
-                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "pedidos" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+                title="Pedidos"
+                aria-label="Pedidos"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "pedidos" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
-                <ClipboardList className="w-4 h-4" /> Pedidos
+                <ClipboardList className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("clientes")}
-                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "clientes" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+                title="Clientes"
+                aria-label="Clientes"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "clientes" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
-                <Users className="w-4 h-4" /> Clientes
+                <Users className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("antifraude")}
-                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "antifraude" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+                title="Afiliados"
+                aria-label="Afiliados"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "antifraude" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
-                <ShieldAlert className="w-4 h-4" /> Afiliados
+                <ShieldAlert className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("config")}
-                className={`px-6 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${activeTab === "config" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+                title="Configurações"
+                aria-label="Configurações"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "config" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
-                <Settings className="w-4 h-4" /> Configurações
+                <Settings className="w-5 h-5" />
               </button>
             </div>
           </div>
