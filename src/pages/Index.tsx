@@ -1,5 +1,20 @@
 import { Link } from "react-router-dom";
-import { Shield, Clock, Award, Droplets, Sun, Scissors, Search, UserPlus, Percent } from "lucide-react";
+import {
+  Shield,
+  Clock,
+  Award,
+  Droplets,
+  Sun,
+  Scissors,
+  Search,
+  UserPlus,
+  Percent,
+  Sparkles,
+  ArrowRight,
+  Star,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 import logo from "@/assets/logo.png";
 import sloganBanner from "@/assets/slogan-banner.png";
 import Header from "@/components/Header";
@@ -9,21 +24,19 @@ import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import StatsCounter from "@/components/StatsCounter";
 import HowItWorks from "@/components/HowItWorks";
 
-import heroBg from "@/assets/hero-banner.jpg";
-
 const services = [
-  { icon: Search, title: "Verificar Vazamento", desc: "Detecção e reparo de vazamentos" },
-  { icon: Droplets, title: "Instalação Padrão Saneago", desc: "Instalação hidráulica padrão" },
-  { icon: Droplets, title: "Limpeza de Caixa d'Água", desc: "Higienização completa" },
-  { icon: Droplets, title: "Limpeza de Caixa de Gordura", desc: "Manutenção preventiva" },
-  { icon: Sun, title: "Limpeza de Placa Solar", desc: "Otimizando sua Geração" },
-  { icon: Scissors, title: "Roçagem de Grama e Mato Alto", desc: "Deixe seu jardim sempre lindo" },
+  { icon: Search, title: "Verificar Vazamento", desc: "Detecção e reparo de vazamentos", gradient: "from-blue-500 to-cyan-500" },
+  { icon: Droplets, title: "Instalação Padrão Saneago", desc: "Instalação hidráulica padrão", gradient: "from-cyan-500 to-sky-500" },
+  { icon: Droplets, title: "Limpeza de Caixa d'Água", desc: "Higienização completa", gradient: "from-sky-500 to-indigo-500" },
+  { icon: Droplets, title: "Limpeza de Caixa de Gordura", desc: "Manutenção preventiva", gradient: "from-emerald-500 to-teal-500" },
+  { icon: Sun, title: "Limpeza de Placa Solar", desc: "Otimizando sua Geração", gradient: "from-orange-500 to-yellow-500" },
+  { icon: Scissors, title: "Roçagem de Grama e Mato Alto", desc: "Deixe seu jardim sempre lindo", gradient: "from-green-500 to-lime-500" },
 ];
 
 const benefits = [
-  { icon: Shield, title: "Garantia de Serviço", desc: "Todos os serviços com garantia de qualidade e satisfação." },
-  { icon: Clock, title: "Pontualidade", desc: "Cumprimos prazos e horários combinados com você." },
-  { icon: Award, title: "Profissionais Qualificados", desc: "Equipe treinada para cada tipo de serviço." },
+  { icon: Shield, title: "Garantia de Serviço", desc: "Todos os serviços com garantia de qualidade e satisfação.", gradient: "from-blue-500 to-cyan-500" },
+  { icon: Clock, title: "Pontualidade", desc: "Cumprimos prazos e horários combinados com você.", gradient: "from-emerald-500 to-teal-500" },
+  { icon: Award, title: "Profissionais Qualificados", desc: "Equipe treinada para cada tipo de serviço.", gradient: "from-orange-500 to-pink-500" },
 ];
 
 const Index = () => (
@@ -31,71 +44,104 @@ const Index = () => (
     <Header />
 
     {/* Hero */}
-    <section className="relative min-h-[600px] flex items-center pt-16">
-      <div className="absolute inset-0">
-        <img
-          src={heroBg}
-          alt="Serviços profissionais"
-          className="w-full h-full object-cover"
-          width={1920}
-          height={1024}
-        />
-        <div className="absolute inset-0 bg-foreground/70" />
+    <section className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-40 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground">
+      {/* Animated gradient blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-white/20 blur-3xl animate-blob" />
+        <div className="absolute top-20 -right-32 w-[26rem] h-[26rem] rounded-full bg-accent/40 blur-3xl animate-blob [animation-delay:2s]" />
+        <div className="absolute -bottom-32 left-1/3 w-[30rem] h-[30rem] rounded-full bg-primary-foreground/10 blur-3xl animate-blob [animation-delay:4s]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.15),transparent_60%)]" />
       </div>
-      <div className="container mx-auto px-4 relative z-10 py-20">
-        <div className="max-w-2xl">
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-8 animate-fade-in-up">
+            <Sparkles className="w-4 h-4" />
+            Serviços Profissionais com Garantia
+          </div>
+
           <img
             src={logo}
             alt="Master Serviços"
-            className="h-32 md:h-40 lg:h-48 w-auto mb-6 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] drop-shadow-2xl"
+            className="h-28 md:h-36 lg:h-44 w-auto mx-auto mb-6 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]"
           />
-          <div className="mb-8 max-w-xl overflow-hidden">
+
+          <div className="mb-10 overflow-hidden animate-fade-in-up [animation-delay:240ms]">
             <img
               src={sloganBanner}
               alt="Não somos Marido de Aluguel - Somos Profissionais!"
-              className="h-24 md:h-[8.4rem] lg:h-[9.6rem] w-auto animate-[slideInPause_8s_ease-in-out_infinite] drop-shadow-xl"
+              className="h-20 md:h-28 lg:h-32 w-auto mx-auto animate-[slideInPause_8s_ease-in-out_infinite] drop-shadow-xl"
             />
           </div>
-          <div className="flex flex-wrap gap-4">
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
             <Link
               to="/orcamento"
-              className="bg-primary text-primary-foreground w-56 text-center py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
             >
-              Fazer Orçamento
+              <Zap className="w-5 h-5" /> Fazer Orçamento
             </Link>
             <a
               href="https://wa.me/5564992642950"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-green-600 text-white w-56 text-center py-3 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
             >
-              Fale Conosco
+              Fale Conosco <ArrowRight className="w-5 h-5" />
             </a>
           </div>
+
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-primary-foreground/90 animate-fade-in-up [animation-delay:480ms]">
+            <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Garantia Total</div>
+            <div className="flex items-center gap-2"><Clock className="w-4 h-4" /> Pontualidade</div>
+            <div className="flex items-center gap-2"><Star className="w-4 h-4 fill-current" /> +500 Clientes</div>
+          </div>
         </div>
+      </div>
+    </section>
+
+    {/* Floating stats card */}
+    <section className="container mx-auto px-4 -mt-16 relative z-20">
+      <div className="max-w-4xl mx-auto bg-card rounded-2xl shadow-2xl border border-border p-6 md:p-8 grid grid-cols-3 gap-4">
+        {[
+          { value: "500+", label: "Clientes" },
+          { value: "5+", label: "Anos" },
+          { value: "100%", label: "Satisfação" },
+        ].map((s, i) => (
+          <div key={s.label} className="text-center animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
+            <div className="text-2xl md:text-4xl font-extrabold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+              {s.value}
+            </div>
+            <div className="text-xs md:text-sm text-muted-foreground mt-1">{s.label}</div>
+          </div>
+        ))}
       </div>
     </section>
 
     {/* Services */}
     <section id="servicos" className="py-20 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Nossos Serviços</h2>
+        <div className="text-center mb-12 animate-fade-in-up">
+          <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+            Nossos <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Serviços</span>
+          </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Oferecemos uma ampla gama de serviços para atender todas as suas necessidades.
           </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((s) => (
+          {services.map((s, i) => (
             <div
               key={s.title}
-              className="bg-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-border group"
+              className="group relative overflow-hidden bg-card rounded-2xl p-6 border-2 border-border hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up"
+              style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <s.icon className="w-6 h-6 text-primary" />
+              <div className={`absolute inset-0 bg-gradient-to-br ${s.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+              <div className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${s.gradient} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                <s.icon className="w-7 h-7" />
               </div>
-              <h3 className="font-semibold text-lg text-card-foreground mb-1">{s.title}</h3>
-              <p className="text-muted-foreground text-sm">{s.desc}</p>
+              <h3 className="relative font-bold text-lg text-card-foreground mb-1">{s.title}</h3>
+              <p className="relative text-muted-foreground text-sm">{s.desc}</p>
             </div>
           ))}
         </div>
@@ -109,18 +155,24 @@ const Index = () => (
     <StatsCounter />
 
     {/* Benefits */}
-    <section className="py-20 bg-background">
+    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-muted/40 via-background to-primary/5">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Por que nos escolher?</h2>
+        <div className="text-center mb-12 animate-fade-in-up">
+          <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
+            Por que <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">nos escolher?</span>
+          </h2>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          {benefits.map((b) => (
-            <div key={b.title} className="text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <b.icon className="w-8 h-8 text-primary" />
+          {benefits.map((b, i) => (
+            <div
+              key={b.title}
+              className="text-center bg-card rounded-2xl p-8 border border-border hover:-translate-y-2 hover:shadow-2xl transition-all animate-fade-in-up"
+              style={{ animationDelay: `${i * 120}ms` }}
+            >
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${b.gradient} text-white flex items-center justify-center mx-auto mb-4 shadow-lg animate-float`}>
+                <b.icon className="w-8 h-8" />
               </div>
-              <h3 className="font-semibold text-lg text-foreground mb-2">{b.title}</h3>
+              <h3 className="font-bold text-lg text-foreground mb-2">{b.title}</h3>
               <p className="text-muted-foreground text-sm">{b.desc}</p>
             </div>
           ))}
@@ -132,33 +184,38 @@ const Index = () => (
     <TestimonialsCarousel />
 
     {/* CTA */}
-    <section className="py-20 bg-primary">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
+    <section className="relative py-24 overflow-hidden bg-gradient-to-br from-accent via-primary to-primary/80 text-primary-foreground">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-blob [animation-delay:3s]" />
+      </div>
+      <div className="container mx-auto px-4 text-center relative z-10">
+        <h2 className="text-3xl md:text-5xl font-extrabold mb-4 animate-fade-in-up">
           Pronto para resolver seu problema?
         </h2>
-        <p className="text-primary-foreground/80 mb-8 max-w-lg mx-auto">
+        <p className="text-primary-foreground/90 mb-8 max-w-lg mx-auto text-lg animate-fade-in-up [animation-delay:120ms]">
           Faça um orçamento sem compromisso online, e feche seus serviços.
         </p>
         <Link
           to="/orcamento"
-          className="inline-block bg-accent text-accent-foreground px-8 py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 bg-white text-primary px-10 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl animate-fade-in-up [animation-delay:240ms]"
         >
-          Fazer Orçamento Gratuito
+          Fazer Orçamento Gratuito <ArrowRight className="w-5 h-5" />
         </Link>
       </div>
     </section>
 
     {/* Client signup CTA */}
-    <section className="py-16 bg-accent/10 border-y border-accent/30">
+    <section className="py-16 bg-gradient-to-br from-accent/10 via-background to-primary/10 border-y border-accent/30">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto bg-card rounded-2xl p-8 md:p-10 border border-border shadow-lg flex flex-col md:flex-row items-center gap-6">
-          <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-            <Percent className="w-10 h-10 text-accent" />
+        <div className="max-w-4xl mx-auto bg-card rounded-2xl p-8 md:p-10 border-2 border-accent/40 shadow-2xl flex flex-col md:flex-row items-center gap-6 hover:-translate-y-1 transition-transform animate-fade-in-up">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent to-orange-500 text-white flex items-center justify-center shrink-0 shadow-lg animate-float">
+            <Percent className="w-10 h-10" />
           </div>
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              Cadastre-se e ganhe <span className="text-accent">3% de desconto</span>
+              Cadastre-se e ganhe{" "}
+              <span className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">3% de desconto</span>
             </h3>
             <p className="text-muted-foreground">
               Crie sua conta gratuita e tenha desconto automático em todos os serviços, além de
@@ -167,7 +224,7 @@ const Index = () => (
           </div>
           <Link
             to="/cliente"
-            className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity whitespace-nowrap"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-accent to-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 hover:shadow-xl transition-all whitespace-nowrap shadow-lg"
           >
             <UserPlus className="w-5 h-5" /> Criar Conta Grátis
           </Link>
