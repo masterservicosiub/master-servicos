@@ -314,10 +314,15 @@ const Orcamento = () => {
       let fraud_reasons = "";
       let finalAffiliate = affiliate_code;
 
-      if (affiliate_code) {
+      // Clientes logados não geram cashback para afiliados
+      if (clientSession) {
+        finalAffiliate = undefined;
+      }
+
+      if (finalAffiliate) {
         try {
           const result = await runFraudCheck({
-            affiliate_code,
+            affiliate_code: finalAffiliate,
             client_phone: phone.trim(),
             client_email: email.trim(),
             client_name: name.trim(),
