@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Trash2, Plus, Send, CheckCircle, Tag, X } from "lucide-react";
+import { Trash2, Plus, Send, CheckCircle, Tag, X, Sparkles, ShieldCheck, Clock, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
@@ -421,10 +421,14 @@ const Orcamento = () => {
     return (
       <div className="min-h-screen">
         <Header />
-        <div className="pt-16 min-h-[80vh] flex items-center justify-center bg-background">
-          <div className="text-center px-4">
-            <CheckCircle className="w-20 h-20 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-foreground mb-4">Orçamento Enviado!</h2>
+        <div className="pt-16 min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/10">
+          <div className="text-center px-4 animate-fade-in-up">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center mx-auto mb-6 shadow-2xl animate-float">
+              <CheckCircle className="w-12 h-12" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Orçamento Enviado!</span>
+            </h2>
             <p className="text-muted-foreground mb-2">
               Obrigado, <strong>{name}</strong>! Recebemos sua solicitação.
             </p>
@@ -440,9 +444,9 @@ const Orcamento = () => {
                 setEmail("");
                 setAddress("");
               }}
-              className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-accent text-white px-8 py-3.5 rounded-xl font-bold hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
             >
-              Novo Orçamento
+              <Sparkles className="w-5 h-5" /> Novo Orçamento
             </button>
           </div>
         </div>
@@ -455,38 +459,63 @@ const Orcamento = () => {
     <div className="min-h-screen">
       <Header />
       <div className="pt-16 bg-background">
-        <div className="bg-primary py-12">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">Solicite seu Orçamento</h1>
-            <p className="text-primary-foreground/80">
+        {/* Hero */}
+        <section className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-24 -left-24 w-[24rem] h-[24rem] rounded-full bg-white/20 blur-3xl animate-blob" />
+            <div className="absolute top-10 -right-32 w-[22rem] h-[22rem] rounded-full bg-accent/40 blur-3xl animate-blob [animation-delay:2s]" />
+            <div className="absolute -bottom-32 left-1/3 w-[26rem] h-[26rem] rounded-full bg-primary-foreground/10 blur-3xl animate-blob [animation-delay:4s]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.15),transparent_60%)]" />
+          </div>
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-6 animate-fade-in-up">
+              <Sparkles className="w-4 h-4" />
+              Orçamento rápido e sem compromisso
+            </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold mb-3 animate-fade-in-up [animation-delay:120ms] drop-shadow-lg">
+              Solicite seu Orçamento
+            </h1>
+            <p className="text-primary-foreground/90 max-w-xl mx-auto animate-fade-in-up [animation-delay:240ms]">
               Preencha seus dados, escolha os serviços e envie sua solicitação.
             </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-primary-foreground/90 animate-fade-in-up [animation-delay:360ms]">
+              <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Garantia Total</div>
+              <div className="flex items-center gap-2"><Clock className="w-4 h-4" /> Resposta Rápida</div>
+              <div className="flex items-center gap-2"><Zap className="w-4 h-4" /> 100% Online</div>
+            </div>
           </div>
-        </div>
+        </section>
 
         <div className="container mx-auto px-4 py-12">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
             {!clientSession && (
-              <div className="bg-accent/10 border border-accent/40 rounded-xl p-4 text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="bg-gradient-to-r from-accent/15 to-orange-500/10 border-2 border-accent/40 rounded-2xl p-5 text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg animate-fade-in-up">
                 <span>
-                  💡 <strong>Cadastre-se</strong> e ganhe <strong className="text-accent">3% de desconto</strong> automático em todos os serviços.
+                  💡 <strong>Cadastre-se</strong> e ganhe{" "}
+                  <strong className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
+                    3% de desconto
+                  </strong>{" "}
+                  automático em todos os serviços.
                 </span>
                 <a
                   href="/cliente"
-                  className="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 whitespace-nowrap"
+                  className="bg-gradient-to-r from-accent to-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:scale-105 hover:shadow-xl transition-all whitespace-nowrap shadow-lg"
                 >
                   Criar conta grátis
                 </a>
               </div>
             )}
             {clientSession && (
-              <div className="bg-green-50 border border-green-300 rounded-xl p-4 text-sm text-foreground">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-5 text-sm text-foreground shadow-lg animate-fade-in-up">
                 ✅ Você está logado como <strong>{clientSession.name}</strong> — desconto de <strong>3%</strong> aplicado automaticamente.
               </div>
             )}
             {/* Client Info */}
-            <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
-              <h2 className="text-xl font-semibold text-card-foreground mb-4">Seus Dados</h2>
+            <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg hover:shadow-xl transition-shadow animate-fade-in-up">
+              <h2 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-sm">1</span>
+                Seus Dados
+              </h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Nome Completo *</label>
@@ -539,8 +568,11 @@ const Orcamento = () => {
             </div>
 
             {/* Service Selection */}
-            <div className="bg-blue-100 rounded-xl p-6 border border-border">
-              <h2 className="text-xl font-semibold text-card-foreground mb-1">Catálogo de Serviços</h2>
+            <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg hover:shadow-xl transition-shadow animate-fade-in-up">
+              <h2 className="text-xl font-bold text-card-foreground mb-1 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-sm">2</span>
+                Catálogo de Serviços
+              </h2>
               <p className="text-sm text-muted-foreground mb-5">
                 Toque em um serviço para adicioná-lo ao seu orçamento.
               </p>
@@ -557,10 +589,10 @@ const Orcamento = () => {
                         key={c}
                         type="button"
                         onClick={() => setActiveCategory(c)}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                        className={`px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition-all ${
                           activeCategory === c
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-white text-foreground border-border hover:border-primary/50"
+                            ? "bg-gradient-to-r from-primary to-accent text-white border-transparent shadow-lg scale-105"
+                            : "bg-card text-foreground border-border hover:border-primary/50 hover:scale-105"
                         }`}
                       >
                         {c}
@@ -576,12 +608,13 @@ const Orcamento = () => {
                       activeCategory === "Todos" ||
                       (s.category || "").trim() === activeCategory,
                   )
-                  .map((s) => {
+                  .map((s, idx) => {
                   const added = !!selectedServices.find((sel) => sel.id === s.id);
                   return (
                     <div
                       key={s.id}
-                      className={`group rounded-xl border bg-white overflow-hidden flex flex-col transition-all shadow-sm ${
+                      style={{ animationDelay: `${idx * 60}ms` }}
+                      className={`group rounded-2xl border-2 bg-card overflow-hidden flex flex-col transition-all shadow-sm hover:-translate-y-1 hover:shadow-2xl animate-fade-in-up ${
                         added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
                       }`}
                     >
@@ -600,14 +633,14 @@ const Orcamento = () => {
                       <div className="p-4 flex flex-col flex-1">
                         <h3 className="font-semibold text-foreground leading-tight">{s.name}</h3>
                         {s.category && (
-                          <span className="inline-block self-start mt-1 text-[10px] uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded">
+                          <span className="inline-block self-start mt-1 text-[10px] uppercase tracking-wide bg-gradient-to-r from-primary/10 to-accent/10 text-primary px-2 py-0.5 rounded-full font-semibold">
                             {s.category}
                           </span>
                         )}
                         {s.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{s.description}</p>
                         )}
-                        <div className="mt-3 mb-3 text-sm font-semibold text-primary">
+                        <div className="mt-3 mb-3 text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                           {s.type === "fixed"
                             ? formatBRL(s.fixedPrice ?? 0)
                             : `A partir de ${formatBRL(s.minPrice ?? 0)} • por m²`}
@@ -616,7 +649,7 @@ const Orcamento = () => {
                           type="button"
                           onClick={() => addService(s.id)}
                           disabled={added}
-                          className="mt-auto w-full bg-primary text-primary-foreground px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          className="mt-auto w-full bg-gradient-to-r from-primary to-accent text-white px-3 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all flex items-center justify-center gap-2"
                         >
                           {added ? (
                             <>
@@ -637,8 +670,9 @@ const Orcamento = () => {
 
             {/* Selected Services */}
             {selectedServices.length > 0 && (
-              <div className="bg-blue-100 rounded-xl p-6 border border-border shadow-sm">
-                <h2 className="text-xl font-semibold text-card-foreground mb-4">
+              <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg animate-fade-in-up">
+                <h2 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-sm">3</span>
                   Serviços Selecionados ({selectedServices.length})
                 </h2>
                 <div className="space-y-4">
@@ -646,7 +680,7 @@ const Orcamento = () => {
                     const def = availableServices.find((d) => d.id === svc.id)!;
                     const price = calcPrice(def, svc);
                     return (
-                      <div key={svc.id} className="p-4 rounded-lg bg-secondary border border-border">
+                      <div key={svc.id} className="p-4 rounded-xl bg-gradient-to-br from-secondary to-muted/50 border border-border hover:border-primary/40 transition-colors">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="font-medium text-foreground">{svc.name}</h3>
                           <button
@@ -729,7 +763,7 @@ const Orcamento = () => {
                   })}
 
                   {/* Total */}
-                  <div className="flex items-center justify-between pt-4 border-t border-border">
+                  <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-border">
                     <div className="flex flex-col gap-1 w-full">
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <span>Subtotal:</span>
@@ -747,9 +781,9 @@ const Orcamento = () => {
                           <span>-{formatBRL(clientDiscount)}</span>
                         </div>
                       )}
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-lg font-semibold text-foreground">Total Estimado:</span>
-                        <span className="text-xl font-bold text-primary">{formatBRL(finalTotal)}</span>
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-lg font-bold text-foreground">Total Estimado:</span>
+                        <span className="text-2xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{formatBRL(finalTotal)}</span>
                       </div>
                     </div>
                   </div>
@@ -759,9 +793,9 @@ const Orcamento = () => {
 
             {/* Cupom de Desconto */}
             {selectedServices.length > 0 && (
-              <div className="bg-[#fcfca9] rounded-xl p-6 border border-border shadow-sm">
-                <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
-                  <Tag className="w-5 h-5" /> Cupom de Desconto
+              <div className="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-2xl p-6 border-2 border-amber-200 shadow-lg animate-fade-in-up">
+                <h2 className="text-xl font-bold text-card-foreground mb-3 flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-amber-600" /> Cupom de Desconto
                 </h2>
                 {appliedCoupon ? (
                   <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30">
@@ -797,7 +831,7 @@ const Orcamento = () => {
                       type="button"
                       onClick={handleApplyCoupon}
                       disabled={validatingCoupon}
-                      className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
+                      className="bg-gradient-to-r from-primary to-accent text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-60"
                     >
                       {validatingCoupon ? "Validando..." : "Aplicar"}
                     </button>
@@ -809,10 +843,11 @@ const Orcamento = () => {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-[#036e0c] text-accent-foreground py-3.5 rounded-lg font-semibold text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              className="group relative w-full overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-green-700 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2 shadow-xl"
             >
-              <Send className="w-5 h-5" />
-              Contratar Serviços
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <Send className="w-5 h-5 relative" />
+              <span className="relative">Contratar Serviços</span>
             </button>
           </form>
         </div>
