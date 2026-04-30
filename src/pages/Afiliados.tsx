@@ -742,7 +742,7 @@ const Afiliados = () => {
                       <div className="text-center mb-4 text-foreground">
                         <h3 className="font-bold text-lg">TERMOS DE USO DO PROGRAMA DE AFILIADOS</h3>
                         <p>
-                          <strong>MASTER SERVIÇOS</strong>
+                          <strong>MASTER SOLUÇÕES</strong>
                           <br />
                           CNPJ: 61.906.390/0001-58
                         </p>
@@ -753,7 +753,7 @@ const Afiliados = () => {
                         <h4 className="font-semibold text-foreground">1. OBJETO</h4>
                         <p>
                           O presente Termo regula a participação de pessoas físicas no Programa de Afiliados da MASTER
-                          SERVIÇOS, permitindo a divulgação de seus serviços por meio de cupons e/ou links
+                          SOLUÇÕES, permitindo a divulgação de seus serviços por meio de cupons e/ou links
                           personalizados, com possibilidade de recebimento de comissões por vendas efetivamente
                           concluídas.
                         </p>
@@ -777,7 +777,7 @@ const Afiliados = () => {
                           múltiplas contas.
                         </p>
                         <p className="mt-1">
-                          2.3. A MASTER SERVIÇOS poderá solicitar documentos adicionais para verificação da identidade
+                          2.3. A MASTER SOLUÇÕES poderá solicitar documentos adicionais para verificação da identidade
                           do afiliado a qualquer momento.
                         </p>
                       </div>
@@ -803,7 +803,7 @@ const Afiliados = () => {
                         <h4 className="font-semibold text-foreground">4. PAGAMENTOS E SAQUES</h4>
                         <p>
                           4.1. Os pagamentos <strong>não serão automáticos</strong> e estarão sujeitos à análise e
-                          aprovação da MASTER SERVIÇOS.
+                          aprovação da MASTER SOLUÇÕES.
                         </p>
                         <p className="mt-1">
                           4.2. Os pagamentos serão realizados <strong>uma vez por mês</strong>, em data definida pela
@@ -833,7 +833,7 @@ const Afiliados = () => {
                           <li>Compartilhar cupons de forma abusiva ou enganosa.</li>
                         </ul>
                         <p className="mt-2">
-                          5.2. A MASTER SERVIÇOS poderá adotar mecanismos de verificação, incluindo:
+                          5.2. A MASTER SOLUÇÕES poderá adotar mecanismos de verificação, incluindo:
                         </p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>Validação de CPF e dados cadastrais;</li>
