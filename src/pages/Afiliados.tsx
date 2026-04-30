@@ -52,7 +52,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-const DEFAULT_COMMISSION_RATE = 0.01; // 1% (fallback)
+const DEFAULT_myCommissionRate = 0.01; // 1% (fallback)
 const STORAGE_KEY = "affiliate_session";
 
 function formatBRL(v: number) {
@@ -67,7 +67,7 @@ const Afiliados = () => {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [topRanking, setTopRanking] = useState<AffiliateRankingRow[]>([]);
-  const [myCommissionRate, setMyCommissionRate] = useState<number>(DEFAULT_COMMISSION_RATE);
+  const [myCommissionRate, setMyCommissionRate] = useState<number>(DEFAULT_myCommissionRate);
 
   // register form
   const [rFullName, setRFullName] = useState("");
@@ -131,7 +131,7 @@ const Afiliados = () => {
         const pct = tier?.percent ?? 1;
         setMyCommissionRate(pct / 100);
       } catch {
-        setMyCommissionRate(DEFAULT_COMMISSION_RATE);
+        setMyCommissionRate(DEFAULT_myCommissionRate);
       }
     })();
   }, [mode, session?.referral_code]);
@@ -207,7 +207,7 @@ const Afiliados = () => {
       const dateToUse = o.paid_at || o.created_at;
       if (dateToUse) {
         const orderDate = new Date(dateToUse).getTime();
-        const commission = Number(o.total || 0) * COMMISSION_RATE;
+        const commission = Number(o.total || 0) * myCommissionRate;
         if (now - orderDate >= SEVEN_DAYS) {
           releasedEarnings += commission;
         } else {
@@ -216,7 +216,7 @@ const Afiliados = () => {
       }
     });
 
-    const pendingEarnings = ((totalAll - totalPaid) * COMMISSION_RATE) + suspicious.reduce((s, o) => s + (Number(o.total || 0) * COMMISSION_RATE), 0);
+    const pendingEarnings = ((totalAll - totalPaid) * myCommissionRate) + suspicious.reduce((s, o) => s + (Number(o.total || 0) * myCommissionRate), 0);
     return {
       referrals: valid.length,
       paidCount: paid.length,
@@ -1095,7 +1095,7 @@ const Afiliados = () => {
                           const fraud = (o.fraud_status || "ok") as string;
                           const isBlocked = fraud === "blocked";
                           const isSuspicious = fraud === "suspicious";
-                          const cb = isBlocked ? 0 : Number(o.total || 0) * COMMISSION_RATE;
+                          const cb = isBlocked ? 0 : Number(o.total || 0) * myCommissionRate;
                           return (
                             <tr key={o.id} className="border-b last:border-0">
                               <td className="py-2 pr-3">
