@@ -467,6 +467,102 @@ const Afiliados = () => {
               </div>
             </section>
 
+            {/* Top 5 Ranking */}
+            <section className="py-20 relative overflow-hidden bg-gradient-to-br from-amber-50 via-background to-yellow-50 dark:from-amber-950/20 dark:via-background dark:to-yellow-950/20">
+              <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                  <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-amber-600 uppercase mb-3">
+                    <Trophy className="w-4 h-4" /> Hall da Fama
+                  </span>
+                  <h2 className="text-3xl md:text-4xl font-extrabold mb-3">
+                    Top 5{" "}
+                    <span className="bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
+                      Afiliados
+                    </span>
+                  </h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    Os afiliados que mais indicam ganham mais cashback por venda. Quanto mais estrelas, maior o seu ganho!
+                  </p>
+                </div>
+
+                {topRanking.length === 0 ? (
+                  <div className="max-w-md mx-auto text-center bg-card border-2 border-dashed border-amber-300/60 rounded-2xl p-8">
+                    <Trophy className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      Seja o primeiro do ranking! Cadastre-se e comece a indicar agora.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="max-w-3xl mx-auto space-y-3">
+                    {topRanking.map((r, i) => {
+                      const parts = r.full_name.trim().split(/\s+/);
+                      const displayName = parts.slice(0, 2).join(" ");
+                      const isFirst = i === 0;
+                      const podium = [
+                        "from-yellow-400 via-amber-500 to-orange-500",
+                        "from-slate-300 via-slate-400 to-slate-500",
+                        "from-orange-400 via-amber-600 to-amber-700",
+                        "from-primary/70 to-accent/70",
+                        "from-primary/60 to-accent/60",
+                      ][i] || "from-primary to-accent";
+                      return (
+                        <div
+                          key={r.referral_code}
+                          className={`relative group flex items-center gap-4 p-4 md:p-5 rounded-2xl bg-card border-2 ${
+                            isFirst ? "border-amber-400 shadow-xl shadow-amber-400/20" : "border-border"
+                          } hover:-translate-y-1 hover:shadow-2xl transition-all animate-fade-in-up`}
+                          style={{ animationDelay: `${i * 100}ms` }}
+                        >
+                          {/* Position badge */}
+                          <div
+                            className={`shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${podium} text-white font-extrabold text-xl flex items-center justify-center shadow-lg ${
+                              isFirst ? "animate-float" : ""
+                            }`}
+                          >
+                            {isFirst ? <Crown className="w-6 h-6" /> : i === 1 || i === 2 ? <Medal className="w-6 h-6" /> : `#${r.rank}`}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-base md:text-lg text-foreground truncate">
+                                {displayName}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-mono">
+                                #{r.rank}
+                              </span>
+                            </div>
+                            {/* Stars */}
+                            <div className="flex items-center gap-0.5 mt-1">
+                              {Array.from({ length: 5 }).map((_, s) => (
+                                <Star
+                                  key={s}
+                                  className={`w-4 h-4 md:w-5 md:h-5 ${
+                                    s < r.stars
+                                      ? "fill-yellow-400 text-yellow-400 drop-shadow"
+                                      : "text-muted-foreground/30"
+                                  }`}
+                                />
+                              ))}
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                {r.stars} estrela{r.stars > 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <div className="text-xs text-muted-foreground">Indicações</div>
+                            <div className="font-extrabold text-lg md:text-xl bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+                              {r.paid_count}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
+
             {/* How it works */}
             <section className="py-20 relative overflow-hidden bg-gradient-to-br from-muted/40 via-background to-primary/5">
               <div className="container mx-auto px-4">
