@@ -15,7 +15,7 @@ const Sobre = () => (
       <div className="bg-primary py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-2">Sobre Nós</h1>
-          <p className="text-primary-foreground/80">Conheça a Master Serviços e nossa história de compromisso com a qualidade.</p>
+          <p className="text-primary-foreground/80">Conheça a Master Soluções e nossa história de compromisso com a qualidade.</p>
         </div>
       </div>
 
@@ -24,7 +24,7 @@ const Sobre = () => (
           <div className="bg-card rounded-xl p-8 border border-border mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-4">Quem Somos</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              A Master Serviços é uma empresa especializada em prestação de serviços residenciais e comerciais. Nascemos com o objetivo de oferecer soluções completas e de alta qualidade para nossos clientes.
+              A Master Soluções é uma empresa especializada em prestação de serviços residenciais e comerciais. Nascemos com o objetivo de oferecer soluções completas e de alta qualidade para nossos clientes.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Com uma equipe de profissionais qualificados e comprometidos, atendemos desde verificação de vazamentos até roçagem e limpeza, sempre com transparência, pontualidade e preços competitivos.

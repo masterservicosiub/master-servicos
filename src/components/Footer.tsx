@@ -6,7 +6,7 @@ const Footer = () => (
   <footer className="bg-foreground text-background py-12">
     <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8">
       <div>
-        <img src={logo} alt="Master Serviços" className="h-16 w-auto mb-4 brightness-0 invert" />
+        <img src={logo} alt="Master Soluções" className="h-16 w-auto mb-4 brightness-0 invert" />
         <p className="text-sm opacity-70">
           Soluções completas em serviços para sua casa e empresa. Qualidade e confiança em cada projeto.
         </p>
@@ -47,7 +47,7 @@ const Footer = () => (
     </div>
     <div className="container mx-auto px-4 mt-8 pt-8 border-t border-background/20 text-center text-sm opacity-50">
       <div className="flex items-center justify-center gap-4">
-        <span>© 2026 Master Serviços. Todos os direitos reservados.</span>
+        <span>© 2026 Master Soluções. Todos os direitos reservados.</span>
       </div>
       <div className="mt-2">CNPJ: 61.906.390/0001-58</div>
     </div>

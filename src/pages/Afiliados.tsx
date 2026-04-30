@@ -498,7 +498,7 @@ const Afiliados = () => {
                     Super fácil de usar!"
                   </p>
                   <p className="text-center text-sm text-muted-foreground mt-3">
-                    — Afiliado Master Serviços
+                    — Afiliado Master Soluções
                   </p>
                 </div>
 
@@ -855,7 +855,7 @@ const Afiliados = () => {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold">Olá, {session.full_name.split(" ")[0]} 👋</h1>
-                <p className="text-muted-foreground">Painel do Afiliado — Master Serviços</p>
+                <p className="text-muted-foreground">Painel do Afiliado — Master Soluções</p>
               </div>
               <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="w-4 h-4" /> Sair
