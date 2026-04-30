@@ -271,6 +271,9 @@ const Admin = () => {
         setEditAdminEmail(data.email || "masterservicos.iub@gmail.com");
       })
       .catch(() => setAdminAuth({ username: "admin", password: "1478", email: "masterservicos.iub@gmail.com" }));
+    fetchCompanyInfo()
+      .then(setCompanyInfo)
+      .catch(() => {});
   }, []);
 
   const handleLogin = (e?: React.FormEvent) => {
