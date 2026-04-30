@@ -44,6 +44,12 @@ import {
   deleteAffiliateMaterialOrder,
   type AffiliateMaterialRow,
   type AffiliateMaterialOrderRow,
+  fetchAffiliateStarRates,
+  upsertAffiliateStarRate,
+  fetchTopAffiliatesRanking,
+  type AffiliateStarRateRow,
+  type AffiliateRankingRow,
+  DEFAULT_STAR_RATES,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -79,6 +85,7 @@ import {
   Search,
 } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
+import { Star, Trophy } from "lucide-react";
 import {
   fetchAffiliatesAll,
   setAffiliateBlocked,
