@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import sloganBanner from "@/assets/slogan-banner.png";
+import heroBg from "@/assets/hero-bg.png";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -44,7 +45,12 @@ const Index = () => (
     <Header />
 
     {/* Hero */}
-    <section className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-40 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground">
+    <section
+      className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-40 text-primary-foreground bg-cover bg-center"
+      style={{ backgroundImage: `url(${heroBg})` }}
+    >
+      {/* Color overlay to keep brand tone */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/50 to-accent/60 pointer-events-none" />
       {/* Animated gradient blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-white/20 blur-3xl animate-blob" />
