@@ -26,6 +26,10 @@ import {
   type AdminAuthSettings,
   fetchEmailSettings,
   updateEmailSettings,
+  fetchCompanyInfo,
+  updateCompanyInfo,
+  type CompanyInfo,
+  DEFAULT_COMPANY_INFO,
   fetchCoupons,
   insertCoupon,
   updateCoupon,
@@ -230,6 +234,10 @@ const Admin = () => {
   const [savingEmail, setSavingEmail] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
 
+  // Company info (public contact)
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(DEFAULT_COMPANY_INFO);
+  const [savingCompany, setSavingCompany] = useState(false);
+
   // Coupons
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [coupCode, setCoupCode] = useState("");
@@ -263,6 +271,9 @@ const Admin = () => {
         setEditAdminEmail(data.email || "masterservicos.iub@gmail.com");
       })
       .catch(() => setAdminAuth({ username: "admin", password: "1478", email: "masterservicos.iub@gmail.com" }));
+    fetchCompanyInfo()
+      .then(setCompanyInfo)
+      .catch(() => {});
   }, []);
 
   const handleLogin = (e?: React.FormEvent) => {
@@ -329,6 +340,29 @@ const Admin = () => {
     } catch (err) {
       console.error("Erro ao alterar acesso:", err);
       toast.error("Erro ao salvar configurações.");
+    }
+  };
+
+  const handleSaveCompanyInfo = async () => {
+    setSavingCompany(true);
+    try {
+      const cleaned: CompanyInfo = {
+        company_phone: companyInfo.company_phone.trim(),
+        company_whatsapp: companyInfo.company_whatsapp.replace(/\D/g, ""),
+        company_email: companyInfo.company_email.trim(),
+        company_address: companyInfo.company_address.trim(),
+        company_cnpj: companyInfo.company_cnpj.trim(),
+      };
+      await updateCompanyInfo(cleaned);
+      setCompanyInfo(cleaned);
+      const { refreshCompanyInfo } = await import("@/hooks/useCompanyInfo");
+      await refreshCompanyInfo();
+      toast.success("Informações da empresa atualizadas!");
+    } catch (err) {
+      console.error("Erro ao salvar empresa:", err);
+      toast.error("Erro ao salvar informações da empresa.");
+    } finally {
+      setSavingCompany(false);
     }
   };
 
@@ -2640,6 +2674,79 @@ const Admin = () => {
                       </span>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Informações da Empresa */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <Phone className="w-5 h-5" /> Informações da Empresa
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Estes dados aparecem no rodapé, botão de WhatsApp e contatos do site.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Telefone</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_phone}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_phone: e.target.value })}
+                      placeholder="(64) 9 9264-2950"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">WhatsApp (somente números, com DDI)</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_whatsapp}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_whatsapp: e.target.value })}
+                      placeholder="5564992642950"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Usado nos links wa.me/...</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">E-mail de Contato</label>
+                    <input
+                      type="email"
+                      value={companyInfo.company_email}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_email: e.target.value })}
+                      placeholder="contato@empresa.com"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">CNPJ</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_cnpj}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_cnpj: e.target.value })}
+                      placeholder="00.000.000/0000-00"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_address}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_address: e.target.value })}
+                      placeholder="Cidade/UF - Bairro - CEP"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <button
+                      onClick={handleSaveCompanyInfo}
+                      disabled={savingCompany}
+                      className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 disabled:opacity-60"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingCompany ? "Salvando..." : "Salvar Informações"}
+                    </button>
+                  </div>
                 </div>
               </div>
 

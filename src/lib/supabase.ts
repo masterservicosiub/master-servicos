@@ -224,6 +224,47 @@ export async function updateEmailSettings(settings: Partial<EmailSettings>): Pro
   if (error) throw error;
 }
 
+// Company public info (phone, email, address, etc.)
+export interface CompanyInfo {
+  company_phone: string;
+  company_whatsapp: string;
+  company_email: string;
+  company_address: string;
+  company_cnpj: string;
+}
+
+export const DEFAULT_COMPANY_INFO: CompanyInfo = {
+  company_phone: "(64) 9 9264-2950",
+  company_whatsapp: "5564992642950",
+  company_email: "masterservicos.iub@gmail.com",
+  company_address: "Itumbiara/GO - Setor Planalto - CEP 75533-250",
+  company_cnpj: "61.906.390/0001-58",
+};
+
+export async function fetchCompanyInfo(): Promise<CompanyInfo> {
+  const { data, error } = await supabase
+    .from("admin_settings")
+    .select("company_phone, company_whatsapp, company_email, company_address, company_cnpj")
+    .eq("id", "main")
+    .single();
+  if (error || !data) return DEFAULT_COMPANY_INFO;
+  return {
+    company_phone: (data as any).company_phone || DEFAULT_COMPANY_INFO.company_phone,
+    company_whatsapp: (data as any).company_whatsapp || DEFAULT_COMPANY_INFO.company_whatsapp,
+    company_email: (data as any).company_email || DEFAULT_COMPANY_INFO.company_email,
+    company_address: (data as any).company_address || DEFAULT_COMPANY_INFO.company_address,
+    company_cnpj: (data as any).company_cnpj || DEFAULT_COMPANY_INFO.company_cnpj,
+  };
+}
+
+export async function updateCompanyInfo(info: Partial<CompanyInfo>): Promise<void> {
+  const { error } = await supabase
+    .from("admin_settings")
+    .update({ ...info, updated_at: new Date().toISOString() })
+    .eq("id", "main");
+  if (error) throw error;
+}
+
 // Coupons
 export interface CouponRow {
   id?: string;
