@@ -66,6 +66,7 @@ const Afiliados = () => {
   const [session, setSession] = useState<AffiliateRow | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [topRanking, setTopRanking] = useState<AffiliateRankingRow[]>([]);
 
   // register form
   const [rFullName, setRFullName] = useState("");
@@ -104,6 +105,15 @@ const Afiliados = () => {
       } catch {}
     }
   }, []);
+
+  // Load Top 5 ranking on landing
+  useEffect(() => {
+    if (mode === "landing") {
+      fetchTopAffiliatesRanking(5)
+        .then(setTopRanking)
+        .catch(() => {});
+    }
+  }, [mode]);
 
   useEffect(() => {
     if (mode === "dashboard" && session?.referral_code) {
