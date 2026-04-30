@@ -401,16 +401,23 @@ const Admin = () => {
   const loadAntifraud = async () => {
     setAfLoading(true);
     try {
-      const [a, o, mats, mOrders] = await Promise.all([
+      const [a, o, mats, mOrders, rates, ranking] = await Promise.all([
         fetchAffiliatesAll(),
         fetchSuspiciousOrders(),
         fetchAffiliateMaterials(),
         fetchAffiliateMaterialOrders(),
+        fetchAffiliateStarRates(),
+        fetchTopAffiliatesRanking(5),
       ]);
       setAfAffiliates(a);
       setAfOrders(o);
       setMaterials(mats);
       setMaterialOrders(mOrders);
+      setStarRates(rates);
+      const rEdits: Record<number, string> = {};
+      rates.forEach((r) => (rEdits[r.stars] = String(r.percent)));
+      setStarRateEdits(rEdits);
+      setTopRanking(ranking);
       const edits: Record<string, { name: string; description: string; price: string; active: boolean }> = {};
       mats.forEach((m) => {
         edits[m.id] = {
@@ -432,8 +439,17 @@ const Admin = () => {
     if (authenticated && activeTab === "antifraude") loadAntifraud();
   }, [authenticated, activeTab]);
 
+  // Resolve cashback rate (decimal) for a given affiliate based on top ranking + star rates.
+  const getAffiliateRate = (referral_code: string): number => {
+    const ranked = topRanking.find((r) => r.referral_code === referral_code);
+    const stars = ranked?.stars ?? 1;
+    const tier = starRates.find((s) => s.stars === stars);
+    const percent = tier?.percent ?? 1.0;
+    return percent / 100;
+  };
+
   const getAffiliateCommissions = (referral_code: string) => {
-    const COMMISSION_RATE = 0.01;
+    const COMMISSION_RATE = getAffiliateRate(referral_code);
     const affiliateOrders = orders.filter(
       (o) => o.affiliate_code === referral_code && (o.fraud_status || "ok") === "ok" && o.status === "Pago"
     );
