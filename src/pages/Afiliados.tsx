@@ -52,7 +52,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-const COMMISSION_RATE = 0.01; // 1%
+const DEFAULT_COMMISSION_RATE = 0.01; // 1% (fallback)
 const STORAGE_KEY = "affiliate_session";
 
 function formatBRL(v: number) {
@@ -67,6 +67,7 @@ const Afiliados = () => {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [topRanking, setTopRanking] = useState<AffiliateRankingRow[]>([]);
+  const [myCommissionRate, setMyCommissionRate] = useState<number>(DEFAULT_COMMISSION_RATE);
 
   // register form
   const [rFullName, setRFullName] = useState("");
@@ -114,6 +115,26 @@ const Afiliados = () => {
         .catch(() => {});
     }
   }, [mode]);
+
+  // Compute my commission rate based on Top 5 ranking + star rates (for dashboard)
+  useEffect(() => {
+    if (mode !== "dashboard" || !session?.referral_code) return;
+    (async () => {
+      try {
+        const [ranking, rates] = await Promise.all([
+          fetchTopAffiliatesRanking(5),
+          (await import("@/lib/supabase")).fetchAffiliateStarRates(),
+        ]);
+        const ranked = ranking.find((r) => r.referral_code === session.referral_code);
+        const stars = ranked?.stars ?? 1;
+        const tier = rates.find((s) => s.stars === stars);
+        const pct = tier?.percent ?? 1;
+        setMyCommissionRate(pct / 100);
+      } catch {
+        setMyCommissionRate(DEFAULT_COMMISSION_RATE);
+      }
+    })();
+  }, [mode, session?.referral_code]);
 
   useEffect(() => {
     if (mode === "dashboard" && session?.referral_code) {
