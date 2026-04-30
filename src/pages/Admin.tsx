@@ -2677,6 +2677,79 @@ const Admin = () => {
                 </div>
               </div>
 
+              {/* Informações da Empresa */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <Phone className="w-5 h-5" /> Informações da Empresa
+                </h2>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Estes dados aparecem no rodapé, botão de WhatsApp e contatos do site.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Telefone</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_phone}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_phone: e.target.value })}
+                      placeholder="(64) 9 9264-2950"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">WhatsApp (somente números, com DDI)</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_whatsapp}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_whatsapp: e.target.value })}
+                      placeholder="5564992642950"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Usado nos links wa.me/...</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">E-mail de Contato</label>
+                    <input
+                      type="email"
+                      value={companyInfo.company_email}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_email: e.target.value })}
+                      placeholder="contato@empresa.com"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">CNPJ</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_cnpj}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_cnpj: e.target.value })}
+                      placeholder="00.000.000/0000-00"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
+                    <input
+                      type="text"
+                      value={companyInfo.company_address}
+                      onChange={(e) => setCompanyInfo({ ...companyInfo, company_address: e.target.value })}
+                      placeholder="Cidade/UF - Bairro - CEP"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <button
+                      onClick={handleSaveCompanyInfo}
+                      disabled={savingCompany}
+                      className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 disabled:opacity-60"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingCompany ? "Salvando..." : "Salvar Informações"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Configurações de Acesso Admin */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
