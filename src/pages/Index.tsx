@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import sloganBanner from "@/assets/slogan-banner.png";
+import heroBg from "@/assets/hero-bg.png";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
