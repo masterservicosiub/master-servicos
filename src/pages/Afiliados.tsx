@@ -344,11 +344,7 @@ const Afiliados = () => {
               </div>
 
               <div className="relative container mx-auto px-4 text-center">
-                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-8 animate-fade-in-up">
-                  <Sparkles className="w-4 h-4" /> Programa de Afiliados Master
-                  <span className="ml-2 px-2 py-0.5 rounded-full bg-yellow-400 text-yellow-950 text-[10px] font-bold animate-pulse">
-                    NOVO
-                  </span>
+                <img src="/assets/logo-CeQo5oUu.png" alt="Master Soluções" class="h-28 md:h-36 lg:h-44 w-auto mx-auto mb-6 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]">
                 </div>
                 <h1 className="text-4xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight animate-fade-in-up [animation-delay:120ms]">
                   Indique. Receba.
