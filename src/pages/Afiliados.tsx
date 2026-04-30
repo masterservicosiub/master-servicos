@@ -447,8 +447,8 @@ const Afiliados = () => {
                   },
                   {
                     icon: Wallet,
-                    title: "1% de cashback",
-                    desc: "Ganhe 1% sobre todo serviço pago — direto na sua chave Pix.",
+                    title: "Até 2% de cashback",
+                    desc: "Ganhe até 2% sobre todo serviço pago — direto na sua chave Pix.",
                     gradient: "from-emerald-500 to-teal-500",
                   },
                   {
