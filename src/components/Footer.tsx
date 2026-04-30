@@ -1,8 +1,11 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 
-const Footer = () => (
+const Footer = () => {
+  const info = useCompanyInfo();
+  return (
   <footer className="bg-foreground text-background py-12">
     <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8">
       <div>
@@ -29,18 +32,18 @@ const Footer = () => (
         <h4 className="font-semibold mb-4">Contato</h4>
         <div className="space-y-2 text-sm opacity-70">
           <a
-            href="https://wa.me/5564992642950"
+            href={`https://wa.me/${info.company_whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 hover:opacity-100"
           >
-            <Phone className="w-4 h-4" /> (64) 9 9264-2950
+            <Phone className="w-4 h-4" /> {info.company_phone}
           </a>
-          <a href="mailto:masterservicos.iub@gmail.com" className="flex items-center gap-2 hover:opacity-100">
-            <Mail className="w-4 h-4" /> masterservicos.iub@gmail.com
+          <a href={`mailto:${info.company_email}`} className="flex items-center gap-2 hover:opacity-100">
+            <Mail className="w-4 h-4" /> {info.company_email}
           </a>
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4" /> Itumbiara/GO - Setor Planalto - CEP 75533-250
+            <MapPin className="w-4 h-4" /> {info.company_address}
           </div>
         </div>
       </div>
@@ -49,9 +52,10 @@ const Footer = () => (
       <div className="flex items-center justify-center gap-4">
         <span>© 2026 Master Soluções. Todos os direitos reservados.</span>
       </div>
-      <div className="mt-2">CNPJ: 61.906.390/0001-58</div>
+      <div className="mt-2">CNPJ: {info.company_cnpj}</div>
     </div>
   </footer>
-);
+  );
+};
 
 export default Footer;
