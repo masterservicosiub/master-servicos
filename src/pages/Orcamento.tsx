@@ -418,7 +418,7 @@ const Orcamento = () => {
       `*Total: ${formatBRL(finalTotal)}*`,
     ].filter(Boolean);
     const whatsappMessage = encodeURIComponent(whatsappLines.join("\n"));
-    window.open(`https://wa.me/5564992642950?text=${whatsappMessage}`, "_blank");
+    window.open(`https://wa.me/${companyInfo.company_whatsapp}?text=${whatsappMessage}`, "_blank");
 
     setSubmitted(true);
     toast.success("Orçamento enviado com sucesso!");
