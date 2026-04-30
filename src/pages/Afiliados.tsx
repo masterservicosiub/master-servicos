@@ -44,13 +44,7 @@ import {
   Crown,
   Medal,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const DEFAULT_COMMISSION_RATE = 0.01; // 1% (fallback)
 const STORAGE_KEY = "affiliate_session";
@@ -196,14 +190,14 @@ const Afiliados = () => {
     const paid = trusted.filter((o) => (o.status || "").toLowerCase() === "pago");
     const totalPaid = paid.reduce((s, o) => s + Number(o.total || 0), 0);
     const totalAll = trusted.reduce((s, o) => s + Number(o.total || 0), 0);
-    
+
     const now = new Date().getTime();
     const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-    
+
     let releasedEarnings = 0;
     let pendingSevenDaysEarnings = 0;
-    
-    paid.forEach(o => {
+
+    paid.forEach((o) => {
       const dateToUse = o.paid_at || o.created_at;
       if (dateToUse) {
         const orderDate = new Date(dateToUse).getTime();
@@ -216,7 +210,9 @@ const Afiliados = () => {
       }
     });
 
-    const pendingEarnings = ((totalAll - totalPaid) * myCommissionRate) + suspicious.reduce((s, o) => s + (Number(o.total || 0) * myCommissionRate), 0);
+    const pendingEarnings =
+      (totalAll - totalPaid) * myCommissionRate +
+      suspicious.reduce((s, o) => s + Number(o.total || 0) * myCommissionRate, 0);
     return {
       referrals: valid.length,
       paidCount: paid.length,
@@ -229,9 +225,7 @@ const Afiliados = () => {
     };
   }, [orders]);
 
-  const referralLink = session
-    ? `${PUBLIC_SITE_URL}/orcamento?ref=${session.referral_code}`
-    : "";
+  const referralLink = session ? `${PUBLIC_SITE_URL}/orcamento?ref=${session.referral_code}` : "";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
@@ -253,8 +247,7 @@ const Afiliados = () => {
     if (onlyDigits(rPhone).length < 10) return toast.error("Contato inválido.");
     if (!rEmail.trim()) return toast.error("Informe seu e-mail.");
     if (!isValidCPF(rPix)) return toast.error("A chave Pix deve ser um CPF válido.");
-    if (onlyDigits(rPix) !== onlyDigits(rCpf))
-      return toast.error("A chave Pix CPF deve ser igual ao CPF do cadastro.");
+    if (onlyDigits(rPix) !== onlyDigits(rCpf)) return toast.error("A chave Pix CPF deve ser igual ao CPF do cadastro.");
     if (rPass.length < 6) return toast.error("Senha deve ter ao menos 6 caracteres.");
     if (rPass !== rPass2) return toast.error("As senhas não coincidem.");
     if (!rTerms) return toast.error("Você deve aceitar os Termos de Uso para continuar.");
@@ -358,14 +351,15 @@ const Afiliados = () => {
                   </span>
                 </div>
                 <h1 className="text-4xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight animate-fade-in-up [animation-delay:120ms]">
-                  Indique. Receba.<br />
+                  Indique. Receba.
+                  <br />
                   <span className="bg-gradient-to-r from-yellow-300 via-orange-200 to-yellow-300 bg-clip-text text-transparent bg-[length:200%_100%] animate-shine">
                     Cresça com a gente.
                   </span>
                 </h1>
                 <p className="text-lg md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto mb-10 animate-fade-in-up [animation-delay:240ms]">
-                  Ganhe <span className="font-bold text-yellow-300">1% de cashback</span> sobre cada serviço pago
-                  pelos seus indicados. Direto no seu Pix, sem burocracia.
+                  Ganhe <span className="font-bold text-yellow-300">cashback</span> sobre cada serviço pago pelos seus
+                  indicados. Direto no seu Pix, sem burocracia.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
                   <Button
@@ -502,7 +496,8 @@ const Afiliados = () => {
                     </span>
                   </h2>
                   <p className="text-muted-foreground max-w-xl mx-auto">
-                    Os afiliados que mais indicam ganham mais cashback por venda. Quanto mais estrelas, maior o seu ganho!
+                    Os afiliados que mais indicam ganham mais cashback por venda. Quanto mais estrelas, maior o seu
+                    ganho!
                   </p>
                 </div>
 
@@ -519,13 +514,14 @@ const Afiliados = () => {
                       const parts = r.full_name.trim().split(/\s+/);
                       const displayName = parts.slice(0, 2).join(" ");
                       const isFirst = i === 0;
-                      const podium = [
-                        "from-yellow-400 via-amber-500 to-orange-500",
-                        "from-slate-300 via-slate-400 to-slate-500",
-                        "from-orange-400 via-amber-600 to-amber-700",
-                        "from-primary/70 to-accent/70",
-                        "from-primary/60 to-accent/60",
-                      ][i] || "from-primary to-accent";
+                      const podium =
+                        [
+                          "from-yellow-400 via-amber-500 to-orange-500",
+                          "from-slate-300 via-slate-400 to-slate-500",
+                          "from-orange-400 via-amber-600 to-amber-700",
+                          "from-primary/70 to-accent/70",
+                          "from-primary/60 to-accent/60",
+                        ][i] || "from-primary to-accent";
                       return (
                         <div
                           key={r.referral_code}
@@ -540,7 +536,13 @@ const Afiliados = () => {
                               isFirst ? "animate-float" : ""
                             }`}
                           >
-                            {isFirst ? <Crown className="w-6 h-6" /> : i === 1 || i === 2 ? <Medal className="w-6 h-6" /> : `#${r.rank}`}
+                            {isFirst ? (
+                              <Crown className="w-6 h-6" />
+                            ) : i === 1 || i === 2 ? (
+                              <Medal className="w-6 h-6" />
+                            ) : (
+                              `#${r.rank}`
+                            )}
                           </div>
 
                           <div className="flex-1 min-w-0">
@@ -626,12 +628,10 @@ const Afiliados = () => {
                     ))}
                   </div>
                   <p className="text-center text-foreground italic">
-                    "Em poucas semanas já tinha indicado vários amigos e recebi minha primeira comissão via Pix.
-                    Super fácil de usar!"
+                    "Em poucas semanas já tinha indicado vários amigos e recebi minha primeira comissão via Pix. Super
+                    fácil de usar!"
                   </p>
-                  <p className="text-center text-sm text-muted-foreground mt-3">
-                    — Afiliado Master Soluções
-                  </p>
+                  <p className="text-center text-sm text-muted-foreground mt-3">— Afiliado Master Soluções</p>
                 </div>
 
                 <div className="text-center mt-12">
@@ -657,9 +657,7 @@ const Afiliados = () => {
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-blob [animation-delay:3s]" />
               </div>
               <div className="relative container mx-auto px-4 text-center">
-                <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-                  Pronto para começar a ganhar?
-                </h2>
+                <h2 className="text-3xl md:text-5xl font-extrabold mb-4">Pronto para começar a ganhar?</h2>
                 <p className="text-lg text-primary-foreground/90 mb-8 max-w-xl mx-auto">
                   Junte-se ao programa de afiliados e transforme suas conexões em renda real.
                 </p>
@@ -741,24 +739,36 @@ const Afiliados = () => {
                       <Input type="password" value={rPass2} onChange={(e) => setRPass2(e.target.value)} />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3 pt-2">
                     <Label className="text-base">Termos de Uso do Programa de Afiliados</Label>
                     <div className="h-64 overflow-y-auto border rounded-md p-4 text-sm text-muted-foreground bg-muted/30 space-y-4">
                       <div className="text-center mb-4 text-foreground">
                         <h3 className="font-bold text-lg">TERMOS DE USO DO PROGRAMA DE AFILIADOS</h3>
-                        <p><strong>MASTER SERVIÇOS</strong><br />CNPJ: 61.906.390/0001-58</p>
+                        <p>
+                          <strong>MASTER SERVIÇOS</strong>
+                          <br />
+                          CNPJ: 61.906.390/0001-58
+                        </p>
                         <p className="text-xs mt-1 text-muted-foreground">Última atualização: 25/04/2026</p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">1. OBJETO</h4>
-                        <p>O presente Termo regula a participação de pessoas físicas no Programa de Afiliados da MASTER SERVIÇOS, permitindo a divulgação de seus serviços por meio de cupons e/ou links personalizados, com possibilidade de recebimento de comissões por vendas efetivamente concluídas.</p>
+                        <p>
+                          O presente Termo regula a participação de pessoas físicas no Programa de Afiliados da MASTER
+                          SERVIÇOS, permitindo a divulgação de seus serviços por meio de cupons e/ou links
+                          personalizados, com possibilidade de recebimento de comissões por vendas efetivamente
+                          concluídas.
+                        </p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">2. CADASTRO DO AFILIADO</h4>
-                        <p>2.1. Para participar, o usuário deverá fornecer informações verdadeiras, completas e atualizadas, incluindo:</p>
+                        <p>
+                          2.1. Para participar, o usuário deverá fornecer informações verdadeiras, completas e
+                          atualizadas, incluindo:
+                        </p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>Nome completo</li>
                           <li>CPF válido</li>
@@ -766,29 +776,54 @@ const Afiliados = () => {
                           <li>Endereço</li>
                           <li>Chave Pix</li>
                         </ul>
-                        <p className="mt-2">2.2. É permitido apenas <strong>um cadastro por CPF</strong>, sendo vedada a criação de múltiplas contas.</p>
-                        <p className="mt-1">2.3. A MASTER SERVIÇOS poderá solicitar documentos adicionais para verificação da identidade do afiliado a qualquer momento.</p>
+                        <p className="mt-2">
+                          2.2. É permitido apenas <strong>um cadastro por CPF</strong>, sendo vedada a criação de
+                          múltiplas contas.
+                        </p>
+                        <p className="mt-1">
+                          2.3. A MASTER SERVIÇOS poderá solicitar documentos adicionais para verificação da identidade
+                          do afiliado a qualquer momento.
+                        </p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">3. FUNCIONAMENTO DO PROGRAMA</h4>
-                        <p>3.1. O afiliado receberá um <strong>cupom de desconto ou link exclusivo</strong> para divulgação.</p>
+                        <p>
+                          3.1. O afiliado receberá um <strong>cupom de desconto ou link exclusivo</strong> para
+                          divulgação.
+                        </p>
                         <p className="mt-1">3.2. A comissão será gerada apenas quando:</p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>A venda for efetivamente concluída;</li>
                           <li>O pagamento for confirmado;</li>
                           <li>Não houver indícios de fraude ou irregularidades.</li>
                         </ul>
-                        <p className="mt-2">3.3. A empresa poderá alterar valores, regras e condições do programa a qualquer momento.</p>
+                        <p className="mt-2">
+                          3.3. A empresa poderá alterar valores, regras e condições do programa a qualquer momento.
+                        </p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">4. PAGAMENTOS E SAQUES</h4>
-                        <p>4.1. Os pagamentos <strong>não serão automáticos</strong> e estarão sujeitos à análise e aprovação da MASTER SERVIÇOS.</p>
-                        <p className="mt-1">4.2. Os pagamentos serão realizados <strong>uma vez por mês</strong>, em data definida pela empresa.</p>
-                        <p className="mt-1">4.3. O valor mínimo para saque é de <strong>R$ 50,00 (cinquenta reais)</strong>.</p>
-                        <p className="mt-1">4.4. Os pagamentos serão realizados exclusivamente via <strong>Pix</strong>, sendo obrigatório que a chave Pix esteja vinculada ao <strong>CPF cadastrado do afiliado</strong>.</p>
-                        <p className="mt-1">4.5. A empresa poderá reter pagamentos em caso de suspeita de fraude até a conclusão da análise.</p>
+                        <p>
+                          4.1. Os pagamentos <strong>não serão automáticos</strong> e estarão sujeitos à análise e
+                          aprovação da MASTER SERVIÇOS.
+                        </p>
+                        <p className="mt-1">
+                          4.2. Os pagamentos serão realizados <strong>uma vez por mês</strong>, em data definida pela
+                          empresa.
+                        </p>
+                        <p className="mt-1">
+                          4.3. O valor mínimo para saque é de <strong>R$ 50,00 (cinquenta reais)</strong>.
+                        </p>
+                        <p className="mt-1">
+                          4.4. Os pagamentos serão realizados exclusivamente via <strong>Pix</strong>, sendo obrigatório
+                          que a chave Pix esteja vinculada ao <strong>CPF cadastrado do afiliado</strong>.
+                        </p>
+                        <p className="mt-1">
+                          4.5. A empresa poderá reter pagamentos em caso de suspeita de fraude até a conclusão da
+                          análise.
+                        </p>
                       </div>
 
                       <div>
@@ -801,20 +836,33 @@ const Afiliados = () => {
                           <li>Gerar comissões indevidas por qualquer meio;</li>
                           <li>Compartilhar cupons de forma abusiva ou enganosa.</li>
                         </ul>
-                        <p className="mt-2">5.2. A MASTER SERVIÇOS poderá adotar mecanismos de verificação, incluindo:</p>
+                        <p className="mt-2">
+                          5.2. A MASTER SERVIÇOS poderá adotar mecanismos de verificação, incluindo:
+                        </p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>Validação de CPF e dados cadastrais;</li>
                           <li>Monitoramento de IP e comportamento;</li>
                           <li>Análise de padrões de compra.</li>
                         </ul>
-                        <p className="mt-2">5.3. Comissões suspeitas poderão ser bloqueadas, canceladas ou estornadas.</p>
+                        <p className="mt-2">
+                          5.3. Comissões suspeitas poderão ser bloqueadas, canceladas ou estornadas.
+                        </p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">6. SUSPENSÃO E CANCELAMENTO</h4>
-                        <p>6.1. Em caso de identificação de fraude ou tentativa de fraude, o afiliado poderá ter seu cadastro suspenso ou cancelado.</p>
-                        <p className="mt-1">6.2. A MASTER SERVIÇOS poderá suspender ou encerrar o Programa de Afiliados <strong>a qualquer momento, sem aviso prévio</strong>.</p>
-                        <p className="mt-1">6.3. Em caso de encerramento, os valores legítimos devidos aos afiliados serão pagos conforme este Termo.</p>
+                        <p>
+                          6.1. Em caso de identificação de fraude ou tentativa de fraude, o afiliado poderá ter seu
+                          cadastro suspenso ou cancelado.
+                        </p>
+                        <p className="mt-1">
+                          6.2. A MASTER SERVIÇOS poderá suspender ou encerrar o Programa de Afiliados{" "}
+                          <strong>a qualquer momento, sem aviso prévio</strong>.
+                        </p>
+                        <p className="mt-1">
+                          6.3. Em caso de encerramento, os valores legítimos devidos aos afiliados serão pagos conforme
+                          este Termo.
+                        </p>
                       </div>
 
                       <div>
@@ -831,7 +879,10 @@ const Afiliados = () => {
 
                       <div>
                         <h4 className="font-semibold text-foreground">8. PROTEÇÃO DE DADOS (LGPD)</h4>
-                        <p>8.1. A MASTER SERVIÇOS realiza o tratamento de dados pessoais em conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados – LGPD).</p>
+                        <p>
+                          8.1. A MASTER SERVIÇOS realiza o tratamento de dados pessoais em conformidade com a Lei nº
+                          13.709/2018 (Lei Geral de Proteção de Dados – LGPD).
+                        </p>
                         <p className="mt-1">8.2. Os dados coletados têm como finalidade:</p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>Identificação do afiliado;</li>
@@ -839,14 +890,22 @@ const Afiliados = () => {
                           <li>Prevenção a fraudes;</li>
                           <li>Cumprimento de obrigações legais.</li>
                         </ul>
-                        <p className="mt-2">8.3. Os dados poderão ser compartilhados com terceiros apenas quando necessário para:</p>
+                        <p className="mt-2">
+                          8.3. Os dados poderão ser compartilhados com terceiros apenas quando necessário para:
+                        </p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>Processamento de pagamentos;</li>
                           <li>Cumprimento de obrigações legais;</li>
                           <li>Execução do programa de afiliados.</li>
                         </ul>
-                        <p className="mt-2">8.4. A MASTER SERVIÇOS adota medidas de segurança técnicas e administrativas para proteger os dados contra acessos não autorizados.</p>
-                        <p className="mt-1">8.5. O afiliado poderá, a qualquer momento, exercer seus direitos previstos na LGPD, incluindo:</p>
+                        <p className="mt-2">
+                          8.4. A MASTER SERVIÇOS adota medidas de segurança técnicas e administrativas para proteger os
+                          dados contra acessos não autorizados.
+                        </p>
+                        <p className="mt-1">
+                          8.5. O afiliado poderá, a qualquer momento, exercer seus direitos previstos na LGPD,
+                          incluindo:
+                        </p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
                           <li>Acesso aos dados;</li>
                           <li>Correção de informações;</li>
@@ -857,28 +916,43 @@ const Afiliados = () => {
                       <div>
                         <h4 className="font-semibold text-foreground">9. RESPONSABILIDADES</h4>
                         <p>9.1. O afiliado é responsável por suas ações de divulgação.</p>
-                        <p className="mt-1">9.2. A MASTER SERVIÇOS não se responsabiliza por danos decorrentes de práticas indevidas do afiliado.</p>
+                        <p className="mt-1">
+                          9.2. A MASTER SERVIÇOS não se responsabiliza por danos decorrentes de práticas indevidas do
+                          afiliado.
+                        </p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">10. ALTERAÇÕES</h4>
-                        <p>10.1. Estes Termos poderão ser atualizados a qualquer momento, sendo responsabilidade do afiliado revisá-los periodicamente.</p>
+                        <p>
+                          10.1. Estes Termos poderão ser atualizados a qualquer momento, sendo responsabilidade do
+                          afiliado revisá-los periodicamente.
+                        </p>
                       </div>
 
                       <div>
                         <h4 className="font-semibold text-foreground">11. DISPOSIÇÕES FINAIS</h4>
                         <p>11.1. A participação no programa implica na aceitação integral destes Termos.</p>
-                        <p className="mt-1">11.2. Fica eleito o foro da comarca da sede da MASTER SERVIÇOS para resolução de eventuais conflitos.</p>
+                        <p className="mt-1">
+                          11.2. Fica eleito o foro da comarca da sede da MASTER SERVIÇOS para resolução de eventuais
+                          conflitos.
+                        </p>
                       </div>
 
                       <div className="mt-6 pt-4 border-t text-xs">
-                        <p><strong>MASTER SERVIÇOS</strong></p>
+                        <p>
+                          <strong>MASTER SERVIÇOS</strong>
+                        </p>
                         <p>CNPJ: 61.906.390/0001-58</p>
                         <p>Endereço: Itumbiara/GO - Setor Planalto - CEP 75533-250</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 pb-2">
-                      <Checkbox id="terms" checked={rTerms} onCheckedChange={(checked) => setRTerms(checked as boolean)} />
+                      <Checkbox
+                        id="terms"
+                        checked={rTerms}
+                        onCheckedChange={(checked) => setRTerms(checked as boolean)}
+                      />
                       <label
                         htmlFor="terms"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
@@ -919,13 +993,22 @@ const Afiliados = () => {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
                     <Label>E-mail</Label>
-                    <Input type="email" value={lEmail} onChange={(e) => setLEmail(e.target.value.toLowerCase())} required />
+                    <Input
+                      type="email"
+                      value={lEmail}
+                      onChange={(e) => setLEmail(e.target.value.toLowerCase())}
+                      required
+                    />
                   </div>
                   <div>
                     <Label>Senha</Label>
                     <Input type="password" value={lPass} onChange={(e) => setLPass(e.target.value)} required />
                     <div className="text-right mt-1">
-                      <button type="button" onClick={() => setMode("forgot_password")} className="text-xs text-primary underline">
+                      <button
+                        type="button"
+                        onClick={() => setMode("forgot_password")}
+                        className="text-xs text-primary underline"
+                      >
                         Esqueci minha senha
                       </button>
                     </div>
@@ -1024,7 +1107,8 @@ const Afiliados = () => {
                   <Sparkles className="w-5 h-5" /> Material de Divulgação
                 </CardTitle>
                 <CardDescription>
-                  Solicite materiais impressos personalizados com o QR Code do seu link de afiliado para divulgar o seu trabalho.
+                  Solicite materiais impressos personalizados com o QR Code do seu link de afiliado para divulgar o seu
+                  trabalho.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1051,14 +1135,16 @@ const Afiliados = () => {
               <div className="text-sm text-muted-foreground bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
                 {stats.pendingSevenDaysEarnings > 0 && (
                   <p>
-                    ⏳ Você tem <span className="font-semibold text-foreground">{formatBRL(stats.pendingSevenDaysEarnings)}</span>{" "}
+                    ⏳ Você tem{" "}
+                    <span className="font-semibold text-foreground">{formatBRL(stats.pendingSevenDaysEarnings)}</span>{" "}
                     em comissões aguardando o prazo de 7 dias após o pagamento do cliente.
                   </p>
                 )}
                 {stats.pendingEarnings > 0 && (
                   <p className={stats.pendingSevenDaysEarnings > 0 ? "mt-1" : ""}>
-                    ⏳ Você tem <span className="font-semibold text-foreground">{formatBRL(stats.pendingEarnings)}</span>{" "}
-                    em comissões pendentes (pedidos em andamento, não pagos ou em análise).
+                    ⏳ Você tem{" "}
+                    <span className="font-semibold text-foreground">{formatBRL(stats.pendingEarnings)}</span> em
+                    comissões pendentes (pedidos em andamento, não pagos ou em análise).
                   </p>
                 )}
               </div>
@@ -1074,9 +1160,7 @@ const Afiliados = () => {
                 {loadingOrders ? (
                   <p className="text-muted-foreground">Carregando...</p>
                 ) : orders.length === 0 ? (
-                  <p className="text-muted-foreground">
-                    Nenhuma indicação ainda. Compartilhe seu link para começar!
-                  </p>
+                  <p className="text-muted-foreground">Nenhuma indicação ainda. Compartilhe seu link para começar!</p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -1099,18 +1183,14 @@ const Afiliados = () => {
                           return (
                             <tr key={o.id} className="border-b last:border-0">
                               <td className="py-2 pr-3">
-                                {o.created_at
-                                  ? new Date(o.created_at).toLocaleDateString("pt-BR")
-                                  : "-"}
+                                {o.created_at ? new Date(o.created_at).toLocaleDateString("pt-BR") : "-"}
                               </td>
                               <td className="py-2 pr-3">{o.name}</td>
                               <td className="py-2 pr-3">
                                 <div className="flex flex-col gap-1">
                                   <span
                                     className={`px-2 py-0.5 rounded-full text-xs font-medium w-fit ${
-                                      isPaid
-                                        ? "bg-green-500/15 text-green-600"
-                                        : "bg-muted text-muted-foreground"
+                                      isPaid ? "bg-green-500/15 text-green-600" : "bg-muted text-muted-foreground"
                                     }`}
                                   >
                                     {o.status}
@@ -1133,21 +1213,27 @@ const Afiliados = () => {
                                   isBlocked
                                     ? "text-red-500 line-through"
                                     : isPaid
-                                    ? "text-primary"
-                                    : "text-muted-foreground"
+                                      ? "text-primary"
+                                      : "text-muted-foreground"
                                 }`}
                               >
                                 <div>{formatBRL(cb)}</div>
-                                {isPaid && !isBlocked && !isSuspicious && (() => {
-                                  const dateToUse = o.paid_at || o.created_at;
-                                  if (!dateToUse) return null;
-                                  const isReleased = (new Date().getTime() - new Date(dateToUse).getTime()) >= (7 * 24 * 60 * 60 * 1000);
-                                  return (
-                                    <div className={`text-[10px] px-2 py-0.5 mt-1 rounded-full w-fit ml-auto ${isReleased ? 'bg-green-500/15 text-green-600' : 'bg-yellow-500/15 text-yellow-600'}`}>
-                                      {isReleased ? "Liberado" : "Aguardando prazo"}
-                                    </div>
-                                  );
-                                })()}
+                                {isPaid &&
+                                  !isBlocked &&
+                                  !isSuspicious &&
+                                  (() => {
+                                    const dateToUse = o.paid_at || o.created_at;
+                                    if (!dateToUse) return null;
+                                    const isReleased =
+                                      new Date().getTime() - new Date(dateToUse).getTime() >= 7 * 24 * 60 * 60 * 1000;
+                                    return (
+                                      <div
+                                        className={`text-[10px] px-2 py-0.5 mt-1 rounded-full w-fit ml-auto ${isReleased ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600"}`}
+                                      >
+                                        {isReleased ? "Liberado" : "Aguardando prazo"}
+                                      </div>
+                                    );
+                                  })()}
                               </td>
                             </tr>
                           );
@@ -1170,15 +1256,14 @@ const Afiliados = () => {
               <ShoppingCart className="w-5 h-5" /> Catálogo de Materiais
             </DialogTitle>
             <DialogDescription>
-              Escolha o material que deseja solicitar. Após a confirmação, entraremos em contato para combinar pagamento e entrega.
+              Escolha o material que deseja solicitar. Após a confirmação, entraremos em contato para combinar pagamento
+              e entrega.
             </DialogDescription>
           </DialogHeader>
           {materialsLoading ? (
             <p className="text-muted-foreground py-6 text-center">Carregando catálogo...</p>
           ) : materials.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-center">
-              Nenhum material disponível no momento.
-            </p>
+            <p className="text-muted-foreground py-6 text-center">Nenhum material disponível no momento.</p>
           ) : (
             <div className="grid sm:grid-cols-2 gap-4 mt-2">
               {materials.map((m) => {
@@ -1190,9 +1275,7 @@ const Afiliados = () => {
                       <Package className="w-5 h-5 text-primary" />
                       <h3 className="font-semibold text-card-foreground">{m.name}</h3>
                     </div>
-                    {m.description && (
-                      <p className="text-xs text-muted-foreground mb-3">{m.description}</p>
-                    )}
+                    {m.description && <p className="text-xs text-muted-foreground mb-3">{m.description}</p>}
                     <p className="text-2xl font-bold text-primary mb-3">{formatBRL(Number(m.price || 0))}</p>
                     <div className="flex items-center gap-2 mb-3">
                       <Label className="text-xs">Qtd:</Label>
@@ -1222,9 +1305,7 @@ const Afiliados = () => {
                       {orderingMaterial === m.id ? "Enviando..." : "Solicitar"}
                     </Button>
                     {Number(m.price) <= 0 && (
-                      <p className="text-xs text-yellow-600 mt-2">
-                        Preço ainda não definido pelo administrador.
-                      </p>
+                      <p className="text-xs text-yellow-600 mt-2">Preço ainda não definido pelo administrador.</p>
                     )}
                   </div>
                 );
