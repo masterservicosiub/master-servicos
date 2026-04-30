@@ -44,6 +44,12 @@ import {
   deleteAffiliateMaterialOrder,
   type AffiliateMaterialRow,
   type AffiliateMaterialOrderRow,
+  fetchAffiliateStarRates,
+  upsertAffiliateStarRate,
+  fetchTopAffiliatesRanking,
+  type AffiliateStarRateRow,
+  type AffiliateRankingRow,
+  DEFAULT_STAR_RATES,
 } from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -79,6 +85,7 @@ import {
   Search,
 } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
+import { Star, Trophy } from "lucide-react";
 import {
   fetchAffiliatesAll,
   setAffiliateBlocked,
@@ -150,6 +157,12 @@ const Admin = () => {
   const [materials, setMaterials] = useState<AffiliateMaterialRow[]>([]);
   const [materialOrders, setMaterialOrders] = useState<AffiliateMaterialOrderRow[]>([]);
   const [materialEdits, setMaterialEdits] = useState<Record<string, { name: string; description: string; price: string; active: boolean }>>({});
+
+  // Star rates + ranking
+  const [starRates, setStarRates] = useState<AffiliateStarRateRow[]>([...DEFAULT_STAR_RATES].reverse());
+  const [starRateEdits, setStarRateEdits] = useState<Record<number, string>>({});
+  const [topRanking, setTopRanking] = useState<AffiliateRankingRow[]>([]);
+  const [savingStar, setSavingStar] = useState<number | null>(null);
 
   // Manual order fields
   const [manualName, setManualName] = useState("");
@@ -388,16 +401,23 @@ const Admin = () => {
   const loadAntifraud = async () => {
     setAfLoading(true);
     try {
-      const [a, o, mats, mOrders] = await Promise.all([
+      const [a, o, mats, mOrders, rates, ranking] = await Promise.all([
         fetchAffiliatesAll(),
         fetchSuspiciousOrders(),
         fetchAffiliateMaterials(),
         fetchAffiliateMaterialOrders(),
+        fetchAffiliateStarRates(),
+        fetchTopAffiliatesRanking(5),
       ]);
       setAfAffiliates(a);
       setAfOrders(o);
       setMaterials(mats);
       setMaterialOrders(mOrders);
+      setStarRates(rates);
+      const rEdits: Record<number, string> = {};
+      rates.forEach((r) => (rEdits[r.stars] = String(r.percent)));
+      setStarRateEdits(rEdits);
+      setTopRanking(ranking);
       const edits: Record<string, { name: string; description: string; price: string; active: boolean }> = {};
       mats.forEach((m) => {
         edits[m.id] = {
@@ -419,8 +439,17 @@ const Admin = () => {
     if (authenticated && activeTab === "antifraude") loadAntifraud();
   }, [authenticated, activeTab]);
 
+  // Resolve cashback rate (decimal) for a given affiliate based on top ranking + star rates.
+  const getAffiliateRate = (referral_code: string): number => {
+    const ranked = topRanking.find((r) => r.referral_code === referral_code);
+    const stars = ranked?.stars ?? 1;
+    const tier = starRates.find((s) => s.stars === stars);
+    const percent = tier?.percent ?? 1.0;
+    return percent / 100;
+  };
+
   const getAffiliateCommissions = (referral_code: string) => {
-    const COMMISSION_RATE = 0.01;
+    const COMMISSION_RATE = getAffiliateRate(referral_code);
     const affiliateOrders = orders.filter(
       (o) => o.affiliate_code === referral_code && (o.fraud_status || "ok") === "ok" && o.status === "Pago"
     );
@@ -1840,6 +1869,117 @@ const Admin = () => {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Top 5 Ranking + % por estrela */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-2 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-amber-500" /> Cashback por Estrela (Top 5 Afiliados)
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Defina o % de cashback que cada nível de estrela do ranking vai receber por cada serviço pago.
+                  O 1º colocado recebe 5★, o 2º 4★, e assim por diante.
+                </p>
+
+                {/* Star tiers editor */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const cur = starRates.find((r) => r.stars === stars);
+                    const val = starRateEdits[stars] ?? String(cur?.percent ?? 1);
+                    return (
+                      <div
+                        key={stars}
+                        className="rounded-xl border border-border p-3 bg-background/50 flex flex-col items-center gap-2"
+                      >
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${i < stars ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                            />
+                          ))}
+                        </div>
+                        <div className="text-xs font-semibold text-muted-foreground">
+                          {stars === 5 ? "1º Lugar" : stars === 4 ? "2º Lugar" : stars === 3 ? "3º Lugar" : stars === 2 ? "4º Lugar" : "5º Lugar"}
+                        </div>
+                        <div className="flex items-center gap-1 w-full">
+                          <input
+                            type="number"
+                            min={0}
+                            step="0.1"
+                            value={val}
+                            onChange={(e) =>
+                              setStarRateEdits((p) => ({ ...p, [stars]: e.target.value }))
+                            }
+                            className="flex-1 rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-center font-semibold"
+                          />
+                          <span className="text-xs text-muted-foreground">%</span>
+                        </div>
+                        <button
+                          disabled={savingStar === stars}
+                          onClick={async () => {
+                            const num = Number(val);
+                            if (isNaN(num) || num < 0) {
+                              toast.error("Informe uma porcentagem válida.");
+                              return;
+                            }
+                            setSavingStar(stars);
+                            try {
+                              await upsertAffiliateStarRate(stars, num);
+                              toast.success(`% atualizado para ${stars}★`);
+                              loadAntifraud();
+                            } catch {
+                              toast.error("Erro ao salvar.");
+                            } finally {
+                              setSavingStar(null);
+                            }
+                          }}
+                          className="w-full text-xs bg-primary text-primary-foreground px-2 py-1.5 rounded font-medium disabled:opacity-50"
+                        >
+                          {savingStar === stars ? "..." : "Salvar"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Current Top 5 preview */}
+                <h3 className="text-sm font-semibold text-card-foreground mb-2">Ranking atual</h3>
+                {topRanking.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum afiliado com pedidos pagos ainda.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {topRanking.map((r) => {
+                      const tier = starRates.find((s) => s.stars === r.stars);
+                      const pct = tier?.percent ?? 1;
+                      const parts = r.full_name.trim().split(/\s+/);
+                      const displayName = parts.slice(0, 2).join(" ");
+                      return (
+                        <div
+                          key={r.referral_code}
+                          className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-background/50"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="font-mono text-xs px-2 py-1 rounded bg-muted">#{r.rank}</span>
+                            <span className="font-semibold truncate">{displayName}</span>
+                            <div className="flex items-center gap-0.5">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-3.5 h-3.5 ${i < r.stars ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className="text-muted-foreground">{r.paid_count} indic.</span>
+                            <span className="font-bold text-emerald-600">{pct}%</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

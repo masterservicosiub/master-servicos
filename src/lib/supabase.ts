@@ -635,3 +635,102 @@ export async function deleteAffiliateMaterialOrder(id: string) {
     .eq("id", id);
   if (error) throw error;
 }
+
+// ---------------- Affiliate Star Rates (Top 5 ranking) ----------------
+export interface AffiliateStarRateRow {
+  stars: number; // 1..5
+  percent: number; // e.g. 1.5 means 1.5%
+  updated_at?: string;
+}
+
+export const DEFAULT_STAR_RATES: AffiliateStarRateRow[] = [
+  { stars: 1, percent: 1.0 },
+  { stars: 2, percent: 1.5 },
+  { stars: 3, percent: 2.0 },
+  { stars: 4, percent: 2.5 },
+  { stars: 5, percent: 3.0 },
+];
+
+export async function fetchAffiliateStarRates(): Promise<AffiliateStarRateRow[]> {
+  try {
+    const { data, error } = await supabase
+      .from("affiliate_star_rates")
+      .select("*")
+      .order("stars", { ascending: false });
+    if (error) throw error;
+    if (!data || data.length === 0) return [...DEFAULT_STAR_RATES].reverse();
+    return data as AffiliateStarRateRow[];
+  } catch {
+    return [...DEFAULT_STAR_RATES].reverse();
+  }
+}
+
+export async function upsertAffiliateStarRate(stars: number, percent: number) {
+  const { error } = await supabase
+    .from("affiliate_star_rates")
+    .upsert(
+      { stars, percent, updated_at: new Date().toISOString() },
+      { onConflict: "stars" }
+    );
+  if (error) throw error;
+}
+
+/**
+ * Compute Top 5 affiliates ranking based on PAID, non-fraud orders count.
+ * Returns ranked list with assigned stars (1st place => 5 stars, 5th => 1 star).
+ */
+export interface AffiliateRankingRow {
+  affiliate_id?: string;
+  referral_code: string;
+  full_name: string;
+  paid_count: number;
+  total_paid: number;
+  stars: number; // 5..1 according to position
+  rank: number; // 1..5
+}
+
+export async function fetchTopAffiliatesRanking(limit = 5): Promise<AffiliateRankingRow[]> {
+  const { data: affiliates, error: afErr } = await supabase
+    .from("affiliates")
+    .select("id, full_name, referral_code, blocked");
+  if (afErr) throw afErr;
+  const list = (affiliates || []).filter((a: any) => !a.blocked);
+
+  const { data: orders, error: orErr } = await supabase
+    .from("orders")
+    .select("affiliate_code, total, status, fraud_status");
+  if (orErr) throw orErr;
+
+  const byCode = new Map<string, { paid_count: number; total_paid: number }>();
+  (orders || []).forEach((o: any) => {
+    if (!o.affiliate_code) return;
+    if ((o.fraud_status || "ok") !== "ok") return;
+    if ((o.status || "").toLowerCase() !== "pago") return;
+    const cur = byCode.get(o.affiliate_code) || { paid_count: 0, total_paid: 0 };
+    cur.paid_count += 1;
+    cur.total_paid += Number(o.total || 0);
+    byCode.set(o.affiliate_code, cur);
+  });
+
+  const ranked = list
+    .map((a: any) => {
+      const stat = byCode.get(a.referral_code) || { paid_count: 0, total_paid: 0 };
+      return {
+        affiliate_id: a.id,
+        referral_code: a.referral_code,
+        full_name: a.full_name,
+        paid_count: stat.paid_count,
+        total_paid: stat.total_paid,
+      };
+    })
+    .filter((a) => a.paid_count > 0)
+    .sort((a, b) => b.paid_count - a.paid_count || b.total_paid - a.total_paid)
+    .slice(0, limit)
+    .map((a, i) => ({
+      ...a,
+      rank: i + 1,
+      stars: Math.max(1, limit - i), // 1st => 5, 2nd => 4, ...
+    }));
+
+  return ranked;
+}
