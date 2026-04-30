@@ -24,6 +24,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import StatsCounter from "@/components/StatsCounter";
 import HowItWorks from "@/components/HowItWorks";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 
 const services = [
   { icon: Search, title: "Verificar Vazamento", desc: "Detecção e reparo de vazamentos", gradient: "from-blue-500 to-cyan-500" },
@@ -40,7 +41,9 @@ const benefits = [
   { icon: Award, title: "Profissionais Qualificados", desc: "Equipe treinada para cada tipo de serviço.", gradient: "from-orange-500 to-pink-500" },
 ];
 
-const Index = () => (
+const Index = () => {
+  const info = useCompanyInfo();
+  return (
   <div className="min-h-screen">
     <Header />
 
@@ -78,7 +81,7 @@ const Index = () => (
               <Zap className="w-5 h-5" /> Fazer Orçamento
             </Link>
             <a
-              href="https://wa.me/5564992642950"
+              href={`https://wa.me/${info.company_whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
