@@ -158,6 +158,12 @@ const Admin = () => {
   const [materialOrders, setMaterialOrders] = useState<AffiliateMaterialOrderRow[]>([]);
   const [materialEdits, setMaterialEdits] = useState<Record<string, { name: string; description: string; price: string; active: boolean }>>({});
 
+  // Star rates + ranking
+  const [starRates, setStarRates] = useState<AffiliateStarRateRow[]>([...DEFAULT_STAR_RATES].reverse());
+  const [starRateEdits, setStarRateEdits] = useState<Record<number, string>>({});
+  const [topRanking, setTopRanking] = useState<AffiliateRankingRow[]>([]);
+  const [savingStar, setSavingStar] = useState<number | null>(null);
+
   // Manual order fields
   const [manualName, setManualName] = useState("");
   const [manualPhone, setManualPhone] = useState("");
