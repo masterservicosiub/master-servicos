@@ -234,6 +234,10 @@ const Admin = () => {
   const [savingEmail, setSavingEmail] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
 
+  // Company info (public contact)
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(DEFAULT_COMPANY_INFO);
+  const [savingCompany, setSavingCompany] = useState(false);
+
   // Coupons
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [coupCode, setCoupCode] = useState("");
