@@ -602,7 +602,7 @@ const Afiliados = () => {
                     { text: "Cadastre-se gratuitamente como afiliado", icon: Users },
                     { text: "Receba seu link exclusivo de indicação", icon: Share2 },
                     { text: "Compartilhe com clientes em potencial", icon: Zap },
-                    { text: "Receba 1% via Pix de cada serviço pago", icon: Wallet },
+                    { text: "Receba até 2% via Pix de cada serviço pago", icon: Wallet },
                   ].map((step, i) => (
                     <div
                       key={i}
