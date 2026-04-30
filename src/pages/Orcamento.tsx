@@ -7,6 +7,7 @@ import { sendToGoogleSheets } from "@/lib/googleSheets";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import { insertOrder, fetchBudgetServices, findCouponByCode, type CouponRow } from "@/lib/supabase";
 import { sendOrderEmailNotification } from "@/lib/emailNotification";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import {
   getDeviceFingerprint,
   getClientIp,
@@ -116,6 +117,7 @@ function formatBRL(v: number) {
 }
 
 const Orcamento = () => {
+  const companyInfo = useCompanyInfo();
   const [availableServices, setAvailableServices] = useState<ServiceDef[]>(defaultServices);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
