@@ -796,6 +796,7 @@ const Afiliados = () => {
                         </ul>
                         <p className="mt-2">
                           3.3. A empresa poderá alterar valores, regras e condições do programa a qualquer momento.
+                          3.4. Os valores de Cashback podem ter valores percentuais diferenciados para afiliados com mais indicações concluídas.
                         </p>
                       </div>
 
