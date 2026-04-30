@@ -343,6 +343,29 @@ const Admin = () => {
     }
   };
 
+  const handleSaveCompanyInfo = async () => {
+    setSavingCompany(true);
+    try {
+      const cleaned: CompanyInfo = {
+        company_phone: companyInfo.company_phone.trim(),
+        company_whatsapp: companyInfo.company_whatsapp.replace(/\D/g, ""),
+        company_email: companyInfo.company_email.trim(),
+        company_address: companyInfo.company_address.trim(),
+        company_cnpj: companyInfo.company_cnpj.trim(),
+      };
+      await updateCompanyInfo(cleaned);
+      setCompanyInfo(cleaned);
+      const { refreshCompanyInfo } = await import("@/hooks/useCompanyInfo");
+      await refreshCompanyInfo();
+      toast.success("Informações da empresa atualizadas!");
+    } catch (err) {
+      console.error("Erro ao salvar empresa:", err);
+      toast.error("Erro ao salvar informações da empresa.");
+    } finally {
+      setSavingCompany(false);
+    }
+  };
+
   const loadOrders = async () => {
     setLoading(true);
     try {
