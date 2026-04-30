@@ -52,7 +52,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-const DEFAULT_myCommissionRate = 0.01; // 1% (fallback)
+const DEFAULT_COMMISSION_RATE = 0.01; // 1% (fallback)
 const STORAGE_KEY = "affiliate_session";
 
 function formatBRL(v: number) {
@@ -67,7 +67,7 @@ const Afiliados = () => {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [topRanking, setTopRanking] = useState<AffiliateRankingRow[]>([]);
-  const [myCommissionRate, setMyCommissionRate] = useState<number>(DEFAULT_myCommissionRate);
+  const [myCommissionRate, setMyCommissionRate] = useState<number>(DEFAULT_COMMISSION_RATE);
 
   // register form
   const [rFullName, setRFullName] = useState("");
@@ -131,7 +131,7 @@ const Afiliados = () => {
         const pct = tier?.percent ?? 1;
         setMyCommissionRate(pct / 100);
       } catch {
-        setMyCommissionRate(DEFAULT_myCommissionRate);
+        setMyCommissionRate(DEFAULT_COMMISSION_RATE);
       }
     })();
   }, [mode, session?.referral_code]);
