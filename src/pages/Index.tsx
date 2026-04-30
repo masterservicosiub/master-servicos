@@ -49,16 +49,6 @@ const Index = () => (
       className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-40 text-primary-foreground bg-cover bg-center"
       style={{ backgroundImage: `url(${heroBg})` }}
     >
-      {/* Color overlay to keep brand tone */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-primary/50 to-accent/60 pointer-events-none" />
-      {/* Animated gradient blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-white/20 blur-3xl animate-blob" />
-        <div className="absolute top-20 -right-32 w-[26rem] h-[26rem] rounded-full bg-accent/40 blur-3xl animate-blob [animation-delay:2s]" />
-        <div className="absolute -bottom-32 left-1/3 w-[30rem] h-[30rem] rounded-full bg-primary-foreground/10 blur-3xl animate-blob [animation-delay:4s]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.15),transparent_60%)]" />
-      </div>
-
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-8 animate-fade-in-up">
