@@ -17,6 +17,8 @@ import {
   fetchAffiliateMaterials,
   insertAffiliateMaterialOrder,
   type AffiliateMaterialRow,
+  fetchTopAffiliatesRanking,
+  type AffiliateRankingRow,
 } from "@/lib/supabase";
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -38,6 +40,9 @@ import {
   ArrowRight,
   ShieldCheck,
   Clock,
+  Trophy,
+  Crown,
+  Medal,
 } from "lucide-react";
 import {
   Dialog,
