@@ -234,6 +234,7 @@ const Index = () => {
     <Footer />
     <WhatsAppFloat />
   </div>
-);
+  );
+};
 
 export default Index;
