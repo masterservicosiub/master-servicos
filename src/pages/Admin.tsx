@@ -14,6 +14,7 @@ import {
   updateService,
   deleteService,
   type ServiceRow,
+  uploadHomeServiceMedia,
   fetchBudgetServices,
   insertBudgetService,
   updateBudgetService,
