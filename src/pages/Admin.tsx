@@ -732,10 +732,20 @@ const Admin = () => {
       return;
     }
     try {
-      await insertService({ title: svcTitle.trim(), description: svcDesc.trim(), image_url: svcImage.trim() });
+      await insertService({
+        title: svcTitle.trim(),
+        description: svcDesc.trim(),
+        image_url: svcImage.trim(),
+        media_type: svcMediaType,
+        video_url: svcVideo.trim(),
+        active: true,
+        sort_order: services.length,
+      });
       setSvcTitle("");
       setSvcDesc("");
       setSvcImage("");
+      setSvcVideo("");
+      setSvcMediaType("image");
       toast.success("Serviço adicionado!");
       loadServices();
     } catch {
@@ -745,7 +755,13 @@ const Admin = () => {
 
   const handleEditService = async (id: string) => {
     try {
-      await updateService(id, { title: editSvcTitle, description: editSvcDesc, image_url: editSvcImage });
+      await updateService(id, {
+        title: editSvcTitle,
+        description: editSvcDesc,
+        image_url: editSvcImage,
+        media_type: editSvcMediaType,
+        video_url: editSvcVideo,
+      });
       setEditingSvcId(null);
       toast.success("Serviço atualizado!");
       loadServices();
