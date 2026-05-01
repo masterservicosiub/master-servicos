@@ -92,6 +92,7 @@ const defaultServices: ServiceDef[] = [
 ];
 
 interface SelectedService {
+  instanceId: string;
   id: string;
   name: string;
   type: ServiceType;
@@ -181,25 +182,33 @@ const Orcamento = () => {
   const addService = (id?: string) => {
     const targetId = id ?? currentServiceId;
     if (!targetId) return;
-    if (selectedServices.find((s) => s.id === targetId)) {
-      toast.error("Este serviço já foi adicionado.");
-      return;
-    }
     const service = availableServices.find((s) => s.id === targetId);
     if (!service) return;
+    // For fixed services, prevent duplicates (use quantity instead).
+    // For area services, allow multiple instances with different sizes.
+    if (service.type === "fixed" && selectedServices.find((s) => s.id === targetId)) {
+      toast.error("Este serviço já foi adicionado. Aumente a quantidade.");
+      return;
+    }
+    const instanceId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${service.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     setSelectedServices([
       ...selectedServices,
-      { id: service.id, name: service.name, type: service.type, observation: "", quantity: 1, width: 0, height: 0 },
+      { instanceId, id: service.id, name: service.name, type: service.type, observation: "", quantity: 1, width: 0, height: 0 },
     ]);
     setCurrentServiceId("");
   };
 
-  const removeService = (id: string) => {
-    setSelectedServices(selectedServices.filter((s) => s.id !== id));
+  const removeService = (instanceId: string) => {
+    setSelectedServices(selectedServices.filter((s) => s.instanceId !== instanceId));
   };
 
-  const updateField = (id: string, field: keyof SelectedService, value: string | number) => {
-    setSelectedServices(selectedServices.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+  const updateField = (instanceId: string, field: keyof SelectedService, value: string | number) => {
+    setSelectedServices(
+      selectedServices.map((s) => (s.instanceId === instanceId ? { ...s, [field]: value } : s)),
+    );
   };
 
   const subtotal = useMemo(() => {
