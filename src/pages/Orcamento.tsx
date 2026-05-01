@@ -625,7 +625,8 @@ const Orcamento = () => {
                       (s.category || "").trim() === activeCategory,
                   )
                   .map((s, idx) => {
-                  const added = !!selectedServices.find((sel) => sel.id === s.id);
+                  const added =
+                    s.type === "fixed" && !!selectedServices.find((sel) => sel.id === s.id);
                   return (
                     <div
                       key={s.id}
@@ -673,7 +674,11 @@ const Orcamento = () => {
                             </>
                           ) : (
                             <>
-                              <Plus className="w-4 h-4" /> Adicionar
+                              <Plus className="w-4 h-4" />
+                              {s.type === "area" &&
+                              selectedServices.some((sel) => sel.id === s.id)
+                                ? "Adicionar outra área"
+                                : "Adicionar"}
                             </>
                           )}
                         </button>
