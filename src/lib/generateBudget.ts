@@ -10,8 +10,12 @@ const COMPANY = {
   phone: "(64) 9 9264-2950",
 };
 
+// ✅ FORMATAÇÃO CORRIGIDA EM R$
 const fmtBRL = (v: number) =>
-  `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `R$ ${Number(v).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 async function loadImageDataUrl(url: string): Promise<string> {
   const res = await fetch(url);
