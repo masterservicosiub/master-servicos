@@ -92,6 +92,7 @@ const defaultServices: ServiceDef[] = [
 ];
 
 interface SelectedService {
+  instanceId: string;
   id: string;
   name: string;
   type: ServiceType;
@@ -181,25 +182,33 @@ const Orcamento = () => {
   const addService = (id?: string) => {
     const targetId = id ?? currentServiceId;
     if (!targetId) return;
-    if (selectedServices.find((s) => s.id === targetId)) {
-      toast.error("Este serviço já foi adicionado.");
-      return;
-    }
     const service = availableServices.find((s) => s.id === targetId);
     if (!service) return;
+    // For fixed services, prevent duplicates (use quantity instead).
+    // For area services, allow multiple instances with different sizes.
+    if (service.type === "fixed" && selectedServices.find((s) => s.id === targetId)) {
+      toast.error("Este serviço já foi adicionado. Aumente a quantidade.");
+      return;
+    }
+    const instanceId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${service.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     setSelectedServices([
       ...selectedServices,
-      { id: service.id, name: service.name, type: service.type, observation: "", quantity: 1, width: 0, height: 0 },
+      { instanceId, id: service.id, name: service.name, type: service.type, observation: "", quantity: 1, width: 0, height: 0 },
     ]);
     setCurrentServiceId("");
   };
 
-  const removeService = (id: string) => {
-    setSelectedServices(selectedServices.filter((s) => s.id !== id));
+  const removeService = (instanceId: string) => {
+    setSelectedServices(selectedServices.filter((s) => s.instanceId !== instanceId));
   };
 
-  const updateField = (id: string, field: keyof SelectedService, value: string | number) => {
-    setSelectedServices(selectedServices.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+  const updateField = (instanceId: string, field: keyof SelectedService, value: string | number) => {
+    setSelectedServices(
+      selectedServices.map((s) => (s.instanceId === instanceId ? { ...s, [field]: value } : s)),
+    );
   };
 
   const subtotal = useMemo(() => {
@@ -616,7 +625,8 @@ const Orcamento = () => {
                       (s.category || "").trim() === activeCategory,
                   )
                   .map((s, idx) => {
-                  const added = !!selectedServices.find((sel) => sel.id === s.id);
+                  const added =
+                    s.type === "fixed" && !!selectedServices.find((sel) => sel.id === s.id);
                   return (
                     <div
                       key={s.id}
@@ -664,7 +674,11 @@ const Orcamento = () => {
                             </>
                           ) : (
                             <>
-                              <Plus className="w-4 h-4" /> Adicionar
+                              <Plus className="w-4 h-4" />
+                              {s.type === "area" &&
+                              selectedServices.some((sel) => sel.id === s.id)
+                                ? "Adicionar outra área"
+                                : "Adicionar"}
                             </>
                           )}
                         </button>
@@ -687,12 +701,12 @@ const Orcamento = () => {
                     const def = availableServices.find((d) => d.id === svc.id)!;
                     const price = calcPrice(def, svc);
                     return (
-                      <div key={svc.id} className="p-4 rounded-xl bg-gradient-to-br from-secondary to-muted/50 border border-border hover:border-primary/40 transition-colors">
+                      <div key={svc.instanceId} className="p-4 rounded-xl bg-gradient-to-br from-secondary to-muted/50 border border-border hover:border-primary/40 transition-colors">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="font-medium text-foreground">{svc.name}</h3>
                           <button
                             type="button"
-                            onClick={() => removeService(svc.id)}
+                            onClick={() => removeService(svc.instanceId)}
                             className="text-destructive hover:opacity-70 transition-opacity"
                           >
                             <Trash2 className="w-5 h-5" />
@@ -706,7 +720,7 @@ const Orcamento = () => {
                               type="number"
                               min={1}
                               value={svc.quantity}
-                              onChange={(e) => updateField(svc.id, "quantity", Math.max(1, Number(e.target.value)))}
+                              onChange={(e) => updateField(svc.instanceId, "quantity", Math.max(1, Number(e.target.value)))}
                               className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                             <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
@@ -723,7 +737,7 @@ const Orcamento = () => {
                                   min={0}
                                   step={0.1}
                                   value={svc.width || ""}
-                                  onChange={(e) => updateField(svc.id, "width", Math.max(0, Number(e.target.value)))}
+                                  onChange={(e) => updateField(svc.instanceId, "width", Math.max(0, Number(e.target.value)))}
                                   className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 />
                               </div>
@@ -734,7 +748,7 @@ const Orcamento = () => {
                                   min={0}
                                   step={0.1}
                                   value={svc.height || ""}
-                                  onChange={(e) => updateField(svc.id, "height", Math.max(0, Number(e.target.value)))}
+                                  onChange={(e) => updateField(svc.instanceId, "height", Math.max(0, Number(e.target.value)))}
                                   className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 />
                               </div>
@@ -760,7 +774,7 @@ const Orcamento = () => {
                         <input
                           type="text"
                           value={svc.observation}
-                          onChange={(e) => updateField(svc.id, "observation", e.target.value)}
+                          onChange={(e) => updateField(svc.instanceId, "observation", e.target.value)}
                           className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           placeholder="Observação (opcional)"
                           maxLength={300}
