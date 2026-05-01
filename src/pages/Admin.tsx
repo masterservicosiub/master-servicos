@@ -14,6 +14,7 @@ import {
   updateService,
   deleteService,
   type ServiceRow,
+  uploadHomeServiceMedia,
   fetchBudgetServices,
   insertBudgetService,
   updateBudgetService,
@@ -191,10 +192,16 @@ const Admin = () => {
   const [svcTitle, setSvcTitle] = useState("");
   const [svcDesc, setSvcDesc] = useState("");
   const [svcImage, setSvcImage] = useState("");
+  const [svcMediaType, setSvcMediaType] = useState<"image" | "video">("image");
+  const [svcVideo, setSvcVideo] = useState("");
+  const [svcUploading, setSvcUploading] = useState(false);
   const [editingSvcId, setEditingSvcId] = useState<string | null>(null);
   const [editSvcTitle, setEditSvcTitle] = useState("");
   const [editSvcDesc, setEditSvcDesc] = useState("");
   const [editSvcImage, setEditSvcImage] = useState("");
+  const [editSvcMediaType, setEditSvcMediaType] = useState<"image" | "video">("image");
+  const [editSvcVideo, setEditSvcVideo] = useState("");
+  const [editSvcUploading, setEditSvcUploading] = useState(false);
 
   // Budget services management
   const [budgetServices, setBudgetServices] = useState<BudgetServiceRow[]>([]);
@@ -725,10 +732,20 @@ const Admin = () => {
       return;
     }
     try {
-      await insertService({ title: svcTitle.trim(), description: svcDesc.trim(), image_url: svcImage.trim() });
+      await insertService({
+        title: svcTitle.trim(),
+        description: svcDesc.trim(),
+        image_url: svcImage.trim(),
+        media_type: svcMediaType,
+        video_url: svcVideo.trim(),
+        active: true,
+        sort_order: services.length,
+      });
       setSvcTitle("");
       setSvcDesc("");
       setSvcImage("");
+      setSvcVideo("");
+      setSvcMediaType("image");
       toast.success("Serviço adicionado!");
       loadServices();
     } catch {
@@ -738,7 +755,13 @@ const Admin = () => {
 
   const handleEditService = async (id: string) => {
     try {
-      await updateService(id, { title: editSvcTitle, description: editSvcDesc, image_url: editSvcImage });
+      await updateService(id, {
+        title: editSvcTitle,
+        description: editSvcDesc,
+        image_url: editSvcImage,
+        media_type: editSvcMediaType,
+        video_url: editSvcVideo,
+      });
       setEditingSvcId(null);
       toast.success("Serviço atualizado!");
       loadServices();
@@ -2181,6 +2204,231 @@ const Admin = () => {
             </>
           ) : (
             <>
+              {/* Gerenciar Serviços da Página Inicial */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <Camera className="w-5 h-5" /> Serviços da Página Inicial
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Gerencie os cards de "Nossos Serviços" exibidos na home. Aceita imagens ou vídeos.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                  <input
+                    value={svcTitle}
+                    onChange={(e) => setSvcTitle(e.target.value)}
+                    placeholder="Título do serviço *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <select
+                    value={svcMediaType}
+                    onChange={(e) => setSvcMediaType(e.target.value as "image" | "video")}
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="image">Imagem</option>
+                    <option value="video">Vídeo</option>
+                  </select>
+                </div>
+                <textarea
+                  value={svcDesc}
+                  onChange={(e) => setSvcDesc(e.target.value)}
+                  placeholder="Descrição curta *"
+                  rows={2}
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
+                <div className="space-y-3 mb-4">
+                  <label className="block text-sm font-medium text-foreground">
+                    {svcMediaType === "video" ? "Vídeo (upload ou URL)" : "Imagem (upload ou URL)"}
+                  </label>
+                  <input
+                    type="file"
+                    accept={svcMediaType === "video" ? "video/*" : "image/*"}
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      setSvcUploading(true);
+                      try {
+                        const res = await uploadHomeServiceMedia(f);
+                        if (res.type === "video") {
+                          setSvcVideo(res.url);
+                          setSvcMediaType("video");
+                        } else {
+                          setSvcImage(res.url);
+                          setSvcMediaType("image");
+                        }
+                        toast.success("Mídia enviada!");
+                      } catch (err: any) {
+                        toast.error("Erro no upload: " + (err?.message || ""));
+                      } finally {
+                        setSvcUploading(false);
+                        e.target.value = "";
+                      }
+                    }}
+                    className="w-full text-sm text-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-semibold hover:file:opacity-90"
+                  />
+                  {svcUploading && <p className="text-xs text-muted-foreground">Enviando arquivo...</p>}
+                  {svcMediaType === "video" ? (
+                    <input
+                      value={svcVideo}
+                      onChange={(e) => setSvcVideo(e.target.value)}
+                      placeholder="ou cole a URL do vídeo (mp4)"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  ) : (
+                    <input
+                      value={svcImage}
+                      onChange={(e) => setSvcImage(e.target.value)}
+                      placeholder="ou cole a URL da imagem"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  )}
+                  {svcMediaType === "image" && svcImage && (
+                    <img src={svcImage} alt="preview" className="w-40 h-24 object-cover rounded-lg border border-border" />
+                  )}
+                  {svcMediaType === "video" && svcVideo && (
+                    <video src={svcVideo} className="w-40 h-24 object-cover rounded-lg border border-border" muted controls />
+                  )}
+                </div>
+                <button
+                  onClick={handleAddService}
+                  className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Adicionar Serviço
+                </button>
+
+                {services.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    {services.map((s) => (
+                      <div key={s.id} className="p-4 rounded-lg bg-secondary border border-border">
+                        {editingSvcId === s.id ? (
+                          <div className="space-y-3">
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              <input
+                                value={editSvcTitle}
+                                onChange={(e) => setEditSvcTitle(e.target.value)}
+                                placeholder="Título"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                              />
+                              <select
+                                value={editSvcMediaType}
+                                onChange={(e) => setEditSvcMediaType(e.target.value as "image" | "video")}
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                <option value="image">Imagem</option>
+                                <option value="video">Vídeo</option>
+                              </select>
+                            </div>
+                            <textarea
+                              value={editSvcDesc}
+                              onChange={(e) => setEditSvcDesc(e.target.value)}
+                              rows={2}
+                              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                            />
+                            <input
+                              type="file"
+                              accept={editSvcMediaType === "video" ? "video/*" : "image/*"}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (!f) return;
+                                setEditSvcUploading(true);
+                                try {
+                                  const res = await uploadHomeServiceMedia(f);
+                                  if (res.type === "video") {
+                                    setEditSvcVideo(res.url);
+                                    setEditSvcMediaType("video");
+                                  } else {
+                                    setEditSvcImage(res.url);
+                                    setEditSvcMediaType("image");
+                                  }
+                                  toast.success("Mídia enviada!");
+                                } catch (err: any) {
+                                  toast.error("Erro no upload: " + (err?.message || ""));
+                                } finally {
+                                  setEditSvcUploading(false);
+                                  e.target.value = "";
+                                }
+                              }}
+                              className="w-full text-sm text-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-semibold"
+                            />
+                            {editSvcUploading && <p className="text-xs text-muted-foreground">Enviando...</p>}
+                            {editSvcMediaType === "video" ? (
+                              <input
+                                value={editSvcVideo}
+                                onChange={(e) => setEditSvcVideo(e.target.value)}
+                                placeholder="URL do vídeo"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                              />
+                            ) : (
+                              <input
+                                value={editSvcImage}
+                                onChange={(e) => setEditSvcImage(e.target.value)}
+                                placeholder="URL da imagem"
+                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                              />
+                            )}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditService(s.id!)}
+                                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1"
+                              >
+                                <Save className="w-4 h-4" /> Salvar
+                              </button>
+                              <button
+                                onClick={() => setEditingSvcId(null)}
+                                className="bg-muted text-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1"
+                              >
+                                <X className="w-4 h-4" /> Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start gap-3">
+                            <div className="w-24 h-16 rounded-md overflow-hidden bg-background flex items-center justify-center shrink-0 border border-border">
+                              {s.media_type === "video" && s.video_url ? (
+                                <video src={s.video_url} className="w-full h-full object-cover" muted />
+                              ) : s.image_url ? (
+                                <img src={s.image_url} alt={s.title} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-[10px] text-muted-foreground">sem mídia</span>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-foreground truncate">{s.title}</div>
+                              <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
+                              <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">
+                                {s.media_type === "video" ? "Vídeo" : "Imagem"}
+                              </div>
+                            </div>
+                            <div className="flex gap-2 shrink-0">
+                              <button
+                                onClick={() => {
+                                  setEditingSvcId(s.id!);
+                                  setEditSvcTitle(s.title);
+                                  setEditSvcDesc(s.description);
+                                  setEditSvcImage(s.image_url || "");
+                                  setEditSvcVideo(s.video_url || "");
+                                  setEditSvcMediaType((s.media_type as "image" | "video") || "image");
+                                }}
+                                className="text-primary hover:opacity-70"
+                                title="Editar"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteService(s.id!)}
+                                className="text-destructive hover:opacity-70"
+                                title="Excluir"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Gerenciar Serviços de Orçamento */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">

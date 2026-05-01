@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   Shield,
   Clock,
@@ -14,6 +15,7 @@ import {
   Star,
   ShieldCheck,
   Zap,
+  Wrench,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import sloganBanner from "@/assets/slogan-banner.png";
@@ -25,14 +27,26 @@ import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import StatsCounter from "@/components/StatsCounter";
 import HowItWorks from "@/components/HowItWorks";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
+import { fetchActiveServices, type ServiceRow } from "@/lib/supabase";
 
-const services = [
+const defaultServices = [
   { icon: Search, title: "Verificar Vazamento", desc: "Detecção e reparo de vazamentos", gradient: "from-blue-500 to-cyan-500" },
   { icon: Droplets, title: "Instalação Padrão Saneago", desc: "Instalação hidráulica padrão", gradient: "from-cyan-500 to-sky-500" },
   { icon: Droplets, title: "Limpeza de Caixa d'Água", desc: "Higienização completa", gradient: "from-sky-500 to-indigo-500" },
   { icon: Droplets, title: "Limpeza de Caixa de Gordura", desc: "Manutenção preventiva", gradient: "from-emerald-500 to-teal-500" },
   { icon: Sun, title: "Limpeza de Placa Solar", desc: "Otimizando sua Geração", gradient: "from-orange-500 to-yellow-500" },
   { icon: Scissors, title: "Roçagem de Grama e Mato Alto", desc: "Deixe seu jardim sempre lindo", gradient: "from-green-500 to-lime-500" },
+];
+
+const cardGradients = [
+  "from-blue-500 to-cyan-500",
+  "from-cyan-500 to-sky-500",
+  "from-sky-500 to-indigo-500",
+  "from-emerald-500 to-teal-500",
+  "from-orange-500 to-yellow-500",
+  "from-green-500 to-lime-500",
+  "from-pink-500 to-rose-500",
+  "from-violet-500 to-fuchsia-500",
 ];
 
 const benefits = [
@@ -43,6 +57,14 @@ const benefits = [
 
 const Index = () => {
   const info = useCompanyInfo();
+  const [dbServices, setDbServices] = useState<ServiceRow[] | null>(null);
+
+  useEffect(() => {
+    fetchActiveServices()
+      .then((data) => setDbServices(data))
+      .catch(() => setDbServices([]));
+  }, []);
+
   return (
   <div className="min-h-screen">
     <Header />
@@ -128,22 +150,69 @@ const Index = () => {
             Oferecemos uma ampla gama de serviços para atender todas as suas necessidades.
           </p>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((s, i) => (
-            <div
-              key={s.title}
-              className="group relative overflow-hidden bg-card rounded-2xl p-6 border-2 border-border hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up"
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${s.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
-              <div className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${s.gradient} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                <s.icon className="w-7 h-7" />
+        {dbServices && dbServices.length > 0 ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dbServices.map((s, i) => {
+              const gradient = cardGradients[i % cardGradients.length];
+              const isVideo = s.media_type === "video" && (s.video_url || "").trim() !== "";
+              const imageSrc = (s.image_url || "").trim();
+              return (
+                <div
+                  key={s.id}
+                  className="group relative overflow-hidden bg-card rounded-2xl border-2 border-border hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <div className="aspect-video bg-muted overflow-hidden">
+                    {isVideo ? (
+                      <video
+                        src={s.video_url}
+                        className="w-full h-full object-cover"
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        controls={false}
+                      />
+                    ) : imageSrc ? (
+                      <img
+                        src={imageSrc}
+                        alt={s.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white`}>
+                        <Wrench className="w-12 h-12" />
+                      </div>
+                    )}
+                  </div>
+                  <div className={`absolute inset-x-0 top-0 aspect-video bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none`} />
+                  <div className="p-5">
+                    <h3 className="font-bold text-lg text-card-foreground mb-1">{s.title}</h3>
+                    <p className="text-muted-foreground text-sm">{s.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {defaultServices.map((s, i) => (
+              <div
+                key={s.title}
+                className="group relative overflow-hidden bg-card rounded-2xl p-6 border-2 border-border hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${s.gradient} opacity-0 group-hover:opacity-5 transition-opacity`} />
+                <div className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${s.gradient} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                  <s.icon className="w-7 h-7" />
+                </div>
+                <h3 className="relative font-bold text-lg text-card-foreground mb-1">{s.title}</h3>
+                <p className="relative text-muted-foreground text-sm">{s.desc}</p>
               </div>
-              <h3 className="relative font-bold text-lg text-card-foreground mb-1">{s.title}</h3>
-              <p className="relative text-muted-foreground text-sm">{s.desc}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
 

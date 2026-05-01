@@ -88,15 +88,31 @@ export interface ServiceRow {
   title: string;
   description: string;
   image_url: string;
+  media_type?: "image" | "video";
+  video_url?: string;
+  sort_order?: number;
+  active?: boolean;
 }
 
 export async function fetchServicesAdmin(): Promise<ServiceRow[]> {
   const { data, error } = await supabase
     .from("services")
     .select("*")
+    .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as ServiceRow[];
+}
+
+export async function fetchActiveServices(): Promise<ServiceRow[]> {
+  const { data, error } = await supabase
+    .from("services")
+    .select("*")
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as ServiceRow[]) || [];
 }
 
 export async function insertService(service: Omit<ServiceRow, "id" | "created_at">) {
@@ -113,6 +129,22 @@ export async function updateService(id: string, service: Partial<ServiceRow>) {
 export async function deleteService(id: string) {
   const { error } = await supabase.from("services").delete().eq("id", id);
   if (error) throw error;
+}
+
+/**
+ * Upload a service media file (image or video) to the public `home-services` bucket
+ * and return its public URL.
+ */
+export async function uploadHomeServiceMedia(file: File): Promise<{ url: string; type: "image" | "video" }> {
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage
+    .from("home-services")
+    .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+  if (error) throw error;
+  const { data } = supabase.storage.from("home-services").getPublicUrl(path);
+  const type: "image" | "video" = file.type.startsWith("video") ? "video" : "image";
+  return { url: data.publicUrl, type };
 }
 
 // Budget Services CRUD (orçamento page pricing)
