@@ -5,7 +5,7 @@ import logoUrl from "@/assets/logo.png";
 import type { OrderRow } from "./supabase";
 
 const COMPANY = {
-  name: "MASTER SERVIÇOS",
+  name: "MASTER SOLUÇÕES",
   cnpj: "61.906.390/0001-58",
   address: "Setor Planalto - Itumbiara/GO",
   phone: "(64) 9 9264-2950",
