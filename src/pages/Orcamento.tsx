@@ -701,12 +701,12 @@ const Orcamento = () => {
                     const def = availableServices.find((d) => d.id === svc.id)!;
                     const price = calcPrice(def, svc);
                     return (
-                      <div key={svc.id} className="p-4 rounded-xl bg-gradient-to-br from-secondary to-muted/50 border border-border hover:border-primary/40 transition-colors">
+                      <div key={svc.instanceId} className="p-4 rounded-xl bg-gradient-to-br from-secondary to-muted/50 border border-border hover:border-primary/40 transition-colors">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="font-medium text-foreground">{svc.name}</h3>
                           <button
                             type="button"
-                            onClick={() => removeService(svc.id)}
+                            onClick={() => removeService(svc.instanceId)}
                             className="text-destructive hover:opacity-70 transition-opacity"
                           >
                             <Trash2 className="w-5 h-5" />
@@ -720,7 +720,7 @@ const Orcamento = () => {
                               type="number"
                               min={1}
                               value={svc.quantity}
-                              onChange={(e) => updateField(svc.id, "quantity", Math.max(1, Number(e.target.value)))}
+                              onChange={(e) => updateField(svc.instanceId, "quantity", Math.max(1, Number(e.target.value)))}
                               className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                             <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
@@ -737,7 +737,7 @@ const Orcamento = () => {
                                   min={0}
                                   step={0.1}
                                   value={svc.width || ""}
-                                  onChange={(e) => updateField(svc.id, "width", Math.max(0, Number(e.target.value)))}
+                                  onChange={(e) => updateField(svc.instanceId, "width", Math.max(0, Number(e.target.value)))}
                                   className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 />
                               </div>
@@ -748,7 +748,7 @@ const Orcamento = () => {
                                   min={0}
                                   step={0.1}
                                   value={svc.height || ""}
-                                  onChange={(e) => updateField(svc.id, "height", Math.max(0, Number(e.target.value)))}
+                                  onChange={(e) => updateField(svc.instanceId, "height", Math.max(0, Number(e.target.value)))}
                                   className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 />
                               </div>
@@ -774,7 +774,7 @@ const Orcamento = () => {
                         <input
                           type="text"
                           value={svc.observation}
-                          onChange={(e) => updateField(svc.id, "observation", e.target.value)}
+                          onChange={(e) => updateField(svc.instanceId, "observation", e.target.value)}
                           className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           placeholder="Observação (opcional)"
                           maxLength={300}
