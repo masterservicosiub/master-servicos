@@ -192,10 +192,16 @@ const Admin = () => {
   const [svcTitle, setSvcTitle] = useState("");
   const [svcDesc, setSvcDesc] = useState("");
   const [svcImage, setSvcImage] = useState("");
+  const [svcMediaType, setSvcMediaType] = useState<"image" | "video">("image");
+  const [svcVideo, setSvcVideo] = useState("");
+  const [svcUploading, setSvcUploading] = useState(false);
   const [editingSvcId, setEditingSvcId] = useState<string | null>(null);
   const [editSvcTitle, setEditSvcTitle] = useState("");
   const [editSvcDesc, setEditSvcDesc] = useState("");
   const [editSvcImage, setEditSvcImage] = useState("");
+  const [editSvcMediaType, setEditSvcMediaType] = useState<"image" | "video">("image");
+  const [editSvcVideo, setEditSvcVideo] = useState("");
+  const [editSvcUploading, setEditSvcUploading] = useState(false);
 
   // Budget services management
   const [budgetServices, setBudgetServices] = useState<BudgetServiceRow[]>([]);
