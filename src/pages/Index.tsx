@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   Shield,
   Clock,
@@ -14,6 +15,7 @@ import {
   Star,
   ShieldCheck,
   Zap,
+  Wrench,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import sloganBanner from "@/assets/slogan-banner.png";
@@ -25,14 +27,26 @@ import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import StatsCounter from "@/components/StatsCounter";
 import HowItWorks from "@/components/HowItWorks";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
+import { fetchActiveServices, type ServiceRow } from "@/lib/supabase";
 
-const services = [
+const defaultServices = [
   { icon: Search, title: "Verificar Vazamento", desc: "Detecção e reparo de vazamentos", gradient: "from-blue-500 to-cyan-500" },
   { icon: Droplets, title: "Instalação Padrão Saneago", desc: "Instalação hidráulica padrão", gradient: "from-cyan-500 to-sky-500" },
   { icon: Droplets, title: "Limpeza de Caixa d'Água", desc: "Higienização completa", gradient: "from-sky-500 to-indigo-500" },
   { icon: Droplets, title: "Limpeza de Caixa de Gordura", desc: "Manutenção preventiva", gradient: "from-emerald-500 to-teal-500" },
   { icon: Sun, title: "Limpeza de Placa Solar", desc: "Otimizando sua Geração", gradient: "from-orange-500 to-yellow-500" },
   { icon: Scissors, title: "Roçagem de Grama e Mato Alto", desc: "Deixe seu jardim sempre lindo", gradient: "from-green-500 to-lime-500" },
+];
+
+const cardGradients = [
+  "from-blue-500 to-cyan-500",
+  "from-cyan-500 to-sky-500",
+  "from-sky-500 to-indigo-500",
+  "from-emerald-500 to-teal-500",
+  "from-orange-500 to-yellow-500",
+  "from-green-500 to-lime-500",
+  "from-pink-500 to-rose-500",
+  "from-violet-500 to-fuchsia-500",
 ];
 
 const benefits = [
@@ -43,6 +57,14 @@ const benefits = [
 
 const Index = () => {
   const info = useCompanyInfo();
+  const [dbServices, setDbServices] = useState<ServiceRow[] | null>(null);
+
+  useEffect(() => {
+    fetchActiveServices()
+      .then((data) => setDbServices(data))
+      .catch(() => setDbServices([]));
+  }, []);
+
   return (
   <div className="min-h-screen">
     <Header />
