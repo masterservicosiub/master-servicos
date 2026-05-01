@@ -22,6 +22,7 @@ import {
 } from "@/lib/supabase";
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
+import masterAfiliadosLogo from "@/assets/master-afiliados-logo.png";
 import {
   DollarSign,
   Users,
@@ -344,8 +345,11 @@ const Afiliados = () => {
               </div>
 
               <div className="relative container mx-auto px-4 text-center">
-                <img src="/assets/logo-CeQo5oUu.png" alt="Master Soluções" class="h-28 md:h-36 lg:h-44 w-auto mx-auto mb-6 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]">
-                </div>
+                <img
+                  src={masterAfiliadosLogo}
+                  alt="Master Afiliados"
+                  className="h-28 md:h-40 lg:h-52 w-auto mx-auto mb-8 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]"
+                />
                 <h1 className="text-4xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight animate-fade-in-up [animation-delay:120ms]">
                   Indique. Receba.
                   <br />
