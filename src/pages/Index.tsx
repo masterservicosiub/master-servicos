@@ -81,11 +81,7 @@ const Index = () => {
             Serviços Profissionais com Garantia
           </div>
 
-          <img
-            src={logo}
-            alt="Master Soluções"
-            className="h-28 md:h-36 lg:h-44 w-auto mx-auto mb-6 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]"
-          />
+          
 
           <div className="mb-10 overflow-hidden animate-fade-in-up [animation-delay:240ms]">
             <img
