@@ -60,6 +60,7 @@ function formatBRL(v: number) {
 const PUBLIC_SITE_URL = "https://masterservicos.click";
 
 const Afiliados = () => {
+  const companyInfo = useCompanyInfo();
   const [mode, setMode] = useState<"landing" | "register" | "login" | "dashboard" | "forgot_password">("landing");
   const [session, setSession] = useState<AffiliateRow | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
