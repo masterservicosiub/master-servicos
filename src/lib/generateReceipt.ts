@@ -76,18 +76,41 @@ function buildPixPayload(opts: { key: string; name: string; city: string; amount
   return toCrc + crcStr;
 }
 
-function parseServices(servicesText: string): { description: string; value: number }[] {
-  if (!servicesText) return [];
-  return servicesText.split("|").map((part) => {
+function parseBRL(raw: string): number {
+  const cleaned = raw.replace(/\s/g, "");
+  // pt-BR: thousands "." and decimals ","
+  if (cleaned.includes(",")) {
+    const v = parseFloat(cleaned.replace(/\./g, "").replace(",", "."));
+    return isNaN(v) ? 0 : v;
+  }
+  const v = parseFloat(cleaned);
+  return isNaN(v) ? 0 : v;
+}
+
+function parseServices(servicesText: string): {
+  items: { description: string; value: number }[];
+  discountFromText: number;
+} {
+  if (!servicesText) return { items: [], discountFromText: 0 };
+  const items: { description: string; value: number }[] = [];
+  let discountFromText = 0;
+  servicesText.split("|").forEach((part) => {
     const trimmed = part.trim();
-    const m = trimmed.match(/^(.*?)-\s*R\$\s*([\d.,]+)\s*$/i);
-    if (m) {
-      const desc = m[1].trim();
-      const val = parseFloat(m[2].replace(/\./g, "").replace(",", "."));
-      return { description: desc, value: isNaN(val) ? 0 : val };
+    if (!trimmed) return;
+    // Discount lines like "Cupom X (-R$ 10,00)" or "Desconto Cliente 3% (-R$ 5,00)"
+    const discMatch = trimmed.match(/\(\s*-\s*R\$\s*([\d.,]+)\s*\)/i);
+    if (discMatch && /cupom|desconto/i.test(trimmed)) {
+      discountFromText += parseBRL(discMatch[1]);
+      return;
     }
-    return { description: trimmed, value: 0 };
+    const m = trimmed.match(/^(.*?)\s*-\s*R\$\s*([\d.,]+)\s*$/i);
+    if (m) {
+      items.push({ description: m[1].trim(), value: parseBRL(m[2]) });
+      return;
+    }
+    items.push({ description: trimmed, value: 0 });
   });
+  return { items, discountFromText };
 }
 
 export async function generateReceipt(order: OrderRow) {
