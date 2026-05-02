@@ -23,6 +23,7 @@ import {
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import masterAfiliadosLogo from "@/assets/master-afiliados-logo.png";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import {
   DollarSign,
   Users,
@@ -44,6 +45,8 @@ import {
   Trophy,
   Crown,
   Medal,
+  AlertCircle,
+  Banknote,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -57,6 +60,7 @@ function formatBRL(v: number) {
 const PUBLIC_SITE_URL = "https://masterservicos.click";
 
 const Afiliados = () => {
+  const companyInfo = useCompanyInfo();
   const [mode, setMode] = useState<"landing" | "register" | "login" | "dashboard" | "forgot_password">("landing");
   const [session, setSession] = useState<AffiliateRow | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -1150,6 +1154,81 @@ const Afiliados = () => {
                 )}
               </div>
             )}
+
+            {/* Cashback withdrawal */}
+            {(() => {
+              const MIN_WITHDRAW = 20;
+              const balance = stats.releasedEarnings;
+              const canWithdraw = balance >= MIN_WITHDRAW;
+              const missing = Math.max(0, MIN_WITHDRAW - balance);
+              const handleRequestCashback = () => {
+                if (!session) return;
+                if (!canWithdraw) {
+                  toast.error(`Saldo mínimo de ${formatBRL(MIN_WITHDRAW)} para resgate. Faltam ${formatBRL(missing)}.`);
+                  return;
+                }
+                const phone = onlyDigits(companyInfo.company_whatsapp || "");
+                if (!phone) {
+                  toast.error("Número de WhatsApp da empresa não configurado.");
+                  return;
+                }
+                const message =
+                  `Olá! Solicito o resgate do meu cashback de afiliado.%0A%0A` +
+                  `👤 *Afiliado:* ${session.full_name}%0A` +
+                  `🔖 *Código:* ${session.referral_code}%0A` +
+                  `💰 *Valor a pagar:* ${formatBRL(balance)}%0A` +
+                  `🔑 *Chave Pix (CPF):* ${session.pix_key || session.cpf}%0A%0A` +
+                  `Aguardo confirmação. Obrigado!`;
+                window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+                toast.success("Solicitação enviada via WhatsApp!");
+              };
+              return (
+                <Card
+                  className={
+                    canWithdraw
+                      ? "border-green-500/40 bg-gradient-to-br from-green-500/10 to-emerald-500/5"
+                      : "border-yellow-500/30 bg-yellow-500/5"
+                  }
+                >
+                  <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      {canWithdraw ? (
+                        <Wallet className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-semibold">
+                          {canWithdraw ? "Cashback disponível para resgate" : "Resgate de Cashback bloqueado"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {canWithdraw ? (
+                            <>
+                              Você pode solicitar o resgate de{" "}
+                              <span className="font-semibold text-foreground">{formatBRL(balance)}</span>.
+                            </>
+                          ) : (
+                            <>
+                              Saldo atual: <span className="font-semibold text-foreground">{formatBRL(balance)}</span>.
+                              Mínimo para resgate:{" "}
+                              <span className="font-semibold text-foreground">{formatBRL(MIN_WITHDRAW)}</span>. Faltam{" "}
+                              <span className="font-semibold text-foreground">{formatBRL(missing)}</span>.
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleRequestCashback}
+                      disabled={!canWithdraw}
+                      className={canWithdraw ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                    >
+                      <Banknote className="w-4 h-4" /> Solicitar Cashback
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             {/* Orders table */}
             <Card>
