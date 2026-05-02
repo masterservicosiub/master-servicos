@@ -413,7 +413,7 @@ const Afiliados = () => {
             <section className="container mx-auto px-4 -mt-10 relative z-10">
               <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto bg-card border border-border rounded-2xl shadow-xl p-6 md:p-8">
                 {[
-                  { value: "1%", label: "Cashback por venda" },
+                  { value: "2%", label: "Cashback por venda" },
                   { value: "7d", label: "Liberação rápida" },
                   { value: "∞", label: "Indicações ilimitadas" },
                 ].map((s, i) => (
