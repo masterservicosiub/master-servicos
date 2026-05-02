@@ -507,7 +507,7 @@ const Orcamento = () => {
             {!clientSession && (
               <div className="bg-gradient-to-r from-accent/15 to-orange-500/10 border-2 border-accent/40 rounded-2xl p-5 text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg animate-fade-in-up">
                 <span>
-                  💡 <strong>Cadastre-se</strong> e ganhe{" "}
+                  💡 <strong>Cadastre-se como Cliente</strong> e ganhe{" "}
                   <strong className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">
                     3% de desconto
                   </strong>{" "}
@@ -517,7 +517,7 @@ const Orcamento = () => {
                   href="/cliente"
                   className="bg-gradient-to-r from-accent to-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:scale-105 hover:shadow-xl transition-all whitespace-nowrap shadow-lg"
                 >
-                  Criar conta grátis
+                  Criar conta Cliente grátis
                 </a>
               </div>
             )}
@@ -530,7 +530,7 @@ const Orcamento = () => {
             <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg hover:shadow-xl transition-shadow animate-fade-in-up">
               <h2 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-sm">1</span>
-                Seus Dados
+                Seus Dados (Sem conta)
               </h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
