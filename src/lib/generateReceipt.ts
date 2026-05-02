@@ -237,13 +237,12 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(40, 40, 40);
-  doc.text(`Subtotal:`, pageW - 60, afterTableY);
-  doc.text(fmtBRL(subtotal > 0 ? subtotal : total), pageW - 14, afterTableY, {
-    align: "right",
-  });
-  afterTableY += 6;
-
   if (discount > 0) {
+    doc.text(`Subtotal:`, pageW - 60, afterTableY);
+    doc.text(fmtBRL(subtotal > 0 ? subtotal : total), pageW - 14, afterTableY, {
+      align: "right",
+    });
+    afterTableY += 6;
     doc.setTextColor(180, 30, 30);
     doc.text(`Desconto:`, pageW - 60, afterTableY);
     doc.text(`- ${fmtBRL(discount)}`, pageW - 14, afterTableY, {
