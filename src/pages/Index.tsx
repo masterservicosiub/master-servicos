@@ -282,11 +282,11 @@ const Index = () => {
           </div>
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              Cadastre-se e ganhe{" "}
+              Cadastre-se com Cliente e ganhe{" "}
               <span className="bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent">3% de desconto</span>
             </h3>
             <p className="text-muted-foreground">
-              Crie sua conta gratuita e tenha desconto automático em todos os serviços, além de
+              Crie sua conta gratuita de Cliente, e tenha desconto automático em todos os serviços, além de
               acompanhar seus pedidos pelo painel do cliente.
             </p>
           </div>
