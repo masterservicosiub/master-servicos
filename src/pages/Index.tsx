@@ -294,7 +294,7 @@ const Index = () => {
             to="/cliente"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-accent to-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 hover:shadow-xl transition-all whitespace-nowrap shadow-lg"
           >
-            <UserPlus className="w-5 h-5" /> Criar Conta Grátis
+            <UserPlus className="w-5 h-5" /> Criar Conta de Cliente Grátis
           </Link>
         </div>
       </div>
