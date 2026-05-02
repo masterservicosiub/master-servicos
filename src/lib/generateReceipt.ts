@@ -204,10 +204,11 @@ export async function generateReceipt(order: OrderRow) {
   }
 
   // ===== SERVICES TABLE =====
-  const items = parseServices(order.services || "");
+  const { items, discountFromText } = parseServices(order.services || "");
   const subtotal = items.reduce((s, i) => s + i.value, 0);
-  const total = Number(order.total) || subtotal;
-  const discount = Math.max(0, subtotal - total);
+  const total = Number(order.total) || Math.max(0, subtotal - discountFromText);
+  const computedDiscount = Math.max(0, subtotal - total);
+  const discount = discountFromText > 0 ? discountFromText : computedDiscount;
 
   const tableBody =
     items.length > 0
