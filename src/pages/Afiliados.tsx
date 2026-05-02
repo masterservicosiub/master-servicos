@@ -23,6 +23,7 @@ import {
 import { applyCpfMask, isValidCPF, onlyDigits } from "@/lib/cpfValidator";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import masterAfiliadosLogo from "@/assets/master-afiliados-logo.png";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import {
   DollarSign,
   Users,
@@ -44,6 +45,8 @@ import {
   Trophy,
   Crown,
   Medal,
+  AlertCircle,
+  Banknote,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
