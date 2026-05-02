@@ -509,7 +509,7 @@ const Afiliados = () => {
                   <div className="max-w-md mx-auto text-center bg-card border-2 border-dashed border-amber-300/60 rounded-2xl p-8">
                     <Trophy className="w-12 h-12 text-amber-400 mx-auto mb-3" />
                     <p className="text-muted-foreground">
-                      Seja o primeiro do ranking! Cadastre-se e comece a indicar agora.
+                      Seja o primeiro do ranking! Cadastre-se como Afiliado e comece a indicar agora.
                     </p>
                   </div>
                 ) : (
@@ -644,7 +644,7 @@ const Afiliados = () => {
                     onClick={() => setMode("register")}
                     className="bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-xl shadow-primary/30 hover:scale-105 transition-transform text-base font-bold"
                   >
-                    <Sparkles className="w-5 h-5" /> Começar agora — É grátis
+                    <Sparkles className="w-5 h-5" /> Seja Master Afiliado — É grátis
                     <ArrowRight className="w-5 h-5" />
                   </Button>
                   <p className="text-xs text-muted-foreground mt-3">
@@ -670,7 +670,7 @@ const Afiliados = () => {
                   onClick={() => setMode("register")}
                   className="bg-yellow-400 text-yellow-950 hover:bg-yellow-300 hover:scale-105 transition-transform shadow-2xl font-bold text-base"
                 >
-                  <Gift className="w-5 h-5" /> Cadastre-se grátis agora
+                  <Gift className="w-5 h-5" /> Cadastre-se como Afiliado agora
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </div>
