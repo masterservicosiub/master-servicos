@@ -663,7 +663,7 @@ const Afiliados = () => {
               <div className="relative container mx-auto px-4 text-center">
                 <h2 className="text-3xl md:text-5xl font-extrabold mb-4">Pronto para começar a ganhar?</h2>
                 <p className="text-lg text-primary-foreground/90 mb-8 max-w-xl mx-auto">
-                  Junte-se ao programa de afiliados e transforme suas conexões em renda real.
+                  Junte-se ao programa "Master Afiliados" e transforme suas conexões em renda real.
                 </p>
                 <Button
                   size="lg"
