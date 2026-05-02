@@ -76,18 +76,41 @@ function buildPixPayload(opts: { key: string; name: string; city: string; amount
   return toCrc + crcStr;
 }
 
-function parseServices(servicesText: string): { description: string; value: number }[] {
-  if (!servicesText) return [];
-  return servicesText.split("|").map((part) => {
+function parseBRL(raw: string): number {
+  const cleaned = raw.replace(/\s/g, "");
+  // pt-BR: thousands "." and decimals ","
+  if (cleaned.includes(",")) {
+    const v = parseFloat(cleaned.replace(/\./g, "").replace(",", "."));
+    return isNaN(v) ? 0 : v;
+  }
+  const v = parseFloat(cleaned);
+  return isNaN(v) ? 0 : v;
+}
+
+function parseServices(servicesText: string): {
+  items: { description: string; value: number }[];
+  discountFromText: number;
+} {
+  if (!servicesText) return { items: [], discountFromText: 0 };
+  const items: { description: string; value: number }[] = [];
+  let discountFromText = 0;
+  servicesText.split("|").forEach((part) => {
     const trimmed = part.trim();
-    const m = trimmed.match(/^(.*?)-\s*R\$\s*([\d.,]+)\s*$/i);
-    if (m) {
-      const desc = m[1].trim();
-      const val = parseFloat(m[2].replace(/\./g, "").replace(",", "."));
-      return { description: desc, value: isNaN(val) ? 0 : val };
+    if (!trimmed) return;
+    // Discount lines like "Cupom X (-R$ 10,00)" or "Desconto Cliente 3% (-R$ 5,00)"
+    const discMatch = trimmed.match(/\(\s*-\s*R\$\s*([\d.,]+)\s*\)/i);
+    if (discMatch && /cupom|desconto/i.test(trimmed)) {
+      discountFromText += parseBRL(discMatch[1]);
+      return;
     }
-    return { description: trimmed, value: 0 };
+    const m = trimmed.match(/^(.*?)\s*-\s*R\$\s*([\d.,]+)\s*$/i);
+    if (m) {
+      items.push({ description: m[1].trim(), value: parseBRL(m[2]) });
+      return;
+    }
+    items.push({ description: trimmed, value: 0 });
   });
+  return { items, discountFromText };
 }
 
 export async function generateReceipt(order: OrderRow) {
@@ -181,10 +204,11 @@ export async function generateReceipt(order: OrderRow) {
   }
 
   // ===== SERVICES TABLE =====
-  const items = parseServices(order.services || "");
+  const { items, discountFromText } = parseServices(order.services || "");
   const subtotal = items.reduce((s, i) => s + i.value, 0);
-  const total = Number(order.total) || subtotal;
-  const discount = Math.max(0, subtotal - total);
+  const total = Number(order.total) || Math.max(0, subtotal - discountFromText);
+  const computedDiscount = Math.max(0, subtotal - total);
+  const discount = discountFromText > 0 ? discountFromText : computedDiscount;
 
   const tableBody =
     items.length > 0
@@ -213,13 +237,12 @@ export async function generateReceipt(order: OrderRow) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(40, 40, 40);
-  doc.text(`Subtotal:`, pageW - 60, afterTableY);
-  doc.text(fmtBRL(subtotal > 0 ? subtotal : total), pageW - 14, afterTableY, {
-    align: "right",
-  });
-  afterTableY += 6;
-
   if (discount > 0) {
+    doc.text(`Subtotal:`, pageW - 60, afterTableY);
+    doc.text(fmtBRL(subtotal > 0 ? subtotal : total), pageW - 14, afterTableY, {
+      align: "right",
+    });
+    afterTableY += 6;
     doc.setTextColor(180, 30, 30);
     doc.text(`Desconto:`, pageW - 60, afterTableY);
     doc.text(`- ${fmtBRL(discount)}`, pageW - 14, afterTableY, {
