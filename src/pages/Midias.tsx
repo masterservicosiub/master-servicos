@@ -16,7 +16,7 @@ const radios: RadioItem[] = [
   {
     name: "Rádio Itumbiara FM",
     description: "Notícias e música local de Itumbiara/GO",
-    streamUrl: "https://stream.zeno.fm/0r0xa792kwzuv",
+    streamUrl: "https://radio.garden/listen/radio-mega-fm-106-1/XcUIFhM4",
   },
   {
     name: "Antena 1",
