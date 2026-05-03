@@ -131,6 +131,56 @@ export async function deleteService(id: string) {
   if (error) throw error;
 }
 
+// Media items CRUD (página Mídias)
+export interface MediaItemRow {
+  id?: string;
+  created_at?: string;
+  kind: "video" | "radio";
+  title: string;
+  description: string;
+  url: string;
+  sort_order: number;
+  active: boolean;
+}
+
+export async function fetchMediaItemsAdmin(): Promise<MediaItemRow[]> {
+  const { data, error } = await supabase
+    .from("media_items")
+    .select("*")
+    .order("kind", { ascending: true })
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as MediaItemRow[]) || [];
+}
+
+export async function fetchActiveMediaItems(): Promise<MediaItemRow[]> {
+  const { data, error } = await supabase
+    .from("media_items")
+    .select("*")
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as MediaItemRow[]) || [];
+}
+
+export async function insertMediaItem(item: Omit<MediaItemRow, "id" | "created_at">) {
+  const { data, error } = await supabase.from("media_items").insert([item]).select();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateMediaItem(id: string, item: Partial<MediaItemRow>) {
+  const { error } = await supabase.from("media_items").update(item).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteMediaItem(id: string) {
+  const { error } = await supabase.from("media_items").delete().eq("id", id);
+  if (error) throw error;
+}
+
 /**
  * Upload a service media file (image or video) to the public `home-services` bucket
  * and return its public URL.
