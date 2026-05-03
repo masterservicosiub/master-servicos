@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Orcamento from "./pages/Orcamento.tsx";
-import Sobre from "./pages/Sobre.tsx";
+import Midias from "./pages/Midias.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
 import Afiliados from "./pages/Afiliados.tsx";
@@ -25,7 +25,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/orcamento" element={<Orcamento />} />
-          <Route path="/sobre" element={<Sobre />} />
+          <Route path="/midias" element={<Midias />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/afiliados" element={<Afiliados />} />
           <Route path="/cliente" element={<Cliente />} />
