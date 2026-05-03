@@ -91,6 +91,7 @@ import {
 } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
 import { Star, Trophy } from "lucide-react";
+import { Radio as RadioIcon, Video as VideoIcon, PlayCircle } from "lucide-react";
 import {
   fetchAffiliatesAll,
   setAffiliateBlocked,
@@ -113,6 +114,13 @@ import {
 import { sendTestEmail } from "@/lib/emailNotification";
 import { buildPixCpfPayload } from "@/lib/pixCpf";
 import { buildPixBrCode } from "@/lib/pixBrCode";
+import {
+  fetchMediaItemsAdmin,
+  insertMediaItem,
+  updateMediaItem,
+  deleteMediaItem,
+  type MediaItemRow,
+} from "@/lib/supabase";
 import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Todos", "Novo", "Em andamento", "Concluído", "Pago", "Cancelado"];
@@ -144,7 +152,22 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<
+    "pedidos" | "clientes" | "antifraude" | "midias" | "config"
+  >("pedidos");
+
+  // Mídias state
+  const [mediaItems, setMediaItems] = useState<MediaItemRow[]>([]);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [mediaForm, setMediaForm] = useState<{
+    kind: "video" | "radio";
+    title: string;
+    description: string;
+    url: string;
+    sort_order: string;
+  }>({ kind: "video", title: "", description: "", url: "", sort_order: "0" });
+  const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
+  const [editingMedia, setEditingMedia] = useState<MediaItemRow | null>(null);
 
   // Antifraude state
   const [afAffiliates, setAfAffiliates] = useState<AffiliateRow[]>([]);
