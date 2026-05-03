@@ -1249,6 +1249,14 @@ const Admin = () => {
                 <ShieldAlert className="w-5 h-5" />
               </button>
               <button
+                onClick={() => setActiveTab("midias")}
+                title="Mídias"
+                aria-label="Mídias"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "midias" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <PlayCircle className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => setActiveTab("config")}
                 title="Configurações"
                 aria-label="Configurações"
