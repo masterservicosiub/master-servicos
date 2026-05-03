@@ -504,6 +504,85 @@ const Admin = () => {
     if (authenticated && activeTab === "antifraude") loadAntifraud();
   }, [authenticated, activeTab]);
 
+  const loadMediaItems = async () => {
+    setMediaLoading(true);
+    try {
+      const data = await fetchMediaItemsAdmin();
+      setMediaItems(data);
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao carregar mídias.");
+    } finally {
+      setMediaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated && activeTab === "midias") loadMediaItems();
+  }, [authenticated, activeTab]);
+
+  const handleAddMedia = async () => {
+    if (!mediaForm.title.trim() || !mediaForm.url.trim()) {
+      toast.error("Preencha título e URL.");
+      return;
+    }
+    try {
+      await insertMediaItem({
+        kind: mediaForm.kind,
+        title: mediaForm.title.trim(),
+        description: mediaForm.description.trim(),
+        url: mediaForm.url.trim(),
+        sort_order: Number(mediaForm.sort_order) || 0,
+        active: true,
+      });
+      setMediaForm({ kind: mediaForm.kind, title: "", description: "", url: "", sort_order: "0" });
+      toast.success("Mídia adicionada!");
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro ao adicionar: " + (e?.message || ""));
+    }
+  };
+
+  const handleSaveMedia = async () => {
+    if (!editingMediaId || !editingMedia) return;
+    try {
+      await updateMediaItem(editingMediaId, {
+        kind: editingMedia.kind,
+        title: editingMedia.title.trim(),
+        description: editingMedia.description.trim(),
+        url: editingMedia.url.trim(),
+        sort_order: Number(editingMedia.sort_order) || 0,
+        active: editingMedia.active,
+      });
+      toast.success("Mídia atualizada!");
+      setEditingMediaId(null);
+      setEditingMedia(null);
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro ao salvar: " + (e?.message || ""));
+    }
+  };
+
+  const handleDeleteMedia = async (id: string) => {
+    if (!confirm("Excluir esta mídia?")) return;
+    try {
+      await deleteMediaItem(id);
+      toast.success("Mídia excluída.");
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro ao excluir: " + (e?.message || ""));
+    }
+  };
+
+  const handleToggleMediaActive = async (item: MediaItemRow) => {
+    try {
+      await updateMediaItem(item.id!, { active: !item.active });
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro: " + (e?.message || ""));
+    }
+  };
+
   // Resolve cashback rate (decimal) for a given affiliate based on top ranking + star rates.
   const getAffiliateRate = (referral_code: string): number => {
     const ranked = topRanking.find((r) => r.referral_code === referral_code);
