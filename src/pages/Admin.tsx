@@ -112,6 +112,7 @@ import {
 } from "@/lib/googleSheets";
 import { sendTestEmail } from "@/lib/emailNotification";
 import { buildPixCpfPayload } from "@/lib/pixCpf";
+import { buildPixBrCode } from "@/lib/pixBrCode";
 import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Todos", "Novo", "Em andamento", "Concluído", "Pago", "Cancelado"];
