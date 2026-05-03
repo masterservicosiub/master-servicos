@@ -8,7 +8,7 @@ type RadioItem = { name: string; description: string; streamUrl: string };
 
 const videos: VideoItem[] = [
   { title: "Conheça a Master Soluções", youtubeId: "dQw4w9WgXcQ" },
-  { title: "Serviços Residenciais", youtubeId: "ScMzIvxBSi4" },
+  { title: "Serviços Residenciais", youtubeId: X1ILuKIM_WA" },
   { title: "Serviços Comerciais", youtubeId: "9bZkp7q19f0" },
 ];
 
