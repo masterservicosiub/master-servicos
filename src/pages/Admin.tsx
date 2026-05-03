@@ -1465,6 +1465,47 @@ const Admin = () => {
                     >
                       <FileText className="w-4 h-4" /> Gerar Orçamento PDF
                     </button>
+                    {order.phone && (
+                      <button
+                        onClick={() => {
+                          try {
+                            const total = Number(order.total) || 0;
+                            if (total <= 0) {
+                              toast.error("Pedido sem valor total para gerar Pix.");
+                              return;
+                            }
+                            const txid = (order.id || "").substring(0, 8).toUpperCase() || "PEDIDO";
+                            const payload = buildPixBrCode({
+                              key: "61906390000158",
+                              amount: total,
+                              merchantName: "MASTER SOLUCOES",
+                              merchantCity: "ITUMBIARA",
+                              txid,
+                            });
+                            const valorBR = total.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            });
+                            const msg =
+                              `Olá ${order.name || ""}! Segue o código Pix (Copia e Cola) para pagamento do seu pedido.%0A%0A` +
+                              `💰 *Valor:* R$ ${valorBR}%0A` +
+                              `🏦 *Beneficiário:* MASTER SOLUÇÕES%0A` +
+                              `🔑 *Chave Pix (CNPJ):* 61.906.390/0001-58%0A%0A` +
+                              `*Pix Copia e Cola:*%0A${payload}%0A%0A` +
+                              `Após o pagamento, por favor envie o comprovante. Obrigado!`;
+                            const phone = "55" + order.phone.replace(/\D/g, "");
+                            window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+                          } catch (err: any) {
+                            console.error("Erro ao gerar Pix:", err);
+                            toast.error(err.message || "Erro ao gerar código Pix.");
+                          }
+                        }}
+                        className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 hover:bg-emerald-700"
+                        title="Enviar código Pix Copia e Cola por WhatsApp"
+                      >
+                        <Phone className="w-4 h-4" /> Enviar Pix WhatsApp
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
