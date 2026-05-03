@@ -26,6 +26,9 @@ const Footer = () => {
           <Link to="/sobre" className="block hover:opacity-100">
             Sobre Nós
           </Link>
+          <Link to="/afiliados" className="block hover:opacity-100">
+            Afiliados
+          </Link>
         </div>
       </div>
       <div>
