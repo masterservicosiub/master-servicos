@@ -8,7 +8,7 @@ type RadioItem = { name: string; description: string; streamUrl: string };
 
 const videos: VideoItem[] = [
   { title: "Conheça a Master Soluções", youtubeId: "dQw4w9WgXcQ" },
-  { title: "Serviços Residenciais", youtubeId: X1ILuKIM_WA" },
+  { title: "Serviços Residenciais", youtubeId: "X1ILuKIM_WA" },
   { title: "Serviços Comerciais", youtubeId: "9bZkp7q19f0" },
 ];
 
@@ -32,8 +32,8 @@ const radios: RadioItem[] = [
 
 const Midias = () => {
   const [playing, setPlaying] = useState<string | null>(null);
-  const audios: Record<string, HTMLAudioElement> = (window as any).__radioAudios ||
-    ((window as any).__radioAudios = {});
+  const audios: Record<string, HTMLAudioElement> =
+    (window as any).__radioAudios || ((window as any).__radioAudios = {});
 
   const togglePlay = (url: string) => {
     Object.entries(audios).forEach(([u, a]) => {
@@ -81,10 +81,7 @@ const Midias = () => {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((v) => (
-                <div
-                  key={v.youtubeId}
-                  className="bg-card rounded-xl overflow-hidden border border-border shadow-sm"
-                >
+                <div key={v.youtubeId} className="bg-card rounded-xl overflow-hidden border border-border shadow-sm">
                   <div className="aspect-video w-full bg-black">
                     <iframe
                       className="w-full h-full"
@@ -113,10 +110,7 @@ const Midias = () => {
               {radios.map((r) => {
                 const isPlaying = playing === r.streamUrl;
                 return (
-                  <div
-                    key={r.streamUrl}
-                    className="bg-card rounded-xl p-6 border border-border flex flex-col"
-                  >
+                  <div key={r.streamUrl} className="bg-card rounded-xl p-6 border border-border flex flex-col">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <Radio className="w-6 h-6 text-primary" />
