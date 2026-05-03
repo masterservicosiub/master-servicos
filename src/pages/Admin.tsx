@@ -91,6 +91,7 @@ import {
 } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
 import { Star, Trophy } from "lucide-react";
+import { Radio as RadioIcon, Video as VideoIcon, PlayCircle } from "lucide-react";
 import {
   fetchAffiliatesAll,
   setAffiliateBlocked,
@@ -113,6 +114,13 @@ import {
 import { sendTestEmail } from "@/lib/emailNotification";
 import { buildPixCpfPayload } from "@/lib/pixCpf";
 import { buildPixBrCode } from "@/lib/pixBrCode";
+import {
+  fetchMediaItemsAdmin,
+  insertMediaItem,
+  updateMediaItem,
+  deleteMediaItem,
+  type MediaItemRow,
+} from "@/lib/supabase";
 import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Todos", "Novo", "Em andamento", "Concluído", "Pago", "Cancelado"];
@@ -144,7 +152,22 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<
+    "pedidos" | "clientes" | "antifraude" | "midias" | "config"
+  >("pedidos");
+
+  // Mídias state
+  const [mediaItems, setMediaItems] = useState<MediaItemRow[]>([]);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [mediaForm, setMediaForm] = useState<{
+    kind: "video" | "radio";
+    title: string;
+    description: string;
+    url: string;
+    sort_order: string;
+  }>({ kind: "video", title: "", description: "", url: "", sort_order: "0" });
+  const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
+  const [editingMedia, setEditingMedia] = useState<MediaItemRow | null>(null);
 
   // Antifraude state
   const [afAffiliates, setAfAffiliates] = useState<AffiliateRow[]>([]);
@@ -480,6 +503,85 @@ const Admin = () => {
   useEffect(() => {
     if (authenticated && activeTab === "antifraude") loadAntifraud();
   }, [authenticated, activeTab]);
+
+  const loadMediaItems = async () => {
+    setMediaLoading(true);
+    try {
+      const data = await fetchMediaItemsAdmin();
+      setMediaItems(data);
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao carregar mídias.");
+    } finally {
+      setMediaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated && activeTab === "midias") loadMediaItems();
+  }, [authenticated, activeTab]);
+
+  const handleAddMedia = async () => {
+    if (!mediaForm.title.trim() || !mediaForm.url.trim()) {
+      toast.error("Preencha título e URL.");
+      return;
+    }
+    try {
+      await insertMediaItem({
+        kind: mediaForm.kind,
+        title: mediaForm.title.trim(),
+        description: mediaForm.description.trim(),
+        url: mediaForm.url.trim(),
+        sort_order: Number(mediaForm.sort_order) || 0,
+        active: true,
+      });
+      setMediaForm({ kind: mediaForm.kind, title: "", description: "", url: "", sort_order: "0" });
+      toast.success("Mídia adicionada!");
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro ao adicionar: " + (e?.message || ""));
+    }
+  };
+
+  const handleSaveMedia = async () => {
+    if (!editingMediaId || !editingMedia) return;
+    try {
+      await updateMediaItem(editingMediaId, {
+        kind: editingMedia.kind,
+        title: editingMedia.title.trim(),
+        description: editingMedia.description.trim(),
+        url: editingMedia.url.trim(),
+        sort_order: Number(editingMedia.sort_order) || 0,
+        active: editingMedia.active,
+      });
+      toast.success("Mídia atualizada!");
+      setEditingMediaId(null);
+      setEditingMedia(null);
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro ao salvar: " + (e?.message || ""));
+    }
+  };
+
+  const handleDeleteMedia = async (id: string) => {
+    if (!confirm("Excluir esta mídia?")) return;
+    try {
+      await deleteMediaItem(id);
+      toast.success("Mídia excluída.");
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro ao excluir: " + (e?.message || ""));
+    }
+  };
+
+  const handleToggleMediaActive = async (item: MediaItemRow) => {
+    try {
+      await updateMediaItem(item.id!, { active: !item.active });
+      loadMediaItems();
+    } catch (e: any) {
+      toast.error("Erro: " + (e?.message || ""));
+    }
+  };
 
   // Resolve cashback rate (decimal) for a given affiliate based on top ranking + star rates.
   const getAffiliateRate = (referral_code: string): number => {
@@ -1145,6 +1247,14 @@ const Admin = () => {
                 className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "antifraude" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
                 <ShieldAlert className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setActiveTab("midias")}
+                title="Mídias"
+                aria-label="Mídias"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "midias" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <PlayCircle className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("config")}
@@ -2240,6 +2350,217 @@ const Admin = () => {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : activeTab === "midias" ? (
+            <>
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <PlayCircle className="w-5 h-5" /> Mídias da Página "Mídias"
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Cadastre vídeos do YouTube e rádios/streamings ao vivo. Para vídeos use a URL completa do YouTube
+                  (ex.: https://www.youtube.com/watch?v=ID) ou apenas o ID. Para rádios use a URL do stream (.mp3, .aac, .m3u8 ou Zeno).
+                </p>
+
+                <div className="grid sm:grid-cols-2 gap-3 mb-4">
+                  <select
+                    value={mediaForm.kind}
+                    onChange={(e) =>
+                      setMediaForm({ ...mediaForm, kind: e.target.value as "video" | "radio" })
+                    }
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="video">Vídeo</option>
+                    <option value="radio">Rádio / Streaming</option>
+                  </select>
+                  <input
+                    type="number"
+                    value={mediaForm.sort_order}
+                    onChange={(e) => setMediaForm({ ...mediaForm, sort_order: e.target.value })}
+                    placeholder="Ordem"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    value={mediaForm.title}
+                    onChange={(e) => setMediaForm({ ...mediaForm, title: e.target.value })}
+                    placeholder="Título"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    value={mediaForm.url}
+                    onChange={(e) => setMediaForm({ ...mediaForm, url: e.target.value })}
+                    placeholder={
+                      mediaForm.kind === "video"
+                        ? "URL ou ID do YouTube"
+                        : "URL do stream (mp3/aac/m3u8)"
+                    }
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    value={mediaForm.description}
+                    onChange={(e) => setMediaForm({ ...mediaForm, description: e.target.value })}
+                    placeholder="Descrição (opcional)"
+                    className="sm:col-span-2 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <button
+                  onClick={handleAddMedia}
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 mb-6"
+                >
+                  <Plus className="w-4 h-4" /> Adicionar Mídia
+                </button>
+
+                {mediaLoading ? (
+                  <p className="text-sm text-muted-foreground">Carregando...</p>
+                ) : mediaItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhuma mídia cadastrada.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {mediaItems.map((m) => {
+                      const isEditing = editingMediaId === m.id;
+                      return (
+                        <div key={m.id} className="bg-secondary/40 rounded-lg p-4 border border-border">
+                          {isEditing && editingMedia ? (
+                            <div className="space-y-2">
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                <select
+                                  value={editingMedia.kind}
+                                  onChange={(e) =>
+                                    setEditingMedia({
+                                      ...editingMedia,
+                                      kind: e.target.value as "video" | "radio",
+                                    })
+                                  }
+                                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                                >
+                                  <option value="video">Vídeo</option>
+                                  <option value="radio">Rádio / Streaming</option>
+                                </select>
+                                <input
+                                  type="number"
+                                  value={editingMedia.sort_order}
+                                  onChange={(e) =>
+                                    setEditingMedia({
+                                      ...editingMedia,
+                                      sort_order: Number(e.target.value) || 0,
+                                    })
+                                  }
+                                  placeholder="Ordem"
+                                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                                />
+                                <input
+                                  value={editingMedia.title}
+                                  onChange={(e) =>
+                                    setEditingMedia({ ...editingMedia, title: e.target.value })
+                                  }
+                                  placeholder="Título"
+                                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                                />
+                                <input
+                                  value={editingMedia.url}
+                                  onChange={(e) =>
+                                    setEditingMedia({ ...editingMedia, url: e.target.value })
+                                  }
+                                  placeholder="URL"
+                                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                                />
+                                <input
+                                  value={editingMedia.description}
+                                  onChange={(e) =>
+                                    setEditingMedia({
+                                      ...editingMedia,
+                                      description: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Descrição"
+                                  className="sm:col-span-2 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={handleSaveMedia}
+                                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1"
+                                >
+                                  <Save className="w-4 h-4" /> Salvar
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingMediaId(null);
+                                    setEditingMedia(null);
+                                  }}
+                                  className="bg-muted text-foreground px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1"
+                                >
+                                  <X className="w-4 h-4" /> Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                {m.kind === "video" ? (
+                                  <VideoIcon className="w-5 h-5 text-primary" />
+                                ) : (
+                                  <RadioIcon className="w-5 h-5 text-primary" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-foreground truncate">
+                                    {m.title}
+                                  </span>
+                                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                                    {m.kind === "video" ? "Vídeo" : "Rádio"} · #{m.sort_order}
+                                  </span>
+                                  {!m.active && (
+                                    <span className="text-[10px] text-destructive">inativo</span>
+                                  )}
+                                </div>
+                                {m.description && (
+                                  <div className="text-xs text-muted-foreground line-clamp-2">
+                                    {m.description}
+                                  </div>
+                                )}
+                                <div className="text-[11px] text-muted-foreground truncate">{m.url}</div>
+                              </div>
+                              <div className="flex flex-col gap-1 shrink-0">
+                                <button
+                                  onClick={() => {
+                                    setEditingMediaId(m.id!);
+                                    setEditingMedia({ ...m });
+                                  }}
+                                  className="bg-secondary text-secondary-foreground px-3 py-1 rounded text-xs flex items-center gap-1 border border-border"
+                                >
+                                  <Edit2 className="w-3 h-3" /> Editar
+                                </button>
+                                <button
+                                  onClick={() => handleToggleMediaActive(m)}
+                                  className="bg-muted text-foreground px-3 py-1 rounded text-xs flex items-center gap-1"
+                                >
+                                  {m.active ? (
+                                    <>
+                                      <ToggleRight className="w-3 h-3" /> Desativar
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ToggleLeft className="w-3 h-3" /> Ativar
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteMedia(m.id!)}
+                                  className="bg-destructive text-destructive-foreground px-3 py-1 rounded text-xs flex items-center gap-1"
+                                >
+                                  <Trash2 className="w-3 h-3" /> Excluir
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
