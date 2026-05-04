@@ -132,13 +132,14 @@ const Index = () => {
               className="h-28 md:h-36 lg:h-44 w-auto mx-auto mb-6 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]"
             />
 
-            <div className="mb-10 overflow-hidden animate-fade-in-up [animation-delay:240ms]">
-              <img
-                src={sloganBanner}
-                alt="Não somos Marido de Aluguel - Somos Profissionais!"
-                className="h-20 md:h-28 lg:h-32 w-auto mx-auto animate-[slideInPause_8s_ease-in-out_infinite] drop-shadow-xl"
-              />
-            </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+              Serviços de Manutenção Residencial em Goiânia
+            </h1>
+
+            <p className="text-white/90 max-w-2xl mx-auto mb-6">
+              Encanador, eletricista, limpeza de caixa d'água, roçagem e serviços gerais em Goiânia. Atendimento rápido,
+              profissional e com garantia.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
               <Link
                 to="/orcamento"
