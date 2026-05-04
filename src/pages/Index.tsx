@@ -128,7 +128,7 @@ const Index = () => {
 
             <img
               src={logo}
-              alt="Master Soluções"
+              alt="Master Soluções | Caça Vazamento, Encanador, Hidráulico em Itumvbiara"
               className="h-28 md:h-36 lg:h-44 w-auto mx-auto mb-6 drop-shadow-2xl animate-fade-in-up [animation-delay:120ms]"
             />
 
