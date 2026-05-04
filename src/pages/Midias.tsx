@@ -1,37 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Radio, Video as VideoIcon, Play, Pause } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-type VideoItem = { title: string; youtubeId: string };
-type RadioItem = { name: string; description: string; streamUrl: string };
-
-const videos: VideoItem[] = [
-  { title: "Conheça a Master Soluções", youtubeId: "dQw4w9WgXcQ" },
-  { title: "Serviços Residenciais", youtubeId: "X1ILuKIM_WA" },
-  { title: "Serviços Comerciais", youtubeId: "9bZkp7q19f0" },
-];
-
-const radios: RadioItem[] = [
-  {
-    name: "Rádio Itumbiara FM",
-    description: "Notícias e música local de Itumbiara/GO",
-    streamUrl: "https://radio.garden/listen/radio-mega-fm-106-1/XcUIFhM4",
-  },
-  {
-    name: "Antena 1",
-    description: "O melhor do Soft Rock",
-    streamUrl: "https://antenaone.crossradio.com.br/stream/1;",
-  },
-  {
-    name: "Jovem Pan FM",
-    description: "Hits e variedades 24h",
-    streamUrl: "https://jpfm.jovempanfm.uol.com.br/jpfmsp.aac",
-  },
-];
+import { getVideos, getRadios } from "@/lib/mediaLibrary";
 
 const Midias = () => {
   const [playing, setPlaying] = useState<string | null>(null);
+  const [videos, setVideos] = useState(() => getVideos());
+  const [radios, setRadios] = useState(() => getRadios());
+
+  useEffect(() => {
+    const refresh = () => {
+      setVideos(getVideos());
+      setRadios(getRadios());
+    };
+    window.addEventListener("media-library-changed", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("media-library-changed", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
   const audios: Record<string, HTMLAudioElement> =
     (window as any).__radioAudios || ((window as any).__radioAudios = {});
 
