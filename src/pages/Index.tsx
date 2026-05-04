@@ -133,7 +133,7 @@ const Index = () => {
             />
 
             <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-              Serviços de Manutenção Residencial em Goiânia
+              Serviço Hidráulico, Caça Vazamento e Serviços Gráficos em Itumbiara
             </h1>
 
             <p className="text-white/90 max-w-2xl mx-auto mb-6">
