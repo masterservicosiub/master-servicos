@@ -90,7 +90,16 @@ import {
   Search,
 } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
-import { Star, Trophy } from "lucide-react";
+import { Star, Trophy, Video as VideoIcon, Radio as RadioIcon } from "lucide-react";
+import {
+  getVideos,
+  getRadios,
+  saveVideos,
+  saveRadios,
+  extractYoutubeId,
+  type VideoItem,
+  type RadioItem,
+} from "@/lib/mediaLibrary";
 import {
   fetchAffiliatesAll,
   setAffiliateBlocked,
@@ -144,7 +153,60 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "config">("pedidos");
+
+  // Mídias
+  const [mediaVideos, setMediaVideos] = useState<VideoItem[]>(() => getVideos());
+  const [mediaRadios, setMediaRadios] = useState<RadioItem[]>(() => getRadios());
+  const [newVideo, setNewVideo] = useState({ title: "", youtubeId: "" });
+  const [newRadio, setNewRadio] = useState({ name: "", description: "", streamUrl: "" });
+
+  const addVideo = () => {
+    const id = extractYoutubeId(newVideo.youtubeId);
+    if (!newVideo.title.trim() || !id) {
+      toast.error("Informe título e link/ID do YouTube");
+      return;
+    }
+    const next = [...mediaVideos, { id: `v_${Date.now()}`, title: newVideo.title.trim(), youtubeId: id }];
+    setMediaVideos(next);
+    saveVideos(next);
+    setNewVideo({ title: "", youtubeId: "" });
+    toast.success("Vídeo adicionado");
+  };
+  const removeVideo = (id: string) => {
+    const next = mediaVideos.filter((v) => v.id !== id);
+    setMediaVideos(next);
+    saveVideos(next);
+  };
+  const updateVideo = (id: string, patch: Partial<VideoItem>) => {
+    const next = mediaVideos.map((v) => (v.id === id ? { ...v, ...patch } : v));
+    setMediaVideos(next);
+    saveVideos(next);
+  };
+  const addRadio = () => {
+    if (!newRadio.name.trim() || !newRadio.streamUrl.trim()) {
+      toast.error("Informe nome e URL do stream");
+      return;
+    }
+    const next = [
+      ...mediaRadios,
+      { id: `r_${Date.now()}`, name: newRadio.name.trim(), description: newRadio.description.trim(), streamUrl: newRadio.streamUrl.trim() },
+    ];
+    setMediaRadios(next);
+    saveRadios(next);
+    setNewRadio({ name: "", description: "", streamUrl: "" });
+    toast.success("Rádio adicionada");
+  };
+  const removeRadio = (id: string) => {
+    const next = mediaRadios.filter((r) => r.id !== id);
+    setMediaRadios(next);
+    saveRadios(next);
+  };
+  const updateRadio = (id: string, patch: Partial<RadioItem>) => {
+    const next = mediaRadios.map((r) => (r.id === id ? { ...r, ...patch } : r));
+    setMediaRadios(next);
+    saveRadios(next);
+  };
 
   // Antifraude state
   const [afAffiliates, setAfAffiliates] = useState<AffiliateRow[]>([]);
