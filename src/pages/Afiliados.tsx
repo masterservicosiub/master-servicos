@@ -57,7 +57,7 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-const PUBLIC_SITE_URL = "https://masterservicos.click";
+const PUBLIC_SITE_URL = "https://masteriub.com.br";
 
 const Afiliados = () => {
   const companyInfo = useCompanyInfo();
