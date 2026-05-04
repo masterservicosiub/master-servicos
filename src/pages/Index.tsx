@@ -133,11 +133,11 @@ const Index = () => {
             />
 
             <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-              Serviço Hidráulico, Caça Vazamento e Serviços Gráficos em Itumbiara
+              Solucionando seus problemas em Itumbiara e Região!
             </h1>
 
             <p className="text-white/90 max-w-2xl mx-auto mb-6">
-              Encanador, eletricista, limpeza de caixa d'água, roçagem e serviços gerais em Goiânia. Atendimento rápido,
+              Detecção de Vazamento, Encanador, Limpeza de caixa d'Água, Roçagem e Serviços Gráficos em Itumbiara. Atendimento rápido,
               profissional e com garantia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
