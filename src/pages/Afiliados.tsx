@@ -803,8 +803,9 @@ const Afiliados = () => {
                           <li>Não houver indícios de fraude ou irregularidades.</li>
                         </ul>
                         <p className="mt-2">
-                          3.3. A empresa poderá alterar valores, regras e condições do programa a qualquer momento.
-                          3.4. Os valores de Cashback podem ter valores percentuais diferenciados para afiliados com mais indicações concluídas.
+                          3.3. A empresa poderá alterar valores, regras e condições do programa a qualquer momento. 3.4.
+                          Os valores de Cashback podem ter valores percentuais diferenciados para afiliados com mais
+                          indicações concluídas.
                         </p>
                       </div>
 
@@ -904,7 +905,7 @@ const Afiliados = () => {
                           <li>Execução do programa de afiliados.</li>
                         </ul>
                         <p className="mt-2">
-                          8.4. A MASTER SERVIÇOS adota medidas de segurança técnicas e administrativas para proteger os
+                          8.4. A MASTER SOLUÇOES adota medidas de segurança técnicas e administrativas para proteger os
                           dados contra acessos não autorizados.
                         </p>
                         <p className="mt-1">
@@ -922,7 +923,7 @@ const Afiliados = () => {
                         <h4 className="font-semibold text-foreground">9. RESPONSABILIDADES</h4>
                         <p>9.1. O afiliado é responsável por suas ações de divulgação.</p>
                         <p className="mt-1">
-                          9.2. A MASTER SERVIÇOS não se responsabiliza por danos decorrentes de práticas indevidas do
+                          9.2. A MASTER SOLUÇOES não se responsabiliza por danos decorrentes de práticas indevidas do
                           afiliado.
                         </p>
                       </div>
@@ -939,14 +940,14 @@ const Afiliados = () => {
                         <h4 className="font-semibold text-foreground">11. DISPOSIÇÕES FINAIS</h4>
                         <p>11.1. A participação no programa implica na aceitação integral destes Termos.</p>
                         <p className="mt-1">
-                          11.2. Fica eleito o foro da comarca da sede da MASTER SERVIÇOS para resolução de eventuais
+                          11.2. Fica eleito o foro da comarca da sede da MASTER SOLUÇOES para resolução de eventuais
                           conflitos.
                         </p>
                       </div>
 
                       <div className="mt-6 pt-4 border-t text-xs">
                         <p>
-                          <strong>MASTER SERVIÇOS</strong>
+                          <strong>MASTER SOLUÇOES</strong>
                         </p>
                         <p>CNPJ: 61.906.390/0001-58</p>
                         <p>Endereço: Itumbiara/GO - Setor Planalto - CEP 75533-250</p>
