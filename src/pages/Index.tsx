@@ -367,6 +367,7 @@ const Index = () => {
         </div>
       </section>
 
+    
       <Footer />
       <WhatsAppFloat />
     </div>
