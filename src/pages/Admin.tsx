@@ -90,7 +90,16 @@ import {
   Search,
 } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
-import { Star, Trophy } from "lucide-react";
+import { Star, Trophy, Video as VideoIcon, Radio as RadioIcon } from "lucide-react";
+import {
+  getVideos,
+  getRadios,
+  saveVideos,
+  saveRadios,
+  extractYoutubeId,
+  type VideoItem,
+  type RadioItem,
+} from "@/lib/mediaLibrary";
 import {
   fetchAffiliatesAll,
   setAffiliateBlocked,
@@ -144,7 +153,60 @@ const Admin = () => {
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
   const [filterStatus, setFilterStatus] = useState("Novo");
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "config">("pedidos");
+
+  // Mídias
+  const [mediaVideos, setMediaVideos] = useState<VideoItem[]>(() => getVideos());
+  const [mediaRadios, setMediaRadios] = useState<RadioItem[]>(() => getRadios());
+  const [newVideo, setNewVideo] = useState({ title: "", youtubeId: "" });
+  const [newRadio, setNewRadio] = useState({ name: "", description: "", streamUrl: "" });
+
+  const addVideo = () => {
+    const id = extractYoutubeId(newVideo.youtubeId);
+    if (!newVideo.title.trim() || !id) {
+      toast.error("Informe título e link/ID do YouTube");
+      return;
+    }
+    const next = [...mediaVideos, { id: `v_${Date.now()}`, title: newVideo.title.trim(), youtubeId: id }];
+    setMediaVideos(next);
+    saveVideos(next);
+    setNewVideo({ title: "", youtubeId: "" });
+    toast.success("Vídeo adicionado");
+  };
+  const removeVideo = (id: string) => {
+    const next = mediaVideos.filter((v) => v.id !== id);
+    setMediaVideos(next);
+    saveVideos(next);
+  };
+  const updateVideo = (id: string, patch: Partial<VideoItem>) => {
+    const next = mediaVideos.map((v) => (v.id === id ? { ...v, ...patch } : v));
+    setMediaVideos(next);
+    saveVideos(next);
+  };
+  const addRadio = () => {
+    if (!newRadio.name.trim() || !newRadio.streamUrl.trim()) {
+      toast.error("Informe nome e URL do stream");
+      return;
+    }
+    const next = [
+      ...mediaRadios,
+      { id: `r_${Date.now()}`, name: newRadio.name.trim(), description: newRadio.description.trim(), streamUrl: newRadio.streamUrl.trim() },
+    ];
+    setMediaRadios(next);
+    saveRadios(next);
+    setNewRadio({ name: "", description: "", streamUrl: "" });
+    toast.success("Rádio adicionada");
+  };
+  const removeRadio = (id: string) => {
+    const next = mediaRadios.filter((r) => r.id !== id);
+    setMediaRadios(next);
+    saveRadios(next);
+  };
+  const updateRadio = (id: string, patch: Partial<RadioItem>) => {
+    const next = mediaRadios.map((r) => (r.id === id ? { ...r, ...patch } : r));
+    setMediaRadios(next);
+    saveRadios(next);
+  };
 
   // Antifraude state
   const [afAffiliates, setAfAffiliates] = useState<AffiliateRow[]>([]);
@@ -1145,6 +1207,14 @@ const Admin = () => {
                 className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "antifraude" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
                 <ShieldAlert className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setActiveTab("midias")}
+                title="Mídias"
+                aria-label="Mídias"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "midias" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <VideoIcon className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("config")}
@@ -2240,6 +2310,137 @@ const Admin = () => {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : activeTab === "midias" ? (
+            <>
+              {/* Gerenciar Vídeos */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <VideoIcon className="w-5 h-5" /> Vídeos da Página Mídias
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Adicione, edite ou remova os vídeos do YouTube exibidos na página Mídias.
+                </p>
+
+                <div className="grid sm:grid-cols-3 gap-2 mb-4">
+                  <input
+                    value={newVideo.title}
+                    onChange={(e) => setNewVideo((p) => ({ ...p, title: e.target.value }))}
+                    placeholder="Título do vídeo"
+                    className="border border-border rounded-lg px-3 py-2 bg-background text-foreground"
+                  />
+                  <input
+                    value={newVideo.youtubeId}
+                    onChange={(e) => setNewVideo((p) => ({ ...p, youtubeId: e.target.value }))}
+                    placeholder="Link ou ID do YouTube"
+                    className="border border-border rounded-lg px-3 py-2 bg-background text-foreground sm:col-span-1"
+                  />
+                  <button
+                    onClick={addVideo}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+
+                {mediaVideos.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhum vídeo cadastrado.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {mediaVideos.map((v) => (
+                      <div key={v.id} className="grid sm:grid-cols-[1fr_1fr_auto] gap-2 items-center border border-border rounded-lg p-3">
+                        <input
+                          value={v.title}
+                          onChange={(e) => updateVideo(v.id, { title: e.target.value })}
+                          className="border border-border rounded px-2 py-1 bg-background text-foreground text-sm"
+                        />
+                        <input
+                          value={v.youtubeId}
+                          onChange={(e) => updateVideo(v.id, { youtubeId: extractYoutubeId(e.target.value) })}
+                          className="border border-border rounded px-2 py-1 bg-background text-foreground text-sm font-mono"
+                        />
+                        <button
+                          onClick={() => removeVideo(v.id)}
+                          className="text-destructive hover:bg-destructive/10 p-2 rounded"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Gerenciar Rádios */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                  <RadioIcon className="w-5 h-5" /> Rádios e Streamings
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Adicione, edite ou remova as rádios ao vivo exibidas na página Mídias.
+                </p>
+
+                <div className="grid sm:grid-cols-4 gap-2 mb-4">
+                  <input
+                    value={newRadio.name}
+                    onChange={(e) => setNewRadio((p) => ({ ...p, name: e.target.value }))}
+                    placeholder="Nome"
+                    className="border border-border rounded-lg px-3 py-2 bg-background text-foreground"
+                  />
+                  <input
+                    value={newRadio.description}
+                    onChange={(e) => setNewRadio((p) => ({ ...p, description: e.target.value }))}
+                    placeholder="Descrição"
+                    className="border border-border rounded-lg px-3 py-2 bg-background text-foreground"
+                  />
+                  <input
+                    value={newRadio.streamUrl}
+                    onChange={(e) => setNewRadio((p) => ({ ...p, streamUrl: e.target.value }))}
+                    placeholder="URL do stream"
+                    className="border border-border rounded-lg px-3 py-2 bg-background text-foreground"
+                  />
+                  <button
+                    onClick={addRadio}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+
+                {mediaRadios.length === 0 ? (
+                  <p className="text-muted-foreground">Nenhuma rádio cadastrada.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {mediaRadios.map((r) => (
+                      <div key={r.id} className="grid sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center border border-border rounded-lg p-3">
+                        <input
+                          value={r.name}
+                          onChange={(e) => updateRadio(r.id, { name: e.target.value })}
+                          className="border border-border rounded px-2 py-1 bg-background text-foreground text-sm"
+                        />
+                        <input
+                          value={r.description}
+                          onChange={(e) => updateRadio(r.id, { description: e.target.value })}
+                          className="border border-border rounded px-2 py-1 bg-background text-foreground text-sm"
+                        />
+                        <input
+                          value={r.streamUrl}
+                          onChange={(e) => updateRadio(r.id, { streamUrl: e.target.value })}
+                          className="border border-border rounded px-2 py-1 bg-background text-foreground text-sm font-mono"
+                        />
+                        <button
+                          onClick={() => removeRadio(r.id)}
+                          className="text-destructive hover:bg-destructive/10 p-2 rounded"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
