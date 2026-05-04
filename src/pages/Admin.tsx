@@ -1610,7 +1610,7 @@ const Admin = () => {
                             const msg =
                               `Olá ${order.name || ""}! Segue o código Pix (Copia e Cola) para pagamento do seu pedido.%0A%0A` +
                               `💰 *Valor:* R$ ${valorBR}%0A` +
-                              `🏦 *Beneficiário:* MASTER SOLUÇÕES%0A` +
+                              `🏦 *Beneficiário:* 61.906.390 Angelo Marcos%0A` +
                               `🔑 *Chave Pix (CNPJ):* 61.906.390/0001-58%0A%0A` +
                               `*Pix Copia e Cola:*%0A${payload}%0A%0A` +
                               `Após o pagamento, por favor envie o comprovante. Obrigado!`;
