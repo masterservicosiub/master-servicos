@@ -92,10 +92,14 @@ import {
 import { ShieldAlert } from "lucide-react";
 import { Star, Trophy, Video as VideoIcon, Radio as RadioIcon } from "lucide-react";
 import {
-  getVideos,
-  getRadios,
-  saveVideos,
-  saveRadios,
+  fetchVideos,
+  fetchRadios,
+  insertVideo,
+  updateVideoRow,
+  deleteVideoRow,
+  insertRadio,
+  updateRadioRow,
+  deleteRadioRow,
   extractYoutubeId,
   type VideoItem,
   type RadioItem,
@@ -156,56 +160,103 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "config">("pedidos");
 
   // Mídias
-  const [mediaVideos, setMediaVideos] = useState<VideoItem[]>(() => getVideos());
-  const [mediaRadios, setMediaRadios] = useState<RadioItem[]>(() => getRadios());
+  const [mediaVideos, setMediaVideos] = useState<VideoItem[]>([]);
+  const [mediaRadios, setMediaRadios] = useState<RadioItem[]>([]);
   const [newVideo, setNewVideo] = useState({ title: "", youtubeId: "" });
   const [newRadio, setNewRadio] = useState({ name: "", description: "", streamUrl: "" });
 
-  const addVideo = () => {
+  const reloadMedia = async () => {
+    try {
+      const [vs, rs] = await Promise.all([fetchVideos(), fetchRadios()]);
+      setMediaVideos(vs);
+      setMediaRadios(rs);
+    } catch (e: any) {
+      toast.error("Erro ao carregar mídias: " + (e?.message || ""));
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "midias") reloadMedia();
+  }, [activeTab]);
+
+  const notifyMediaChanged = () => {
+    window.dispatchEvent(new CustomEvent("media-library-changed"));
+  };
+
+  const addVideo = async () => {
     const id = extractYoutubeId(newVideo.youtubeId);
     if (!newVideo.title.trim() || !id) {
       toast.error("Informe título e link/ID do YouTube");
       return;
     }
-    const next = [...mediaVideos, { id: `v_${Date.now()}`, title: newVideo.title.trim(), youtubeId: id }];
-    setMediaVideos(next);
-    saveVideos(next);
-    setNewVideo({ title: "", youtubeId: "" });
-    toast.success("Vídeo adicionado");
+    try {
+      await insertVideo({ title: newVideo.title.trim(), youtubeId: id });
+      setNewVideo({ title: "", youtubeId: "" });
+      await reloadMedia();
+      notifyMediaChanged();
+      toast.success("Vídeo adicionado");
+    } catch (e: any) {
+      toast.error("Erro: " + (e?.message || ""));
+    }
   };
-  const removeVideo = (id: string) => {
-    const next = mediaVideos.filter((v) => v.id !== id);
-    setMediaVideos(next);
-    saveVideos(next);
+  const removeVideo = async (id: string) => {
+    if (!confirm("Excluir este vídeo?")) return;
+    try {
+      await deleteVideoRow(id);
+      await reloadMedia();
+      notifyMediaChanged();
+    } catch (e: any) {
+      toast.error("Erro ao excluir: " + (e?.message || ""));
+    }
   };
-  const updateVideo = (id: string, patch: Partial<VideoItem>) => {
-    const next = mediaVideos.map((v) => (v.id === id ? { ...v, ...patch } : v));
-    setMediaVideos(next);
-    saveVideos(next);
+  const updateVideo = async (id: string, patch: Partial<VideoItem>) => {
+    setMediaVideos((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+    try {
+      await updateVideoRow(id, patch);
+      notifyMediaChanged();
+    } catch (e: any) {
+      toast.error("Erro ao salvar: " + (e?.message || ""));
+      reloadMedia();
+    }
   };
-  const addRadio = () => {
+  const addRadio = async () => {
     if (!newRadio.name.trim() || !newRadio.streamUrl.trim()) {
       toast.error("Informe nome e URL do stream");
       return;
     }
-    const next = [
-      ...mediaRadios,
-      { id: `r_${Date.now()}`, name: newRadio.name.trim(), description: newRadio.description.trim(), streamUrl: newRadio.streamUrl.trim() },
-    ];
-    setMediaRadios(next);
-    saveRadios(next);
-    setNewRadio({ name: "", description: "", streamUrl: "" });
-    toast.success("Rádio adicionada");
+    try {
+      await insertRadio({
+        name: newRadio.name.trim(),
+        description: newRadio.description.trim(),
+        streamUrl: newRadio.streamUrl.trim(),
+      });
+      setNewRadio({ name: "", description: "", streamUrl: "" });
+      await reloadMedia();
+      notifyMediaChanged();
+      toast.success("Rádio adicionada");
+    } catch (e: any) {
+      toast.error("Erro: " + (e?.message || ""));
+    }
   };
-  const removeRadio = (id: string) => {
-    const next = mediaRadios.filter((r) => r.id !== id);
-    setMediaRadios(next);
-    saveRadios(next);
+  const removeRadio = async (id: string) => {
+    if (!confirm("Excluir esta rádio?")) return;
+    try {
+      await deleteRadioRow(id);
+      await reloadMedia();
+      notifyMediaChanged();
+    } catch (e: any) {
+      toast.error("Erro ao excluir: " + (e?.message || ""));
+    }
   };
-  const updateRadio = (id: string, patch: Partial<RadioItem>) => {
-    const next = mediaRadios.map((r) => (r.id === id ? { ...r, ...patch } : r));
-    setMediaRadios(next);
-    saveRadios(next);
+  const updateRadio = async (id: string, patch: Partial<RadioItem>) => {
+    setMediaRadios((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    try {
+      await updateRadioRow(id, patch);
+      notifyMediaChanged();
+    } catch (e: any) {
+      toast.error("Erro ao salvar: " + (e?.message || ""));
+      reloadMedia();
+    }
   };
 
   // Antifraude state

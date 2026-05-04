@@ -2,24 +2,27 @@ import { useEffect, useState } from "react";
 import { Radio, Video as VideoIcon, Play, Pause } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getVideos, getRadios } from "@/lib/mediaLibrary";
+import { fetchVideos, fetchRadios, type VideoItem, type RadioItem } from "@/lib/mediaLibrary";
 
 const Midias = () => {
   const [playing, setPlaying] = useState<string | null>(null);
-  const [videos, setVideos] = useState(() => getVideos());
-  const [radios, setRadios] = useState(() => getRadios());
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [radios, setRadios] = useState<RadioItem[]>([]);
 
   useEffect(() => {
-    const refresh = () => {
-      setVideos(getVideos());
-      setRadios(getRadios());
+    const load = async () => {
+      try {
+        const [vs, rs] = await Promise.all([fetchVideos(), fetchRadios()]);
+        setVideos(vs);
+        setRadios(rs);
+      } catch (e) {
+        console.error("Erro carregando mídias:", e);
+      }
     };
-    window.addEventListener("media-library-changed", refresh);
-    window.addEventListener("storage", refresh);
-    return () => {
-      window.removeEventListener("media-library-changed", refresh);
-      window.removeEventListener("storage", refresh);
-    };
+    load();
+    const onChange = () => load();
+    window.addEventListener("media-library-changed", onChange);
+    return () => window.removeEventListener("media-library-changed", onChange);
   }, []);
   const audios: Record<string, HTMLAudioElement> =
     (window as any).__radioAudios || ((window as any).__radioAudios = {});
