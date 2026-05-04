@@ -1,69 +1,85 @@
-export type VideoItem = { id: string; title: string; youtubeId: string };
-export type RadioItem = { id: string; name: string; description: string; streamUrl: string };
+import { supabase } from "./supabase";
 
-const VIDEOS_KEY = "media_library_videos_v1";
-const RADIOS_KEY = "media_library_radios_v1";
+export type VideoItem = { id: string; title: string; youtubeId: string; sort_order?: number };
+export type RadioItem = { id: string; name: string; description: string; streamUrl: string; sort_order?: number };
 
-const DEFAULT_VIDEOS: VideoItem[] = [
-  { id: "v1", title: "Conheça a Master Soluções", youtubeId: "dQw4w9WgXcQ" },
-  { id: "v2", title: "Serviços Residenciais", youtubeId: "X1ILuKIM_WA" },
-  { id: "v3", title: "Serviços Comerciais", youtubeId: "9bZkp7q19f0" },
-];
-
-const DEFAULT_RADIOS: RadioItem[] = [
-  {
-    id: "r1",
-    name: "Rádio Itumbiara FM",
-    description: "Notícias e música local de Itumbiara/GO",
-    streamUrl: "https://radio.garden/listen/radio-mega-fm-106-1/XcUIFhM4",
-  },
-  {
-    id: "r2",
-    name: "Antena 1",
-    description: "O melhor do Soft Rock",
-    streamUrl: "https://antenaone.crossradio.com.br/stream/1;",
-  },
-  {
-    id: "r3",
-    name: "Jovem Pan FM",
-    description: "Hits e variedades 24h",
-    streamUrl: "https://jpfm.jovempanfm.uol.com.br/jpfmsp.aac",
-  },
-];
-
-function read<T>(key: string, fallback: T[]): T[] {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : fallback;
-  } catch {
-    return fallback;
-  }
+export async function fetchVideos(): Promise<VideoItem[]> {
+  const { data, error } = await supabase
+    .from("media_videos")
+    .select("*")
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data || []).map((r: any) => ({
+    id: r.id,
+    title: r.title,
+    youtubeId: r.youtube_id,
+    sort_order: r.sort_order,
+  }));
 }
 
-function write<T>(key: string, items: T[]) {
-  localStorage.setItem(key, JSON.stringify(items));
-  window.dispatchEvent(new CustomEvent("media-library-changed"));
+export async function fetchRadios(): Promise<RadioItem[]> {
+  const { data, error } = await supabase
+    .from("media_radios")
+    .select("*")
+    .eq("active", true)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data || []).map((r: any) => ({
+    id: r.id,
+    name: r.name,
+    description: r.description || "",
+    streamUrl: r.stream_url,
+    sort_order: r.sort_order,
+  }));
 }
 
-export function getVideos(): VideoItem[] {
-  return read(VIDEOS_KEY, DEFAULT_VIDEOS);
+export async function insertVideo(v: { title: string; youtubeId: string }) {
+  const { error } = await supabase
+    .from("media_videos")
+    .insert([{ title: v.title, youtube_id: v.youtubeId }]);
+  if (error) throw error;
 }
-export function getRadios(): RadioItem[] {
-  return read(RADIOS_KEY, DEFAULT_RADIOS);
+
+export async function updateVideoRow(id: string, patch: Partial<VideoItem>) {
+  const upd: any = {};
+  if (patch.title !== undefined) upd.title = patch.title;
+  if (patch.youtubeId !== undefined) upd.youtube_id = patch.youtubeId;
+  const { error } = await supabase.from("media_videos").update(upd).eq("id", id);
+  if (error) throw error;
 }
-export function saveVideos(items: VideoItem[]) {
-  write(VIDEOS_KEY, items);
+
+export async function deleteVideoRow(id: string) {
+  const { error } = await supabase.from("media_videos").delete().eq("id", id);
+  if (error) throw error;
 }
-export function saveRadios(items: RadioItem[]) {
-  write(RADIOS_KEY, items);
+
+export async function insertRadio(r: { name: string; description: string; streamUrl: string }) {
+  const { error } = await supabase
+    .from("media_radios")
+    .insert([{ name: r.name, description: r.description, stream_url: r.streamUrl }]);
+  if (error) throw error;
+}
+
+export async function updateRadioRow(id: string, patch: Partial<RadioItem>) {
+  const upd: any = {};
+  if (patch.name !== undefined) upd.name = patch.name;
+  if (patch.description !== undefined) upd.description = patch.description;
+  if (patch.streamUrl !== undefined) upd.stream_url = patch.streamUrl;
+  const { error } = await supabase.from("media_radios").update(upd).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteRadioRow(id: string) {
+  const { error } = await supabase.from("media_radios").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export function extractYoutubeId(input: string): string {
   const s = input.trim();
   if (!s) return "";
-  // Already an id (no slashes / spaces, length around 11)
   if (!/[\/\s?=&]/.test(s) && s.length >= 8 && s.length <= 20) return s;
   const patterns = [
     /[?&]v=([a-zA-Z0-9_-]{6,})/,
