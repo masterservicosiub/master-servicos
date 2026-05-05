@@ -23,11 +23,14 @@ const Footer = () => {
           <Link to="/orcamento" className="block hover:opacity-100">
             Orçamento
           </Link>
-          <Link to="/sobre" className="block hover:opacity-100">
-            Sobre Nós
+          <Link to="/midias" className="block hover:opacity-100">
+            Mídias
           </Link>
           <Link to="/afiliados" className="block hover:opacity-100">
             Afiliados
+          </Link>
+          <Link to="/cliente" className="block hover:opacity-100">
+            Área do Cliente
           </Link>
         </div>
       </div>
