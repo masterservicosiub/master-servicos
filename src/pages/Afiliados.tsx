@@ -691,7 +691,7 @@ const Afiliados = () => {
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div>
                     <Label>Nome completo</Label>
-                    <Input value={rFullName} onChange={(e) => setRFullName(e.target.value)} />
+                    <Input value={rFullName} onChange={(e) => setRFullName(e.target.value.toUpperCase())} />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
