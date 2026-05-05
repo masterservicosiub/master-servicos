@@ -258,7 +258,7 @@ const Cliente = () => {
                   <p className="text-sm text-muted-foreground">Ganhe <strong className="text-accent">3% de desconto</strong> em todos os serviços ao se cadastrar.</p>
                   <input
                     value={rName}
-                    onChange={(e) => setRName(e.target.value)}
+                    onChange={(e) => setRName(e.target.value.toUpperCase())}
                     placeholder="Nome completo *"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
