@@ -154,9 +154,14 @@ const Admin = () => {
   const [recoverEmail, setRecoverEmail] = useState("");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
+  const [filterMonth, setFilterMonth] = useState(() => {
+    const v = localStorage.getItem("admin_default_filter_month");
+    return v !== null ? Number(v) : new Date().getMonth() + 1;
+  });
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-  const [filterStatus, setFilterStatus] = useState("Novo");
+  const [filterStatus, setFilterStatus] = useState(() => {
+    return localStorage.getItem("admin_default_filter_status") || "Novo";
+  });
   const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "config">("pedidos");
 
   // Mídias
@@ -1356,6 +1361,17 @@ const Admin = () => {
                     </option>
                   ))}
                 </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem("admin_default_filter_status", filterStatus);
+                    toast.success(`Status padrão definido: ${filterStatus}`);
+                  }}
+                  className="text-xs px-2 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  title="Definir status atual como padrão"
+                >
+                  Definir padrão
+                </button>
                 <select
                   value={filterYear}
                   onChange={(e) => setFilterYear(Number(e.target.value))}
@@ -1378,6 +1394,17 @@ const Admin = () => {
                     </option>
                   ))}
                 </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem("admin_default_filter_month", String(filterMonth));
+                    toast.success(`Mês padrão definido: ${MONTHS[filterMonth]}`);
+                  }}
+                  className="text-xs px-2 py-1 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  title="Definir mês atual como padrão"
+                >
+                  Definir padrão
+                </button>
                 <span className="text-sm text-muted-foreground">{filteredOrders.length} pedidos encontrados</span>
               </div>
 
