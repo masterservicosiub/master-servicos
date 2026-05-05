@@ -1350,17 +1350,30 @@ const Admin = () => {
               {/* Filtros */}
               <div className="bg-card rounded-xl p-4 border border-border flex flex-wrap items-center gap-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                {(() => {
+                  const STATUS_COLORS: Record<string, string> = {
+                    "Todos": "bg-gray-500 text-white border-gray-500",
+                    "Novo": "bg-blue-600 text-white border-blue-600",
+                    "Em andamento": "bg-yellow-400 text-black border-yellow-400",
+                    "Concluído": "bg-orange-500 text-white border-orange-500",
+                    "Pago": "bg-green-600 text-white border-green-600",
+                    "Cancelado": "bg-red-600 text-white border-red-600",
+                  };
+                  const cls = STATUS_COLORS[filterStatus] || "bg-background text-foreground border-input";
+                  return (
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className={`rounded-lg border px-3 py-1.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ring ${cls}`}
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s} className="bg-background text-foreground">
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  );
+                })()}
                 <button
                   type="button"
                   onClick={() => {
