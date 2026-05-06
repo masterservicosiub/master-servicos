@@ -2542,6 +2542,309 @@ const Admin = () => {
                 )}
               </div>
             </>
+          ) : activeTab === "servicos" ? (
+            <>
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" /> Tipo de Serviço
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setBsKindFilter("residencial")}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold border ${bsKindFilter === "residencial" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
+                  >
+                    Serviços Residenciais
+                  </button>
+                  <button
+                    onClick={() => setBsKindFilter("grafico")}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold border ${bsKindFilter === "grafico" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
+                  >
+                    Serviços Gráficos
+                  </button>
+                </div>
+              </div>
+
+              {/* Gerenciar Serviços de Orçamento */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" /> Serviços da Página Orçamento
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                  <input
+                    value={bsName}
+                    onChange={(e) => setBsName(e.target.value)}
+                    placeholder="Nome do serviço *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <select
+                    value={bsType}
+                    onChange={(e) => setBsType(e.target.value as "fixed" | "area")}
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="fixed">Preço Fixo (por unidade)</option>
+                    <option value="area">Por Área (m²)</option>
+                  </select>
+                </div>
+                <input
+                  value={bsImage}
+                  onChange={(e) => setBsImage(e.target.value)}
+                  placeholder="URL da imagem (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
+                <input
+                  value={bsCategory}
+                  onChange={(e) => setBsCategory(e.target.value)}
+                  placeholder="Categoria (ex: Hidráulica, Limpeza, Jardinagem)"
+                  list="bs-categories-list"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
+                <datalist id="bs-categories-list">
+                  {Array.from(new Set(budgetServices.filter((b) => b.kind === bsKindFilter).map((b) => b.category).filter(Boolean))).map((c) => (
+                    <option key={c} value={c as string} />
+                  ))}
+                </datalist>
+                <textarea
+                  value={bsDescription}
+                  onChange={(e) => setBsDescription(e.target.value)}
+                  placeholder="Descrição curta (catálogo)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                  rows={2}
+                />
+                {bsType === "fixed" ? (
+                  <input
+                    type="number"
+                    value={bsFixedPrice}
+                    onChange={(e) => setBsFixedPrice(e.target.value)}
+                    placeholder="Preço fixo (R$) *"
+                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                  />
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="number"
+                      value={bsTier1}
+                      onChange={(e) => setBsTier1(e.target.value)}
+                      placeholder="Preço/m² até 50m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier2}
+                      onChange={(e) => setBsTier2(e.target.value)}
+                      placeholder="Preço/m² 51-100m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier3}
+                      onChange={(e) => setBsTier3(e.target.value)}
+                      placeholder="Preço/m² acima 100m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsMinPrice}
+                      onChange={(e) => setBsMinPrice(e.target.value)}
+                      placeholder="Preço mínimo (R$)"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                )}
+                <button
+                  onClick={handleAddBudgetService}
+                  className="bg-accent text-accent-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Adicionar Serviço
+                </button>
+
+                {budgetServices.filter((b) => b.kind === bsKindFilter).length > 0 && (
+                  <div className="mt-6 space-y-4">
+                    {budgetServices.filter((b) => b.kind === bsKindFilter).map((bs) => (
+                      <div key={bs.id} className="p-4 rounded-lg bg-secondary border border-border">
+                        {editingBsId === bs.id ? (
+                          <div className="space-y-3">
+                            <div className="grid sm:grid-cols-2 gap-3">
+                              <input
+                                value={editBsName}
+                                onChange={(e) => setEditBsName(e.target.value)}
+                                placeholder="Nome"
+                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <select
+                                value={editBsType}
+                                onChange={(e) => setEditBsType(e.target.value as "fixed" | "area")}
+                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              >
+                                <option value="fixed">Preço Fixo</option>
+                                <option value="area">Por Área (m²)</option>
+                              </select>
+                            </div>
+                            <input
+                              value={editBsImage}
+                              onChange={(e) => setEditBsImage(e.target.value)}
+                              placeholder="URL da imagem"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <input
+                              value={editBsCategory}
+                              onChange={(e) => setEditBsCategory(e.target.value)}
+                              placeholder="Categoria"
+                              list="bs-categories-list"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <textarea
+                              value={editBsDescription}
+                              onChange={(e) => setEditBsDescription(e.target.value)}
+                              placeholder="Descrição curta"
+                              className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              rows={2}
+                            />
+                            {editBsType === "fixed" ? (
+                              <input
+                                type="number"
+                                value={editBsFixedPrice}
+                                onChange={(e) => setEditBsFixedPrice(e.target.value)}
+                                placeholder="Preço fixo"
+                                className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                            ) : (
+                              <div className="grid sm:grid-cols-2 gap-3">
+                                <input
+                                  type="number"
+                                  value={editBsTier1}
+                                  onChange={(e) => setEditBsTier1(e.target.value)}
+                                  placeholder="R$/m² até 50m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier2}
+                                  onChange={(e) => setEditBsTier2(e.target.value)}
+                                  placeholder="R$/m² 51-100m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier3}
+                                  onChange={(e) => setEditBsTier3(e.target.value)}
+                                  placeholder="R$/m² +100m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsMinPrice}
+                                  onChange={(e) => setEditBsMinPrice(e.target.value)}
+                                  placeholder="Preço mínimo"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditBudgetService(bs.id!)}
+                                className="bg-primary text-primary-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                              >
+                                <Save className="w-4 h-4" /> Salvar
+                              </button>
+                              <button
+                                onClick={() => setEditingBsId(null)}
+                                className="bg-muted text-muted-foreground px-4 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                              >
+                                <X className="w-4 h-4" /> Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex flex-col gap-1">
+                                <button
+                                  onClick={async () => {
+                                    const idx = budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id);
+                                    if (idx <= 0) return;
+                                    const prev = budgetServices.filter((b) => b.kind === bsKindFilter)[idx - 1];
+                                    await updateBudgetService(bs.id!, { sort_order: prev.sort_order });
+                                    await updateBudgetService(prev.id!, { sort_order: bs.sort_order });
+                                    loadBudgetServices();
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                  disabled={budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id) === 0}
+                                >
+                                  <ArrowUp className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    const idx = budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id);
+                                    if (idx >= budgetServices.filter((b) => b.kind === bsKindFilter).length - 1) return;
+                                    const next = budgetServices.filter((b) => b.kind === bsKindFilter)[idx + 1];
+                                    await updateBudgetService(bs.id!, { sort_order: next.sort_order });
+                                    await updateBudgetService(next.id!, { sort_order: bs.sort_order });
+                                    loadBudgetServices();
+                                  }}
+                                  className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                  disabled={
+                                    budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id) === budgetServices.filter((b) => b.kind === bsKindFilter).length - 1
+                                  }
+                                >
+                                  <ArrowDown className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-foreground">{bs.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {bs.type === "fixed"
+                                    ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}`
+                                    : `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
+                                </p>
+                                {bs.category && (
+                                  <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                    {bs.category}
+                                  </span>
+                                )}
+                              </div>
+                              {bs.image_url && (
+                                <img
+                                  src={bs.image_url}
+                                  alt={bs.name}
+                                  className="w-14 h-14 object-cover rounded-md ml-2"
+                                />
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingBsId(bs.id!);
+                                  setEditBsName(bs.name);
+                                  setEditBsType(bs.type);
+                                  setEditBsFixedPrice(String(bs.fixed_price || ""));
+                                  setEditBsMinPrice(String(bs.min_price || ""));
+                                  const t = bs.tiers || [];
+                                  setEditBsTier1(String(t[0]?.pricePerM2 || ""));
+                                  setEditBsTier2(String(t[1]?.pricePerM2 || ""));
+                                  setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                  setEditBsImage(bs.image_url || "");
+                                  setEditBsDescription(bs.description || "");
+                                  setEditBsCategory(bs.category || "");
+                                }}
+                                className="text-primary hover:opacity-70"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBudgetService(bs.id!)}
+                                className="text-destructive hover:opacity-70"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <>
               {/* Gerenciar Serviços da Página Inicial */}
