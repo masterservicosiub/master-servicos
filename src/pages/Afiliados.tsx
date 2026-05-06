@@ -230,7 +230,7 @@ const Afiliados = () => {
     };
   }, [orders]);
 
-  const referralLink = session ? `${PUBLIC_SITE_URL}/orcamento?ref=${session.referral_code}` : "";
+  const referralLink = session ? `${PUBLIC_SITE_URL}ref=${session.referral_code}` : "";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
