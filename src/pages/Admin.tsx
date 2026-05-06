@@ -171,7 +171,8 @@ const Admin = () => {
   const [filterStatus, setFilterStatus] = useState(() => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "config">("pedidos");
+  const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
 
   // Mídias
   const [mediaVideos, setMediaVideos] = useState<VideoItem[]>([]);
