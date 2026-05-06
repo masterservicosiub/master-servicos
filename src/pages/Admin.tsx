@@ -934,6 +934,7 @@ const Admin = () => {
         image_url: bsImage.trim(),
         description: bsDescription.trim(),
         category: bsCategory.trim(),
+        kind: bsKindFilter,
       });
       setBsName("");
       setBsFixedPrice("");
