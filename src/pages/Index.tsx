@@ -145,7 +145,7 @@ const Index = () => {
                 to="/orcamento"
                 className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
               >
-                <Zap className="w-5 h-5" /> Fazer Orçamento
+                <Zap className="w-5 h-5" /> Serviços Residenciais
               </Link>
               <a
                 href={`/servicos-graficos`}
@@ -153,7 +153,7 @@ const Index = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
               >
-                Fale Conosco <ArrowRight className="w-5 h-5" />
+                Serviços Gráficos <ArrowRight className="w-5 h-5" />
               </a>
             </div>
 
