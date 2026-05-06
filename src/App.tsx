@@ -4,7 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
-import Orcamento from "./pages/Orcamento.tsx";
+import ServicosResidenciais from "./pages/ServicosResidenciais.tsx";
+import ServicosGraficos from "./pages/ServicosGraficos.tsx";
 import Midias from "./pages/Midias.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -24,7 +25,9 @@ const App = () => (
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/orcamento" element={<Orcamento />} />
+          <Route path="/orcamento" element={<ServicosResidenciais />} />
+          <Route path="/servicos-residenciais" element={<ServicosResidenciais />} />
+          <Route path="/servicos-graficos" element={<ServicosGraficos />} />
           <Route path="/midias" element={<Midias />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/afiliados" element={<Afiliados />} />
