@@ -117,9 +117,15 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-const Orcamento = () => {
+interface OrcamentoProps {
+  kind?: "residencial" | "grafico";
+  pageTitle?: string;
+  pageSubtitle?: string;
+}
+
+const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento", pageSubtitle = "Preencha seus dados, escolha os serviços e envie sua solicitação." }: OrcamentoProps = {}) => {
   const companyInfo = useCompanyInfo();
-  const [availableServices, setAvailableServices] = useState<ServiceDef[]>(defaultServices);
+  const [availableServices, setAvailableServices] = useState<ServiceDef[]>(kind === "residencial" ? defaultServices : []);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -156,7 +162,7 @@ const Orcamento = () => {
         if (c.address && !address) setAddress(c.address);
       }
     } catch {}
-    fetchBudgetServices()
+    fetchBudgetServices(kind)
       .then((data) => {
         if (data.length > 0) {
           const mapped: ServiceDef[] = data.map((bs) => ({
@@ -489,10 +495,10 @@ const Orcamento = () => {
               Orçamento rápido e sem compromisso
             </div>
             <h1 className="text-3xl md:text-5xl font-extrabold mb-3 animate-fade-in-up [animation-delay:120ms] drop-shadow-lg">
-              Solicite seu Orçamento
+              {pageTitle}
             </h1>
             <p className="text-primary-foreground/90 max-w-xl mx-auto animate-fade-in-up [animation-delay:240ms]">
-              Preencha seus dados, escolha os serviços e envie sua solicitação.
+              {pageSubtitle}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-primary-foreground/90 animate-fade-in-up [animation-delay:360ms]">
               <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Garantia Total</div>

@@ -160,13 +160,15 @@ export interface BudgetServiceRow {
   image_url?: string;
   description?: string;
   category?: string;
+  kind?: "residencial" | "grafico";
 }
 
-export async function fetchBudgetServices(): Promise<BudgetServiceRow[]> {
-  const { data, error } = await supabase
-    .from("budget_services")
-    .select("*")
-    .order("sort_order", { ascending: true });
+export async function fetchBudgetServices(
+  kind?: "residencial" | "grafico",
+): Promise<BudgetServiceRow[]> {
+  let q = supabase.from("budget_services").select("*").order("sort_order", { ascending: true });
+  if (kind) q = q.eq("kind", kind);
+  const { data, error } = await q;
   if (error) throw error;
   return data as BudgetServiceRow[];
 }
