@@ -148,7 +148,7 @@ const Index = () => {
                 <Zap className="w-5 h-5" /> Fazer Orçamento
               </Link>
               <a
-                href={`https://wa.me/${info.company_whatsapp}`}
+                href={`/servicos-graficos`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
@@ -330,7 +330,7 @@ const Index = () => {
             Faça um orçamento sem compromisso online, e feche seus serviços.
           </p>
           <Link
-            to="/orcamento"
+            to="/servicos-residenciais"
             className="inline-flex items-center gap-2 bg-white text-primary px-10 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl animate-fade-in-up [animation-delay:240ms]"
           >
             Fazer Orçamento Gratuito <ArrowRight className="w-5 h-5" />
