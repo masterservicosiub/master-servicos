@@ -17,7 +17,8 @@ const Header = () => {
 
   const links = [
     { to: "/", label: "Início" },
-    { to: "/orcamento", label: "Orçamento" },
+    { to: "/servicos-residenciais", label: "Serviços Residenciais" },
+    { to: "/servicos-graficos", label: "Serviços Gráficos" },
     { to: "/midias", label: "Mídias" },
     { to: "/afiliados", label: "Afiliados" },
   ];
@@ -49,7 +50,7 @@ const Header = () => {
             <User className="w-4 h-4" /> {hasClient ? "Minha Conta" : "Entrar"}
           </Link>
           <Link
-            to="/orcamento"
+            to="/servicos-residenciais"
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             Solicitar Orçamento
@@ -79,7 +80,7 @@ const Header = () => {
             {hasClient ? "Minha Conta" : "Entrar / Cadastrar"}
           </Link>
           <Link
-            to="/orcamento"
+            to="/servicos-residenciais"
             onClick={() => setMenuOpen(false)}
             className="block bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold text-center"
           >
