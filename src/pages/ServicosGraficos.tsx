@@ -3,8 +3,8 @@ import Orcamento from "./Orcamento";
 const ServicosGraficos = () => (
   <Orcamento
     kind="grafico"
-    pageTitle="Serviços Gráficos"
-    pageSubtitle="Solicite cartões, banners, panfletos e outros materiais gráficos."
+    pageTitle="Master Gráfica"
+    pageSubtitle="Serviços Gráficos: Cartões, Banners, Panfletos e Outros Materiais Gráficos em Itumbiara e Região."
   />
 );
 
