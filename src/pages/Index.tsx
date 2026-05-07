@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Printer, Wrench, ArrowRight } from "lucide-react";
 import {
   Shield,
   Clock,
@@ -17,6 +16,7 @@ import {
   ShieldCheck,
   Zap,
   Wrench,
+  Printer
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import sloganBanner from "@/assets/slogan-banner.png";
@@ -137,7 +137,6 @@ const Index = () => {
               profissional e com garantia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
-
 
 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
   <Link
