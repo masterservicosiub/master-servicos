@@ -121,11 +121,6 @@ const Index = () => {
       >
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-8 animate-fade-in-up">
-              <Sparkles className="w-4 h-4" />
-              Serviços Profissionais com Garantia
-            </div>
-
             <img
               src={logo}
               alt="Master Soluções | Caça Vazamento, Encanador, Hidráulico em Itumbiara e Região"
