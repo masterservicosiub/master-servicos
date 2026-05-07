@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Trash2, Plus, Send, CheckCircle, Tag, X, Sparkles, ShieldCheck, Clock, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import logoMasterServicos from "@/assets/logo-master-servicos.png";
 import { toast } from "sonner";
 import { sendToGoogleSheets } from "@/lib/googleSheets";
 import { applyPhoneMask } from "@/lib/phoneMask";
@@ -490,10 +491,20 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.15),transparent_60%)]" />
           </div>
           <div className="container mx-auto px-4 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-6 animate-fade-in-up">
-              <Sparkles className="w-4 h-4" />
-              Orçamento rápido e sem compromisso
-            </div>
+            {kind === "grafico" ? (
+              <div className="mb-6 animate-fade-in-up flex justify-center">
+                <img
+                  src={logoMasterServicos}
+                  alt="Master Serviços"
+                  className="h-32 md:h-40 w-auto drop-shadow-2xl"
+                />
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-2 rounded-full text-sm font-semibold mb-6 animate-fade-in-up">
+                <Sparkles className="w-4 h-4" />
+                Orçamento rápido e sem compromisso
+              </div>
+            )}
             <h1 className="text-3xl md:text-5xl font-extrabold mb-3 animate-fade-in-up [animation-delay:120ms] drop-shadow-lg">
               {pageTitle}
             </h1>
