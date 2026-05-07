@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Printer, Wrench, ArrowRight } from "lucide-react";
 import {
   Shield,
   Clock,
@@ -136,7 +137,7 @@ const Index = () => {
               profissional e com garantia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
-  import { Printer, Wrench, ArrowRight } from "lucide-react";
+
 
 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
   <Link
