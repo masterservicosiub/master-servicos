@@ -136,20 +136,20 @@ const Index = () => {
               profissional e com garantia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
-              <Link
-                to="/orcamento"
-                className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
-              >
-                <Zap className="w-5 h-5" /> Serviços Residenciais
-              </Link>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
-              <Link
-                to="/orcamento"
-                className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
-              >
-                <Zap className="w-5 h-5" /> Serviços Residenciais
-              </Link>
-            </div>
+  <Link
+    to="/orcamento"
+    className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
+  >
+    <Zap className="w-5 h-5" /> Serviços Residenciais
+  </Link>
+
+  <Link
+    to="/servicos-graficos"
+    className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
+  >
+    Serviços Gráficos <ArrowRight className="w-5 h-5" />
+  </Link>
+</div>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-primary-foreground/90 animate-fade-in-up [animation-delay:480ms]">
               <div className="flex items-center gap-2">
