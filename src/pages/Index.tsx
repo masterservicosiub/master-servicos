@@ -145,9 +145,9 @@ const Index = () => {
 
   <Link
     to="/servicos-graficos"
-    className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
+    className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
   >
-    Serviços Gráficos <ArrowRight className="w-5 h-5" />
+    <Zap className="w-5 h-5" /> Serviços Gráficos
   </Link>
 </div>
 
