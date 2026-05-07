@@ -136,18 +136,21 @@ const Index = () => {
               profissional e com garantia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
+  import { Printer, Wrench, ArrowRight } from "lucide-react";
+
+<div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
   <Link
     to="/orcamento"
     className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
   >
-    <Zap className="w-5 h-5" /> Serviços Residenciais
+    <Wrench className="w-5 h-5" /> Serviços Residenciais
   </Link>
 
   <Link
     to="/servicos-graficos"
-    className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
+    className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
   >
-    <Zap className="w-5 h-5" /> Serviços Gráficos
+    <Printer className="w-5 h-5" /> Serviços Gráficos
   </Link>
 </div>
 
