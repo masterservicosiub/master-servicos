@@ -3019,6 +3019,12 @@ const Admin = () => {
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                               />
                             )}
+                            <input
+                              value={editSvcLink}
+                              onChange={(e) => setEditSvcLink(e.target.value)}
+                              placeholder="Link do card (ex: /servicos-residenciais ou https://...)"
+                              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                            />
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEditService(s.id!)}
@@ -3061,6 +3067,7 @@ const Admin = () => {
                                   setEditSvcImage(s.image_url || "");
                                   setEditSvcVideo(s.video_url || "");
                                   setEditSvcMediaType((s.media_type as "image" | "video") || "image");
+                                  setEditSvcLink(s.link_url || "");
                                 }}
                                 className="text-primary hover:opacity-70"
                                 title="Editar"
