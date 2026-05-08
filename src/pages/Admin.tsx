@@ -323,6 +323,7 @@ const Admin = () => {
   const [svcImage, setSvcImage] = useState("");
   const [svcMediaType, setSvcMediaType] = useState<"image" | "video">("image");
   const [svcVideo, setSvcVideo] = useState("");
+  const [svcLink, setSvcLink] = useState("");
   const [svcUploading, setSvcUploading] = useState(false);
   const [editingSvcId, setEditingSvcId] = useState<string | null>(null);
   const [editSvcTitle, setEditSvcTitle] = useState("");
@@ -331,6 +332,7 @@ const Admin = () => {
   const [editSvcMediaType, setEditSvcMediaType] = useState<"image" | "video">("image");
   const [editSvcVideo, setEditSvcVideo] = useState("");
   const [editSvcUploading, setEditSvcUploading] = useState(false);
+  const [editSvcLink, setEditSvcLink] = useState("");
 
   // Budget services management
   const [budgetServices, setBudgetServices] = useState<BudgetServiceRow[]>([]);
