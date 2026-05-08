@@ -69,16 +69,9 @@ const Header = () => {
           <Link
             to="/cliente"
             onClick={() => setMenuOpen(false)}
-            className="block text-sm font-medium text-muted-foreground hover:text-primary"
+            className="block bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold text-center hover:opacity-90 transition-opacity"
           >
-            {hasClient ? "Minha Conta" : "Entrar / Cadastrar"}
-          </Link>
-          <Link
-            to="/servicos-residenciais"
-            onClick={() => setMenuOpen(false)}
-            className="block bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold text-center"
-          >
-            Solicitar Orçamento
+            <User className="w-4 h-4 inline-block mr-1" /> {hasClient ? "Minha Conta" : "Entrar / Cadastrar"}
           </Link>
         </div>
       )}
