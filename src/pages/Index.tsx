@@ -203,12 +203,9 @@ const Index = () => {
                 const gradient = cardGradients[i % cardGradients.length];
                 const isVideo = s.media_type === "video" && (s.video_url || "").trim() !== "";
                 const imageSrc = (s.image_url || "").trim();
-                return (
-                  <div
-                    key={s.id}
-                    className="group relative overflow-hidden bg-card rounded-2xl border-2 border-border hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up"
-                    style={{ animationDelay: `${i * 80}ms` }}
-                  >
+                const linkUrl = (s.link_url || "").trim();
+                const cardInner = (
+                  <>
                     <div className="aspect-video bg-muted overflow-hidden">
                       {isVideo ? (
                         <video
@@ -242,6 +239,29 @@ const Index = () => {
                       <h3 className="font-bold text-lg text-card-foreground mb-1">{s.title}</h3>
                       <p className="text-muted-foreground text-sm">{s.description}</p>
                     </div>
+                  </>
+                );
+                const className =
+                  "group relative block overflow-hidden bg-card rounded-2xl border-2 border-border hover:border-primary/40 transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up";
+                const style = { animationDelay: `${i * 80}ms` };
+                if (linkUrl) {
+                  const isExternal = /^https?:\/\//i.test(linkUrl);
+                  if (isExternal) {
+                    return (
+                      <a key={s.id} href={linkUrl} target="_blank" rel="noopener noreferrer" className={className} style={style}>
+                        {cardInner}
+                      </a>
+                    );
+                  }
+                  return (
+                    <Link key={s.id} to={linkUrl} className={className} style={style}>
+                      {cardInner}
+                    </Link>
+                  );
+                }
+                return (
+                  <div key={s.id} className={className} style={style}>
+                    {cardInner}
                   </div>
                 );
               })}
