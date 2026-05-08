@@ -43,17 +43,11 @@ const Header = () => {
           ))}
           <Link
             to="/cliente"
-            className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
-              location.pathname === "/cliente" ? "text-primary" : "text-muted-foreground"
+            className={`flex items-center gap-1 bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity ${
+              location.pathname === "/cliente" ? "opacity-100" : ""
             }`}
           >
             <User className="w-4 h-4" /> {hasClient ? "Minha Conta" : "Entrar"}
-          </Link>
-          <Link
-            to="/servicos-residenciais"
-            className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
-            Solicitar Orçamento
           </Link>
         </nav>
         <button className="md:hidden text-foreground" onClick={() => setMenuOpen(!menuOpen)}>
