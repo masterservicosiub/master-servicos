@@ -92,6 +92,7 @@ export interface ServiceRow {
   video_url?: string;
   sort_order?: number;
   active?: boolean;
+  link_url?: string;
 }
 
 export async function fetchServicesAdmin(): Promise<ServiceRow[]> {

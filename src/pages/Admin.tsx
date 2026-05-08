@@ -323,6 +323,7 @@ const Admin = () => {
   const [svcImage, setSvcImage] = useState("");
   const [svcMediaType, setSvcMediaType] = useState<"image" | "video">("image");
   const [svcVideo, setSvcVideo] = useState("");
+  const [svcLink, setSvcLink] = useState("");
   const [svcUploading, setSvcUploading] = useState(false);
   const [editingSvcId, setEditingSvcId] = useState<string | null>(null);
   const [editSvcTitle, setEditSvcTitle] = useState("");
@@ -331,6 +332,7 @@ const Admin = () => {
   const [editSvcMediaType, setEditSvcMediaType] = useState<"image" | "video">("image");
   const [editSvcVideo, setEditSvcVideo] = useState("");
   const [editSvcUploading, setEditSvcUploading] = useState(false);
+  const [editSvcLink, setEditSvcLink] = useState("");
 
   // Budget services management
   const [budgetServices, setBudgetServices] = useState<BudgetServiceRow[]>([]);
@@ -867,6 +869,7 @@ const Admin = () => {
         image_url: svcImage.trim(),
         media_type: svcMediaType,
         video_url: svcVideo.trim(),
+        link_url: svcLink.trim(),
         active: true,
         sort_order: services.length,
       });
@@ -875,6 +878,7 @@ const Admin = () => {
       setSvcImage("");
       setSvcVideo("");
       setSvcMediaType("image");
+      setSvcLink("");
       toast.success("Serviço adicionado!");
       loadServices();
     } catch {
@@ -890,6 +894,7 @@ const Admin = () => {
         image_url: editSvcImage,
         media_type: editSvcMediaType,
         video_url: editSvcVideo,
+        link_url: editSvcLink,
       });
       setEditingSvcId(null);
       toast.success("Serviço atualizado!");
@@ -2931,6 +2936,12 @@ const Admin = () => {
                     <video src={svcVideo} className="w-40 h-24 object-cover rounded-lg border border-border" muted controls />
                   )}
                 </div>
+                <input
+                  value={svcLink}
+                  onChange={(e) => setSvcLink(e.target.value)}
+                  placeholder="Link do card (ex: /servicos-residenciais ou https://...)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
                 <button
                   onClick={handleAddService}
                   className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
@@ -3008,6 +3019,12 @@ const Admin = () => {
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                               />
                             )}
+                            <input
+                              value={editSvcLink}
+                              onChange={(e) => setEditSvcLink(e.target.value)}
+                              placeholder="Link do card (ex: /servicos-residenciais ou https://...)"
+                              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                            />
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEditService(s.id!)}
@@ -3050,6 +3067,7 @@ const Admin = () => {
                                   setEditSvcImage(s.image_url || "");
                                   setEditSvcVideo(s.video_url || "");
                                   setEditSvcMediaType((s.media_type as "image" | "video") || "image");
+                                  setEditSvcLink(s.link_url || "");
                                 }}
                                 className="text-primary hover:opacity-70"
                                 title="Editar"
