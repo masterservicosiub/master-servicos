@@ -869,6 +869,7 @@ const Admin = () => {
         image_url: svcImage.trim(),
         media_type: svcMediaType,
         video_url: svcVideo.trim(),
+        link_url: svcLink.trim(),
         active: true,
         sort_order: services.length,
       });
@@ -877,6 +878,7 @@ const Admin = () => {
       setSvcImage("");
       setSvcVideo("");
       setSvcMediaType("image");
+      setSvcLink("");
       toast.success("Serviço adicionado!");
       loadServices();
     } catch {
@@ -892,6 +894,7 @@ const Admin = () => {
         image_url: editSvcImage,
         media_type: editSvcMediaType,
         video_url: editSvcVideo,
+        link_url: editSvcLink,
       });
       setEditingSvcId(null);
       toast.success("Serviço atualizado!");
