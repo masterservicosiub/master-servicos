@@ -2936,6 +2936,12 @@ const Admin = () => {
                     <video src={svcVideo} className="w-40 h-24 object-cover rounded-lg border border-border" muted controls />
                   )}
                 </div>
+                <input
+                  value={svcLink}
+                  onChange={(e) => setSvcLink(e.target.value)}
+                  placeholder="Link do card (ex: /servicos-residenciais ou https://...)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
+                />
                 <button
                   onClick={handleAddService}
                   className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
