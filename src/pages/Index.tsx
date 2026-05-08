@@ -10,16 +10,13 @@ import {
   Search,
   UserPlus,
   Percent,
-  Sparkles,
   ArrowRight,
   Star,
   ShieldCheck,
-  Zap,
   Wrench,
   Printer
 } from "lucide-react";
 import logo from "@/assets/logo.png";
-import sloganBanner from "@/assets/slogan-banner.png";
 import heroBg from "@/assets/hero-bg.png";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -27,7 +24,6 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import StatsCounter from "@/components/StatsCounter";
 import HowItWorks from "@/components/HowItWorks";
-import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { fetchActiveServices, type ServiceRow } from "@/lib/supabase";
 
 const defaultServices = [
@@ -102,7 +98,6 @@ const benefits = [
 ];
 
 const Index = () => {
-  const info = useCompanyInfo();
   const [dbServices, setDbServices] = useState<ServiceRow[] | null>(null);
 
   useEffect(() => {
