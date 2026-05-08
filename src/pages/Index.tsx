@@ -10,13 +10,16 @@ import {
   Search,
   UserPlus,
   Percent,
+  Sparkles,
   ArrowRight,
   Star,
   ShieldCheck,
+  Zap,
   Wrench,
-  Printer
+  Printer,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
+import sloganBanner from "@/assets/slogan-banner.png";
 import heroBg from "@/assets/hero-bg.png";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -24,6 +27,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
 import StatsCounter from "@/components/StatsCounter";
 import HowItWorks from "@/components/HowItWorks";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { fetchActiveServices, type ServiceRow } from "@/lib/supabase";
 
 const defaultServices = [
@@ -98,6 +102,7 @@ const benefits = [
 ];
 
 const Index = () => {
+  const info = useCompanyInfo();
   const [dbServices, setDbServices] = useState<ServiceRow[] | null>(null);
 
   useEffect(() => {
@@ -128,25 +133,24 @@ const Index = () => {
             </h1>
 
             <p className="text-white/90 max-w-2xl mx-auto mb-6">
-              Detecção de Vazamento, Encanador, Limpeza de caixa d'Água, Roçagem e Serviços Gráficos em Itumbiara. Atendimento rápido,
-              profissional e com garantia.
+              Detecção de Vazamento, Encanador, Limpeza de caixa d'Água, Roçagem e Serviços Gráficos em Itumbiara.
+              Atendimento rápido, profissional e com garantia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
+              <Link
+                to="/orcamento"
+                className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
+              >
+                <Wrench className="w-5 h-5" /> Serviços Residenciais
+              </Link>
 
-  <Link
-    to="/orcamento"
-    className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
-  >
-    <Wrench className="w-5 h-5" /> Serviços Residenciais
-  </Link>
-
-  <Link
-    to="/servicos-graficos"
-    className="inline-flex items-center justify-center gap-2 bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 hover:scale-105 transition-all"
-  >
-    <Printer className="w-5 h-5" /> Serviços Gráficos
-  </Link>
-</div>
+              <Link
+                to="/servicos-graficos"
+                className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
+              >
+                <Printer className="w-5 h-5" /> Serviços Gráficos
+              </Link>
+            </div>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-primary-foreground/90 animate-fade-in-up [animation-delay:480ms]">
               <div className="flex items-center gap-2">
@@ -358,7 +362,6 @@ const Index = () => {
         </div>
       </section>
 
-    
       <Footer />
       <WhatsAppFloat />
     </div>
