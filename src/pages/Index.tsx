@@ -138,7 +138,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
               <Link
-                to="/orcamento"
+                to="/servicos-residenciais"
                 className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
               >
                 <Wrench className="w-5 h-5" /> Serviços Residenciais
