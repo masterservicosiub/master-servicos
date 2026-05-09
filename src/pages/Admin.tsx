@@ -290,7 +290,7 @@ const Admin = () => {
   // Affiliate Materials state
   const [materials, setMaterials] = useState<AffiliateMaterialRow[]>([]);
   const [materialOrders, setMaterialOrders] = useState<AffiliateMaterialOrderRow[]>([]);
-  const [materialEdits, setMaterialEdits] = useState<Record<string, { name: string; description: string; price: string; active: boolean }>>({});
+  const [materialEdits, setMaterialEdits] = useState<Record<string, { name: string; description: string; price: string; active: boolean; image_url: string }>>({});
 
   // Star rates + ranking
   const [starRates, setStarRates] = useState<AffiliateStarRateRow[]>([...DEFAULT_STAR_RATES].reverse());
@@ -594,13 +594,14 @@ const Admin = () => {
       rates.forEach((r) => (rEdits[r.stars] = String(r.percent)));
       setStarRateEdits(rEdits);
       setTopRanking(ranking);
-      const edits: Record<string, { name: string; description: string; price: string; active: boolean }> = {};
+      const edits: Record<string, { name: string; description: string; price: string; active: boolean; image_url: string }> = {};
       mats.forEach((m) => {
         edits[m.id] = {
           name: m.name,
           description: m.description || "",
           price: String(m.price ?? 0),
           active: m.active !== false,
+          image_url: m.image_url || "",
         };
       });
       setMaterialEdits(edits);
@@ -2284,7 +2285,7 @@ const Admin = () => {
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4">
                     {materials.map((m) => {
-                      const ed = materialEdits[m.id] || { name: m.name, description: m.description || "", price: String(m.price || 0), active: m.active !== false };
+                      const ed = materialEdits[m.id] || { name: m.name, description: m.description || "", price: String(m.price || 0), active: m.active !== false, image_url: m.image_url || "" };
                       return (
                         <div key={m.id} className="border border-border rounded-lg p-4 space-y-2">
                           <input
@@ -2304,6 +2305,21 @@ const Admin = () => {
                             placeholder="Descrição"
                             rows={2}
                           />
+                          <input
+                            value={ed.image_url}
+                            onChange={(e) =>
+                              setMaterialEdits((p) => ({ ...p, [m.id]: { ...ed, image_url: e.target.value } }))
+                            }
+                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                            placeholder="URL da imagem (catálogo)"
+                          />
+                          {ed.image_url && (
+                            <img
+                              src={ed.image_url}
+                              alt={ed.name}
+                              className="w-full h-32 object-cover rounded-md border border-border"
+                            />
+                          )}
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">R$</span>
                             <input
@@ -2335,6 +2351,7 @@ const Admin = () => {
                                   description: ed.description,
                                   price: Number(ed.price) || 0,
                                   active: ed.active,
+                                  image_url: ed.image_url.trim(),
                                 });
                                 toast.success("Material atualizado!");
                                 loadAntifraud();
