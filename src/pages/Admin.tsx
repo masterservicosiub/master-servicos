@@ -2599,11 +2599,12 @@ const Admin = () => {
                   />
                   <select
                     value={bsType}
-                    onChange={(e) => setBsType(e.target.value as "fixed" | "area")}
+                    onChange={(e) => setBsType(e.target.value as "fixed" | "area" | "quantity")}
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="fixed">Preço Fixo (por unidade)</option>
                     <option value="area">Por Área (m²)</option>
+                    <option value="quantity">Por Quantidade (faixas)</option>
                   </select>
                 </div>
                 <input
@@ -2639,7 +2640,7 @@ const Admin = () => {
                     placeholder="Preço fixo (R$) *"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                   />
-                ) : (
+                ) : bsType === "area" ? (
                   <div className="grid sm:grid-cols-2 gap-4 mb-4">
                     <input
                       type="number"
@@ -2660,6 +2661,51 @@ const Admin = () => {
                       value={bsTier3}
                       onChange={(e) => setBsTier3(e.target.value)}
                       placeholder="Preço/m² acima 100m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsMinPrice}
+                      onChange={(e) => setBsMinPrice(e.target.value)}
+                      placeholder="Preço mínimo (R$)"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="number"
+                      value={bsQtyT1}
+                      onChange={(e) => setBsQtyT1(e.target.value)}
+                      placeholder="Faixa 1 - até X unidades"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier1}
+                      onChange={(e) => setBsTier1(e.target.value)}
+                      placeholder="R$/un na faixa 1"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsQtyT2}
+                      onChange={(e) => setBsQtyT2(e.target.value)}
+                      placeholder="Faixa 2 - até Y unidades"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier2}
+                      onChange={(e) => setBsTier2(e.target.value)}
+                      placeholder="R$/un na faixa 2"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier3}
+                      onChange={(e) => setBsTier3(e.target.value)}
+                      placeholder="R$/un acima da faixa 2"
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
@@ -2693,11 +2739,12 @@ const Admin = () => {
                               />
                               <select
                                 value={editBsType}
-                                onChange={(e) => setEditBsType(e.target.value as "fixed" | "area")}
+                                onChange={(e) => setEditBsType(e.target.value as "fixed" | "area" | "quantity")}
                                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               >
                                 <option value="fixed">Preço Fixo</option>
                                 <option value="area">Por Área (m²)</option>
+                                <option value="quantity">Por Quantidade</option>
                               </select>
                             </div>
                             <input
@@ -2728,7 +2775,7 @@ const Admin = () => {
                                 placeholder="Preço fixo"
                                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               />
-                            ) : (
+                            ) : editBsType === "area" ? (
                               <div className="grid sm:grid-cols-2 gap-3">
                                 <input
                                   type="number"
@@ -2749,6 +2796,51 @@ const Admin = () => {
                                   value={editBsTier3}
                                   onChange={(e) => setEditBsTier3(e.target.value)}
                                   placeholder="R$/m² +100m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsMinPrice}
+                                  onChange={(e) => setEditBsMinPrice(e.target.value)}
+                                  placeholder="Preço mínimo"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                              </div>
+                            ) : (
+                              <div className="grid sm:grid-cols-2 gap-3">
+                                <input
+                                  type="number"
+                                  value={editBsQtyT1}
+                                  onChange={(e) => setEditBsQtyT1(e.target.value)}
+                                  placeholder="Faixa 1 - até X un."
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier1}
+                                  onChange={(e) => setEditBsTier1(e.target.value)}
+                                  placeholder="R$/un na faixa 1"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsQtyT2}
+                                  onChange={(e) => setEditBsQtyT2(e.target.value)}
+                                  placeholder="Faixa 2 - até Y un."
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier2}
+                                  onChange={(e) => setEditBsTier2(e.target.value)}
+                                  placeholder="R$/un na faixa 2"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier3}
+                                  onChange={(e) => setEditBsTier3(e.target.value)}
+                                  placeholder="R$/un acima da faixa 2"
                                   className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 />
                                 <input
@@ -2815,7 +2907,9 @@ const Admin = () => {
                                 <p className="text-sm text-muted-foreground">
                                   {bs.type === "fixed"
                                     ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}`
-                                    : `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
+                                    : bs.type === "area"
+                                    ? `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`
+                                    : `Por quantidade | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
                                 {bs.category && (
                                   <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
