@@ -646,6 +646,7 @@ export interface AffiliateMaterialRow {
   description: string;
   price: number;
   active: boolean;
+  image_url?: string;
   updated_at?: string;
 }
 
