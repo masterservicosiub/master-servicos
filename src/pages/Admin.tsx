@@ -594,13 +594,14 @@ const Admin = () => {
       rates.forEach((r) => (rEdits[r.stars] = String(r.percent)));
       setStarRateEdits(rEdits);
       setTopRanking(ranking);
-      const edits: Record<string, { name: string; description: string; price: string; active: boolean }> = {};
+      const edits: Record<string, { name: string; description: string; price: string; active: boolean; image_url: string }> = {};
       mats.forEach((m) => {
         edits[m.id] = {
           name: m.name,
           description: m.description || "",
           price: String(m.price ?? 0),
           active: m.active !== false,
+          image_url: m.image_url || "",
         };
       });
       setMaterialEdits(edits);
