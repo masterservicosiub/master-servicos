@@ -758,6 +758,28 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                           </div>
                         )}
 
+                        {def.type === "quantity" && (
+                          <div className="space-y-2 mb-2">
+                            <div className="flex items-center gap-3">
+                              <label className="text-sm text-muted-foreground">Qtd:</label>
+                              <input
+                                type="number"
+                                min={1}
+                                value={svc.quantity}
+                                onChange={(e) => updateField(svc.instanceId, "quantity", Math.max(1, Number(e.target.value)))}
+                                className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
+                            </div>
+                            {def.qtyTiers && def.qtyTiers.length >= 3 && (
+                              <p className="text-xs text-muted-foreground">
+                                Até {def.qtyTiers[0].maxQty} un.: {formatBRL(def.qtyTiers[0].pricePerUnit)}/un · até {def.qtyTiers[1].maxQty} un.: {formatBRL(def.qtyTiers[1].pricePerUnit)}/un · acima: {formatBRL(def.qtyTiers[2].pricePerUnit)}/un
+                                {def.minPrice ? ` · Mínimo: ${formatBRL(def.minPrice)}` : ""}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
                         {def.type === "area" && (
                           <div className="space-y-2 mb-2">
                             <div className="flex flex-wrap items-center gap-3">
