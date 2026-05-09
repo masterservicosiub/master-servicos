@@ -2839,10 +2839,18 @@ const Admin = () => {
                                   setEditBsType(bs.type);
                                   setEditBsFixedPrice(String(bs.fixed_price || ""));
                                   setEditBsMinPrice(String(bs.min_price || ""));
-                                  const t = bs.tiers || [];
-                                  setEditBsTier1(String(t[0]?.pricePerM2 || ""));
-                                  setEditBsTier2(String(t[1]?.pricePerM2 || ""));
-                                  setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                  const t: any[] = (bs.tiers as any[]) || [];
+                                  if (bs.type === "quantity") {
+                                    setEditBsTier1(String(t[0]?.pricePerUnit || ""));
+                                    setEditBsTier2(String(t[1]?.pricePerUnit || ""));
+                                    setEditBsTier3(String(t[2]?.pricePerUnit || ""));
+                                    setEditBsQtyT1(String(t[0]?.maxQty || "10"));
+                                    setEditBsQtyT2(String(t[1]?.maxQty || "50"));
+                                  } else {
+                                    setEditBsTier1(String(t[0]?.pricePerM2 || ""));
+                                    setEditBsTier2(String(t[1]?.pricePerM2 || ""));
+                                    setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                  }
                                   setEditBsImage(bs.image_url || "");
                                   setEditBsDescription(bs.description || "");
                                   setEditBsCategory(bs.category || "");
