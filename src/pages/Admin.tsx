@@ -931,6 +931,12 @@ const Admin = () => {
             { maxArea: 100, pricePerM2: parseFloat(bsTier2) || 0 },
             { maxArea: Infinity, pricePerM2: parseFloat(bsTier3) || 0 },
           ]
+        : bsType === "quantity"
+        ? [
+            { maxQty: parseFloat(bsQtyT1) || 10, pricePerUnit: parseFloat(bsTier1) || 0 },
+            { maxQty: parseFloat(bsQtyT2) || 50, pricePerUnit: parseFloat(bsTier2) || 0 },
+            { maxQty: Infinity, pricePerUnit: parseFloat(bsTier3) || 0 },
+          ]
         : null;
     try {
       await insertBudgetService({
@@ -969,6 +975,12 @@ const Admin = () => {
             { maxArea: 50, pricePerM2: parseFloat(editBsTier1) || 0 },
             { maxArea: 100, pricePerM2: parseFloat(editBsTier2) || 0 },
             { maxArea: Infinity, pricePerM2: parseFloat(editBsTier3) || 0 },
+          ]
+        : editBsType === "quantity"
+        ? [
+            { maxQty: parseFloat(editBsQtyT1) || 10, pricePerUnit: parseFloat(editBsTier1) || 0 },
+            { maxQty: parseFloat(editBsQtyT2) || 50, pricePerUnit: parseFloat(editBsTier2) || 0 },
+            { maxQty: Infinity, pricePerUnit: parseFloat(editBsTier3) || 0 },
           ]
         : null;
     try {
