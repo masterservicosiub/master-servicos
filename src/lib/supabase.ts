@@ -153,9 +153,12 @@ export interface BudgetServiceRow {
   id?: string;
   created_at?: string;
   name: string;
-  type: "fixed" | "area";
+  type: "fixed" | "area" | "quantity";
   fixed_price: number;
-  tiers: { maxArea: number; pricePerM2: number }[] | null;
+  tiers:
+    | { maxArea: number; pricePerM2: number }[]
+    | { maxQty: number; pricePerUnit: number }[]
+    | null;
   min_price: number;
   sort_order: number;
   image_url?: string;
