@@ -1352,6 +1352,13 @@ const Afiliados = () => {
                 const total = Number(m.price || 0) * qty;
                 return (
                   <div key={m.id} className="border border-border rounded-lg p-4 flex flex-col">
+                    {m.image_url && (
+                      <img
+                        src={m.image_url}
+                        alt={m.name}
+                        className="w-full h-36 object-cover rounded-md border border-border mb-3"
+                      />
+                    )}
                     <div className="flex items-center gap-2 mb-2">
                       <Package className="w-5 h-5 text-primary" />
                       <h3 className="font-semibold text-card-foreground">{m.name}</h3>
