@@ -337,23 +337,27 @@ const Admin = () => {
   // Budget services management
   const [budgetServices, setBudgetServices] = useState<BudgetServiceRow[]>([]);
   const [bsName, setBsName] = useState("");
-  const [bsType, setBsType] = useState<"fixed" | "area">("fixed");
+  const [bsType, setBsType] = useState<"fixed" | "area" | "quantity">("fixed");
   const [bsFixedPrice, setBsFixedPrice] = useState("");
   const [bsMinPrice, setBsMinPrice] = useState("");
   const [bsTier1, setBsTier1] = useState("");
   const [bsTier2, setBsTier2] = useState("");
   const [bsTier3, setBsTier3] = useState("");
+  const [bsQtyT1, setBsQtyT1] = useState("10");
+  const [bsQtyT2, setBsQtyT2] = useState("50");
   const [bsImage, setBsImage] = useState("");
   const [bsDescription, setBsDescription] = useState("");
   const [bsCategory, setBsCategory] = useState("");
   const [editingBsId, setEditingBsId] = useState<string | null>(null);
   const [editBsName, setEditBsName] = useState("");
-  const [editBsType, setEditBsType] = useState<"fixed" | "area">("fixed");
+  const [editBsType, setEditBsType] = useState<"fixed" | "area" | "quantity">("fixed");
   const [editBsFixedPrice, setEditBsFixedPrice] = useState("");
   const [editBsMinPrice, setEditBsMinPrice] = useState("");
   const [editBsTier1, setEditBsTier1] = useState("");
   const [editBsTier2, setEditBsTier2] = useState("");
   const [editBsTier3, setEditBsTier3] = useState("");
+  const [editBsQtyT1, setEditBsQtyT1] = useState("10");
+  const [editBsQtyT2, setEditBsQtyT2] = useState("50");
   const [editBsImage, setEditBsImage] = useState("");
   const [editBsDescription, setEditBsDescription] = useState("");
   const [editBsCategory, setEditBsCategory] = useState("");
@@ -927,6 +931,12 @@ const Admin = () => {
             { maxArea: 100, pricePerM2: parseFloat(bsTier2) || 0 },
             { maxArea: Infinity, pricePerM2: parseFloat(bsTier3) || 0 },
           ]
+        : bsType === "quantity"
+        ? [
+            { maxQty: parseFloat(bsQtyT1) || 10, pricePerUnit: parseFloat(bsTier1) || 0 },
+            { maxQty: parseFloat(bsQtyT2) || 50, pricePerUnit: parseFloat(bsTier2) || 0 },
+            { maxQty: Infinity, pricePerUnit: parseFloat(bsTier3) || 0 },
+          ]
         : null;
     try {
       await insertBudgetService({
@@ -965,6 +975,12 @@ const Admin = () => {
             { maxArea: 50, pricePerM2: parseFloat(editBsTier1) || 0 },
             { maxArea: 100, pricePerM2: parseFloat(editBsTier2) || 0 },
             { maxArea: Infinity, pricePerM2: parseFloat(editBsTier3) || 0 },
+          ]
+        : editBsType === "quantity"
+        ? [
+            { maxQty: parseFloat(editBsQtyT1) || 10, pricePerUnit: parseFloat(editBsTier1) || 0 },
+            { maxQty: parseFloat(editBsQtyT2) || 50, pricePerUnit: parseFloat(editBsTier2) || 0 },
+            { maxQty: Infinity, pricePerUnit: parseFloat(editBsTier3) || 0 },
           ]
         : null;
     try {
@@ -2583,11 +2599,12 @@ const Admin = () => {
                   />
                   <select
                     value={bsType}
-                    onChange={(e) => setBsType(e.target.value as "fixed" | "area")}
+                    onChange={(e) => setBsType(e.target.value as "fixed" | "area" | "quantity")}
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="fixed">Preço Fixo (por unidade)</option>
                     <option value="area">Por Área (m²)</option>
+                    <option value="quantity">Por Quantidade (faixas)</option>
                   </select>
                 </div>
                 <input
@@ -2623,7 +2640,7 @@ const Admin = () => {
                     placeholder="Preço fixo (R$) *"
                     className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                   />
-                ) : (
+                ) : bsType === "area" ? (
                   <div className="grid sm:grid-cols-2 gap-4 mb-4">
                     <input
                       type="number"
@@ -2644,6 +2661,51 @@ const Admin = () => {
                       value={bsTier3}
                       onChange={(e) => setBsTier3(e.target.value)}
                       placeholder="Preço/m² acima 100m²"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsMinPrice}
+                      onChange={(e) => setBsMinPrice(e.target.value)}
+                      placeholder="Preço mínimo (R$)"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="number"
+                      value={bsQtyT1}
+                      onChange={(e) => setBsQtyT1(e.target.value)}
+                      placeholder="Faixa 1 - até X unidades"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier1}
+                      onChange={(e) => setBsTier1(e.target.value)}
+                      placeholder="R$/un na faixa 1"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsQtyT2}
+                      onChange={(e) => setBsQtyT2(e.target.value)}
+                      placeholder="Faixa 2 - até Y unidades"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier2}
+                      onChange={(e) => setBsTier2(e.target.value)}
+                      placeholder="R$/un na faixa 2"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <input
+                      type="number"
+                      value={bsTier3}
+                      onChange={(e) => setBsTier3(e.target.value)}
+                      placeholder="R$/un acima da faixa 2"
                       className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
@@ -2677,11 +2739,12 @@ const Admin = () => {
                               />
                               <select
                                 value={editBsType}
-                                onChange={(e) => setEditBsType(e.target.value as "fixed" | "area")}
+                                onChange={(e) => setEditBsType(e.target.value as "fixed" | "area" | "quantity")}
                                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               >
                                 <option value="fixed">Preço Fixo</option>
                                 <option value="area">Por Área (m²)</option>
+                                <option value="quantity">Por Quantidade</option>
                               </select>
                             </div>
                             <input
@@ -2712,7 +2775,7 @@ const Admin = () => {
                                 placeholder="Preço fixo"
                                 className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               />
-                            ) : (
+                            ) : editBsType === "area" ? (
                               <div className="grid sm:grid-cols-2 gap-3">
                                 <input
                                   type="number"
@@ -2733,6 +2796,51 @@ const Admin = () => {
                                   value={editBsTier3}
                                   onChange={(e) => setEditBsTier3(e.target.value)}
                                   placeholder="R$/m² +100m²"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsMinPrice}
+                                  onChange={(e) => setEditBsMinPrice(e.target.value)}
+                                  placeholder="Preço mínimo"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                              </div>
+                            ) : (
+                              <div className="grid sm:grid-cols-2 gap-3">
+                                <input
+                                  type="number"
+                                  value={editBsQtyT1}
+                                  onChange={(e) => setEditBsQtyT1(e.target.value)}
+                                  placeholder="Faixa 1 - até X un."
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier1}
+                                  onChange={(e) => setEditBsTier1(e.target.value)}
+                                  placeholder="R$/un na faixa 1"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsQtyT2}
+                                  onChange={(e) => setEditBsQtyT2(e.target.value)}
+                                  placeholder="Faixa 2 - até Y un."
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier2}
+                                  onChange={(e) => setEditBsTier2(e.target.value)}
+                                  placeholder="R$/un na faixa 2"
+                                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                />
+                                <input
+                                  type="number"
+                                  value={editBsTier3}
+                                  onChange={(e) => setEditBsTier3(e.target.value)}
+                                  placeholder="R$/un acima da faixa 2"
                                   className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 />
                                 <input
@@ -2799,7 +2907,9 @@ const Admin = () => {
                                 <p className="text-sm text-muted-foreground">
                                   {bs.type === "fixed"
                                     ? `Preço fixo: R$ ${Number(bs.fixed_price).toFixed(2)}`
-                                    : `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
+                                    : bs.type === "area"
+                                    ? `Por m² | Mín: R$ ${Number(bs.min_price).toFixed(2)}`
+                                    : `Por quantidade | Mín: R$ ${Number(bs.min_price).toFixed(2)}`}
                                 </p>
                                 {bs.category && (
                                   <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
@@ -2823,10 +2933,18 @@ const Admin = () => {
                                   setEditBsType(bs.type);
                                   setEditBsFixedPrice(String(bs.fixed_price || ""));
                                   setEditBsMinPrice(String(bs.min_price || ""));
-                                  const t = bs.tiers || [];
-                                  setEditBsTier1(String(t[0]?.pricePerM2 || ""));
-                                  setEditBsTier2(String(t[1]?.pricePerM2 || ""));
-                                  setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                  const t: any[] = (bs.tiers as any[]) || [];
+                                  if (bs.type === "quantity") {
+                                    setEditBsTier1(String(t[0]?.pricePerUnit || ""));
+                                    setEditBsTier2(String(t[1]?.pricePerUnit || ""));
+                                    setEditBsTier3(String(t[2]?.pricePerUnit || ""));
+                                    setEditBsQtyT1(String(t[0]?.maxQty || "10"));
+                                    setEditBsQtyT2(String(t[1]?.maxQty || "50"));
+                                  } else {
+                                    setEditBsTier1(String(t[0]?.pricePerM2 || ""));
+                                    setEditBsTier2(String(t[1]?.pricePerM2 || ""));
+                                    setEditBsTier3(String(t[2]?.pricePerM2 || ""));
+                                  }
                                   setEditBsImage(bs.image_url || "");
                                   setEditBsDescription(bs.description || "");
                                   setEditBsCategory(bs.category || "");

@@ -17,7 +17,7 @@ import {
   runFraudCheck,
 } from "@/lib/antifraud";
 
-type ServiceType = "fixed" | "area";
+type ServiceType = "fixed" | "area" | "quantity";
 
 interface ServiceDef {
   id: string;
@@ -25,6 +25,7 @@ interface ServiceDef {
   type: ServiceType;
   fixedPrice?: number;
   tiers?: { maxArea: number; pricePerM2: number }[];
+  qtyTiers?: { maxQty: number; pricePerUnit: number }[];
   minPrice?: number;
   imageUrl?: string;
   description?: string;
@@ -108,6 +109,13 @@ function calcPrice(def: ServiceDef, svc: SelectedService): number {
   if (def.type === "fixed") {
     return (def.fixedPrice ?? 0) * svc.quantity;
   }
+  if (def.type === "quantity") {
+    const qty = Math.max(1, svc.quantity || 1);
+    const tier =
+      def.qtyTiers?.find((t) => qty <= t.maxQty) ?? def.qtyTiers?.[def.qtyTiers.length - 1];
+    const raw = qty * (tier?.pricePerUnit ?? 0);
+    return Math.max(raw, def.minPrice ?? 0);
+  }
   const area = svc.width * svc.height;
   if (area <= 0) return 0;
   const tier = def.tiers?.find((t) => area <= t.maxArea) ?? def.tiers?.[def.tiers.length - 1];
@@ -167,20 +175,32 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
     fetchBudgetServices(kind)
       .then((data) => {
         if (data.length > 0) {
-          const mapped: ServiceDef[] = data.map((bs) => ({
-            id: bs.id!,
-            name: bs.name,
-            type: bs.type as ServiceType,
-            fixedPrice: bs.fixed_price,
-            tiers: bs.tiers?.map((t: any) => ({
-              maxArea: t.maxArea === null ? Infinity : t.maxArea,
-              pricePerM2: t.pricePerM2,
-            })),
-            minPrice: bs.min_price,
-            imageUrl: bs.image_url || "",
-            description: bs.description || "",
-            category: bs.category || "",
-          }));
+          const mapped: ServiceDef[] = data.map((bs) => {
+            const rawTiers = (bs.tiers as any[]) || undefined;
+            const isQty = bs.type === "quantity";
+            return {
+              id: bs.id!,
+              name: bs.name,
+              type: bs.type as ServiceType,
+              fixedPrice: bs.fixed_price,
+              tiers: !isQty
+                ? rawTiers?.map((t: any) => ({
+                    maxArea: t.maxArea === null ? Infinity : t.maxArea,
+                    pricePerM2: t.pricePerM2,
+                  }))
+                : undefined,
+              qtyTiers: isQty
+                ? rawTiers?.map((t: any) => ({
+                    maxQty: t.maxQty === null ? Infinity : t.maxQty,
+                    pricePerUnit: t.pricePerUnit,
+                  }))
+                : undefined,
+              minPrice: bs.min_price,
+              imageUrl: bs.image_url || "",
+              description: bs.description || "",
+              category: bs.category || "",
+            };
+          });
           setAvailableServices(mapped);
         }
       })
@@ -735,6 +755,28 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                               className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                             <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
+                          </div>
+                        )}
+
+                        {def.type === "quantity" && (
+                          <div className="space-y-2 mb-2">
+                            <div className="flex items-center gap-3">
+                              <label className="text-sm text-muted-foreground">Qtd:</label>
+                              <input
+                                type="number"
+                                min={1}
+                                value={svc.quantity}
+                                onChange={(e) => updateField(svc.instanceId, "quantity", Math.max(1, Number(e.target.value)))}
+                                className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              />
+                              <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
+                            </div>
+                            {def.qtyTiers && def.qtyTiers.length >= 3 && (
+                              <p className="text-xs text-muted-foreground">
+                                Até {def.qtyTiers[0].maxQty} un.: {formatBRL(def.qtyTiers[0].pricePerUnit)}/un · até {def.qtyTiers[1].maxQty} un.: {formatBRL(def.qtyTiers[1].pricePerUnit)}/un · acima: {formatBRL(def.qtyTiers[2].pricePerUnit)}/un
+                                {def.minPrice ? ` · Mínimo: ${formatBRL(def.minPrice)}` : ""}
+                              </p>
+                            )}
                           </div>
                         )}
 
