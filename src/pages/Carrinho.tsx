@@ -76,7 +76,7 @@ const Carrinho = () => {
         phone: phone.trim(),
         email: email.trim(),
         address: address.trim(),
-        services: `[Loja Gráfica]\n${servicesText}${coupon ? `\nCupom: ${coupon.code} (-R$ ${discount.toFixed(2)})` : ""}`,
+        services: `[Angelo Design]\n${servicesText}${coupon ? `\nCupom: ${coupon.code} (-R$ ${discount.toFixed(2)})` : ""}`,
         total,
         status: "Novo",
         notes: "",
@@ -87,7 +87,7 @@ const Carrinho = () => {
       setSubmitting(false);
       return;
     }
-    let msg = `Olá! Quero fechar este pedido da Loja Gráfica:\n\n${lines}\n\nSubtotal: R$ ${subtotal.toFixed(2)}`;
+    let msg = `Olá! Quero fechar este pedido da Angelo Design:\n\n${lines}\n\nSubtotal: R$ ${subtotal.toFixed(2)}`;
     if (coupon) msg += `\nCupom ${coupon.code} (-R$ ${discount.toFixed(2)})`;
     msg += `\n*Total: R$ ${total.toFixed(2)}*\n\nCliente: ${name}\nTel: ${phone}${email ? `\nE-mail: ${email}` : ""}${address ? `\nEndereço: ${address}` : ""}`;
     const url = `https://wa.me/${info.company_whatsapp}?text=${encodeURIComponent(msg)}`;
