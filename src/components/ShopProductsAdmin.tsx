@@ -384,6 +384,20 @@ const ShopProductsAdmin = () => {
                 ))}
               </datalist>
             </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                value={edit.download_label}
+                onChange={(e) => setEdit({ ...edit, download_label: e.target.value })}
+                placeholder="Texto do link de download (ex: Baixar catálogo)"
+                className="rounded-md border border-input bg-card px-3 py-2 text-sm"
+              />
+              <input
+                value={edit.download_url}
+                onChange={(e) => setEdit({ ...edit, download_url: e.target.value })}
+                placeholder="URL do download (https://...)"
+                className="rounded-md border border-input bg-card px-3 py-2 text-sm font-mono"
+              />
+            </div>
             <div className="flex gap-3 items-center">
               <label className="flex items-center gap-2 text-sm">
                 <input
