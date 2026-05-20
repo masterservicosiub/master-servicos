@@ -24,6 +24,7 @@ type EditState = {
   name: string;
   slug: string;
   description: string;
+  category: string;
   active: boolean;
   sort_order: number;
   base_price_mode: PriceMode;
@@ -40,6 +41,7 @@ function emptyEdit(): EditState {
     name: "",
     slug: "",
     description: "",
+    category: "",
     active: true,
     sort_order: 0,
     base_price_mode: "unit",
@@ -57,6 +59,7 @@ function toEdit(p: ShopProductFull): EditState {
     name: p.name,
     slug: p.slug,
     description: p.description,
+    category: (p as any).category || "",
     active: p.active,
     sort_order: p.sort_order,
     base_price_mode: p.base_price_mode,
@@ -132,6 +135,7 @@ const ShopProductsAdmin = () => {
         name: edit.name.trim(),
         slug,
         description: edit.description,
+        category: edit.category.trim(),
         active: edit.active,
         sort_order: edit.sort_order,
         base_price_mode: edit.base_price_mode,
