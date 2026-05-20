@@ -21,7 +21,7 @@ const Footer = () => {
             Início
           </Link>
           <Link to="/servicos-residenciais" className="block hover:opacity-100">
-            Serviços Residenciais
+            Master Serviços
           </Link>
           <Link to="/servicos-graficos" className="block hover:opacity-100">
             Angelo Design
