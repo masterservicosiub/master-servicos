@@ -16,6 +16,12 @@ export function logoUrlFor(origin: OrderOrigin): string {
   return defaultLogo;
 }
 
+export function companyNameFor(origin: OrderOrigin): string {
+  if (origin === "angelo") return "ANGELO DESIGN";
+  if (origin === "master") return "MASTER SERVIÇOS";
+  return "MASTER SOLUÇÕES";
+}
+
 export async function loadLogo(origin: OrderOrigin): Promise<{ dataUrl: string; width: number; height: number } | null> {
   try {
     const res = await fetch(logoUrlFor(origin));

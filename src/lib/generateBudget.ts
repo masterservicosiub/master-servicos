@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { OrderRow } from "./supabase";
-import { detectOrigin, loadLogo, fitLogo } from "./pdfLogo";
+import { detectOrigin, loadLogo, fitLogo, companyNameFor } from "./pdfLogo";
 
 const COMPANY = {
   name: "MASTER SOLUÇÕES",
@@ -87,7 +87,7 @@ export async function generateBudget(order: OrderRow) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor(20, 20, 20);
-  doc.text(COMPANY.name, 42, 20);
+  doc.text(companyNameFor(origin), 42, 20);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
