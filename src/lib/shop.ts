@@ -8,6 +8,7 @@ export interface ShopProductRow {
   slug: string;
   name: string;
   description: string;
+  category: string;
   active: boolean;
   sort_order: number;
   base_price_mode: PriceMode;
