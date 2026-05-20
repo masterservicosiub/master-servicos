@@ -32,6 +32,8 @@ type EditState = {
   base_area_price_per_m2: number;
   base_fixed_price: number;
   base_min_price: number;
+  download_url: string;
+  download_label: string;
   images: ShopProductImageRow[];
   variations: ShopProductVariationRow[];
 };
@@ -49,6 +51,8 @@ function emptyEdit(): EditState {
     base_area_price_per_m2: 0,
     base_fixed_price: 0,
     base_min_price: 0,
+    download_url: "",
+    download_label: "",
     images: [],
     variations: [],
   };
@@ -67,6 +71,8 @@ function toEdit(p: ShopProductFull): EditState {
     base_area_price_per_m2: Number(p.base_area_price_per_m2) || 0,
     base_fixed_price: Number(p.base_fixed_price) || 0,
     base_min_price: Number(p.base_min_price) || 0,
+    download_url: (p as any).download_url || "",
+    download_label: (p as any).download_label || "",
     images: p.images.map((i) => ({
       image_url: i.image_url,
       is_primary: i.is_primary,
