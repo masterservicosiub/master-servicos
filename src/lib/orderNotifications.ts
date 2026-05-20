@@ -5,9 +5,12 @@ import { supabase } from './supabase';
 /**
  * Listens to new orders via Supabase Realtime and shows local notifications on the device.
  */
+let started = false;
 export function startOrderNotificationListener() {
-  supabase
-    .channel('new-orders')
+  if (started) return;
+  started = true;
+  const channel = supabase.channel('new-orders');
+  channel
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'orders' },
