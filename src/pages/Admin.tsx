@@ -2994,6 +2994,8 @@ const Admin = () => {
                 )}
               </div>
             </>
+          ) : activeTab === "loja" ? (
+            <ShopProductsAdmin />
           ) : (
             <>
               {/* Gerenciar Serviços da Página Inicial */}
