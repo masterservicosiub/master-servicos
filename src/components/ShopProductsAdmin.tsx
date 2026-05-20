@@ -24,6 +24,7 @@ type EditState = {
   name: string;
   slug: string;
   description: string;
+  category: string;
   active: boolean;
   sort_order: number;
   base_price_mode: PriceMode;
@@ -40,6 +41,7 @@ function emptyEdit(): EditState {
     name: "",
     slug: "",
     description: "",
+    category: "",
     active: true,
     sort_order: 0,
     base_price_mode: "unit",
@@ -57,6 +59,7 @@ function toEdit(p: ShopProductFull): EditState {
     name: p.name,
     slug: p.slug,
     description: p.description,
+    category: (p as any).category || "",
     active: p.active,
     sort_order: p.sort_order,
     base_price_mode: p.base_price_mode,
@@ -132,6 +135,7 @@ const ShopProductsAdmin = () => {
         name: edit.name.trim(),
         slug,
         description: edit.description,
+        category: edit.category.trim(),
         active: edit.active,
         sort_order: edit.sort_order,
         base_price_mode: edit.base_price_mode,
@@ -352,6 +356,26 @@ const ShopProductsAdmin = () => {
               rows={3}
               className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
             />
+            <div>
+              <input
+                value={edit.category}
+                onChange={(e) => setEdit({ ...edit, category: e.target.value })}
+                placeholder="Categoria (ex: Cartões, Banners, Panfletos)"
+                list="shop-categories-list"
+                className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
+              />
+              <datalist id="shop-categories-list">
+                {Array.from(
+                  new Set(
+                    products
+                      .map((p) => (p as any).category)
+                      .filter((c): c is string => !!c && c.trim().length > 0),
+                  ),
+                ).map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
             <div className="flex gap-3 items-center">
               <label className="flex items-center gap-2 text-sm">
                 <input
