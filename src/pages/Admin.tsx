@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ShopProductsAdmin from "@/components/ShopProductsAdmin";
 import {
   fetchOrders,
   updateOrderStatus,
@@ -171,7 +172,7 @@ const Admin = () => {
   const [filterStatus, setFilterStatus] = useState(() => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
 
   // Mídias
