@@ -149,6 +149,8 @@ const ShopProductsAdmin = () => {
         base_area_price_per_m2: edit.base_area_price_per_m2 || 0,
         base_fixed_price: edit.base_fixed_price || 0,
         base_min_price: edit.base_min_price || 0,
+        download_url: edit.download_url.trim(),
+        download_label: edit.download_label.trim(),
       };
       if (editingId === "new") {
         const row = await insertShopProduct(payload);
