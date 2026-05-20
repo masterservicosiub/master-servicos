@@ -32,6 +32,8 @@ type EditState = {
   base_area_price_per_m2: number;
   base_fixed_price: number;
   base_min_price: number;
+  download_url: string;
+  download_label: string;
   images: ShopProductImageRow[];
   variations: ShopProductVariationRow[];
 };
@@ -49,6 +51,8 @@ function emptyEdit(): EditState {
     base_area_price_per_m2: 0,
     base_fixed_price: 0,
     base_min_price: 0,
+    download_url: "",
+    download_label: "",
     images: [],
     variations: [],
   };
@@ -67,6 +71,8 @@ function toEdit(p: ShopProductFull): EditState {
     base_area_price_per_m2: Number(p.base_area_price_per_m2) || 0,
     base_fixed_price: Number(p.base_fixed_price) || 0,
     base_min_price: Number(p.base_min_price) || 0,
+    download_url: (p as any).download_url || "",
+    download_label: (p as any).download_label || "",
     images: p.images.map((i) => ({
       image_url: i.image_url,
       is_primary: i.is_primary,
@@ -143,6 +149,8 @@ const ShopProductsAdmin = () => {
         base_area_price_per_m2: edit.base_area_price_per_m2 || 0,
         base_fixed_price: edit.base_fixed_price || 0,
         base_min_price: edit.base_min_price || 0,
+        download_url: edit.download_url.trim(),
+        download_label: edit.download_label.trim(),
       };
       if (editingId === "new") {
         const row = await insertShopProduct(payload);
@@ -375,6 +383,20 @@ const ShopProductsAdmin = () => {
                   <option key={c} value={c} />
                 ))}
               </datalist>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                value={edit.download_label}
+                onChange={(e) => setEdit({ ...edit, download_label: e.target.value })}
+                placeholder="Texto do link de download (ex: Baixar catálogo)"
+                className="rounded-md border border-input bg-card px-3 py-2 text-sm"
+              />
+              <input
+                value={edit.download_url}
+                onChange={(e) => setEdit({ ...edit, download_url: e.target.value })}
+                placeholder="URL do download (https://...)"
+                className="rounded-md border border-input bg-card px-3 py-2 text-sm font-mono"
+              />
             </div>
             <div className="flex gap-3 items-center">
               <label className="flex items-center gap-2 text-sm">

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Share2, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Share2, ShoppingCart, ArrowLeft, Download } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -232,6 +232,17 @@ const Produto = () => {
                 >
                   <Share2 className="w-4 h-4" /> Compartilhar
                 </button>
+                {(product as any).download_url && (
+                  <a
+                    href={(product as any).download_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent"
+                  >
+                    <Download className="w-4 h-4" />
+                    {(product as any).download_label?.trim() || "Baixar catálogo"}
+                  </a>
+                )}
               </div>
             </div>
           </div>
