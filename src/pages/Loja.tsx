@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { fetchShopProducts, primaryImage, startingPrice, type ShopProductFull } from "@/lib/shop";
+import angeloLogo from "@/assets/angelo-design-logo.png";
 
 const Loja = () => {
   const [products, setProducts] = useState<ShopProductFull[]>([]);
@@ -27,7 +28,12 @@ const Loja = () => {
       <main className="flex-1 pt-24">
         <div className="container mx-auto px-4 py-10">
           <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Angelo Design</h1>
+            <h1 className="sr-only">Angelo Design</h1>
+            <img
+              src={angeloLogo}
+              alt="Angelo Design - Serviços Gráficos"
+              className="mx-auto w-full max-w-md md:max-w-lg h-auto"
+            />
             <p className="text-muted-foreground mt-2">
               Produtos gráficos personalizados com entrega rápida em Itumbiara e região.
             </p>
