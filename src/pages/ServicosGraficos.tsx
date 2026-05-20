@@ -1,11 +1,5 @@
-import Orcamento from "./Orcamento";
+import Loja from "./Loja";
 
-const ServicosGraficos = () => (
-  <Orcamento
-    kind="grafico"
-    pageTitle="ANGELO DESIGN"
-    pageSubtitle="Serviços Gráficos: Cartões, Banners, Panfletos e Outros Materiais Gráficos em Itumbiara e Região."
-  />
-);
+const ServicosGraficos = () => <Loja />;
 
 export default ServicosGraficos;
