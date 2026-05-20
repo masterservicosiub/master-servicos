@@ -1,8 +1,8 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
-import logoUrl from "@/assets/logo.png";
 import type { OrderRow } from "./supabase";
+import { detectOrigin, loadLogo, fitLogo } from "./pdfLogo";
 
 const COMPANY = {
   name: "MASTER SOLUÇÕES",
@@ -17,17 +17,6 @@ const fmtBRL = (v: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
-
-async function loadImageDataUrl(url: string): Promise<string> {
-  const res = await fetch(url);
-  const blob = await res.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
 
 function buildPixPayload(opts: { key: string; name: string; city: string; amount: number; txid?: string }): string {
   const { key, name, city, amount, txid = "***" } = opts;
@@ -119,20 +108,16 @@ export async function generateReceipt(order: OrderRow) {
   const pageH = doc.internal.pageSize.getHeight();
 
   // ===== LOGO =====
-  let logoData = "";
-  try {
-    logoData = await loadImageDataUrl(logoUrl);
-  } catch (e) {
-    console.error("Erro ao carregar logo:", e);
-  }
+  const origin = detectOrigin(order.services);
+  const logo = await loadLogo(origin);
+  const logoData = logo?.dataUrl || "";
 
   // Watermark
-  if (logoData) {
+  if (logo) {
     try {
       const gState = (doc as any).GState ? new (doc as any).GState({ opacity: 0.08 }) : null;
       if (gState) (doc as any).setGState(gState);
-      const wmW = 130;
-      const wmH = 130;
+      const [wmW, wmH] = fitLogo(logo.width, logo.height, 140, 140);
       doc.addImage(logoData, "PNG", (pageW - wmW) / 2, (pageH - wmH) / 2, wmW, wmH);
       if (gState) {
         const reset = new (doc as any).GState({ opacity: 1 });
@@ -144,8 +129,9 @@ export async function generateReceipt(order: OrderRow) {
   }
 
   // ===== HEADER =====
-  if (logoData) {
-    doc.addImage(logoData, "PNG", 14, 12, 24, 24);
+  if (logo) {
+    const [hW, hH] = fitLogo(logo.width, logo.height, 26, 24);
+    doc.addImage(logoData, "PNG", 14, 12 + (24 - hH) / 2, hW, hH);
   }
 
   doc.setFont("helvetica", "bold");
