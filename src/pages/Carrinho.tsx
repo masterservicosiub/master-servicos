@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { readCart, removeFromCart, subscribeCart, clearCart, type CartItem } from "@/lib/cart";
-import { findCouponByCode, type CouponRow } from "@/lib/supabase";
+import { findCouponByCode, insertOrder, type CouponRow } from "@/lib/supabase";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { toast } from "sonner";
 
@@ -14,6 +14,11 @@ const Carrinho = () => {
   const [couponCode, setCouponCode] = useState("");
   const [coupon, setCoupon] = useState<CouponRow | null>(null);
   const [validating, setValidating] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const info = useCompanyInfo();
 
   useEffect(() => {
@@ -49,8 +54,13 @@ const Carrinho = () => {
     }
   };
 
-  const finalize = () => {
+  const finalize = async () => {
     if (!items.length) return;
+    if (!name.trim() || !phone.trim()) {
+      toast.error("Informe ao menos nome e telefone.");
+      return;
+    }
+    setSubmitting(true);
     const lines = items
       .map((i, idx) => {
         const qtyTxt =
@@ -58,15 +68,35 @@ const Carrinho = () => {
         return `${idx + 1}. ${i.name}${i.variationLabel ? ` (${i.variationLabel})` : ""} — ${qtyTxt} = R$ ${i.unitPrice.toFixed(2)}`;
       })
       .join("\n");
+    const servicesText = lines;
+    try {
+      await insertOrder({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        address: address.trim(),
+        services: `[Loja Gráfica]\n${servicesText}${coupon ? `\nCupom: ${coupon.code} (-R$ ${discount.toFixed(2)})` : ""}`,
+        total,
+        status: "Novo",
+        notes: "",
+      });
+    } catch (err) {
+      console.error("Erro ao salvar pedido:", err);
+      toast.error("Não foi possível registrar o pedido. Tente novamente.");
+      setSubmitting(false);
+      return;
+    }
     let msg = `Olá! Quero fechar este pedido da Loja Gráfica:\n\n${lines}\n\nSubtotal: R$ ${subtotal.toFixed(2)}`;
     if (coupon) msg += `\nCupom ${coupon.code} (-R$ ${discount.toFixed(2)})`;
-    msg += `\n*Total: R$ ${total.toFixed(2)}*`;
+    msg += `\n*Total: R$ ${total.toFixed(2)}*\n\nCliente: ${name}\nTel: ${phone}${email ? `\nE-mail: ${email}` : ""}${address ? `\nEndereço: ${address}` : ""}`;
     const url = `https://wa.me/${info.company_whatsapp}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
     clearCart();
     setItems([]);
     setCoupon(null);
     setCouponCode("");
+    toast.success("Pedido registrado!");
+    setSubmitting(false);
   };
 
   return (
@@ -129,6 +159,24 @@ const Carrinho = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl p-4 mt-6 space-y-3">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nome *</label>
+                    <input value={name} onChange={(e) => setName(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Telefone *</label>
+                    <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">E-mail</label>
+                    <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Endereço</label>
+                    <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Cupom de desconto</label>
                   <div className="flex gap-2">
@@ -172,9 +220,10 @@ const Carrinho = () => {
 
                 <button
                   onClick={finalize}
-                  className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90"
+                  disabled={submitting}
+                  className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-60"
                 >
-                  Finalizar pedido via WhatsApp
+                  {submitting ? "Enviando..." : "Finalizar pedido via WhatsApp"}
                 </button>
               </div>
             </>
