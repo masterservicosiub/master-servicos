@@ -20,14 +20,14 @@ const Loja = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Helmet>
-        <title>Loja Gráfica — Master Soluções</title>
+        <title>Angelo Design — Master Soluções</title>
         <meta name="description" content="Cartões, banners, panfletos e produtos gráficos sob medida." />
       </Helmet>
       <Header />
       <main className="flex-1 pt-24">
         <div className="container mx-auto px-4 py-10">
           <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Loja Gráfica</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Angelo Design</h1>
             <p className="text-muted-foreground mt-2">
               Produtos gráficos personalizados com entrega rápida em Itumbiara e região.
             </p>

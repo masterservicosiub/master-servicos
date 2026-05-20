@@ -148,7 +148,7 @@ const Index = () => {
                 to="/servicos-graficos"
                 className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
               >
-                <Printer className="w-5 h-5" /> Serviços Gráficos
+                <Printer className="w-5 h-5" /> Angelo Design
               </Link>
             </div>
 
