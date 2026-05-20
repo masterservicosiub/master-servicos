@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ShopProductsAdmin from "@/components/ShopProductsAdmin";
 import {
   fetchOrders,
   updateOrderStatus,
@@ -171,7 +172,7 @@ const Admin = () => {
   const [filterStatus, setFilterStatus] = useState(() => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
 
   // Mídias
@@ -1312,6 +1313,14 @@ const Admin = () => {
                 className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "servicos" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
                 <DollarSign className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setActiveTab("loja")}
+                title="Loja Gráfica"
+                aria-label="Loja Gráfica"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "loja" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <Tag className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("config")}
@@ -2985,6 +2994,8 @@ const Admin = () => {
                 )}
               </div>
             </>
+          ) : activeTab === "loja" ? (
+            <ShopProductsAdmin />
           ) : (
             <>
               {/* Gerenciar Serviços da Página Inicial */}
