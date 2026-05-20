@@ -356,6 +356,26 @@ const ShopProductsAdmin = () => {
               rows={3}
               className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
             />
+            <div>
+              <input
+                value={edit.category}
+                onChange={(e) => setEdit({ ...edit, category: e.target.value })}
+                placeholder="Categoria (ex: Cartões, Banners, Panfletos)"
+                list="shop-categories-list"
+                className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
+              />
+              <datalist id="shop-categories-list">
+                {Array.from(
+                  new Set(
+                    products
+                      .map((p) => (p as any).category)
+                      .filter((c): c is string => !!c && c.trim().length > 0),
+                  ),
+                ).map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
             <div className="flex gap-3 items-center">
               <label className="flex items-center gap-2 text-sm">
                 <input
