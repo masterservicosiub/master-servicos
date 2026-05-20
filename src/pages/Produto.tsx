@@ -20,6 +20,7 @@ const Produto = () => {
   const [qty, setQty] = useState(1);
   const [area, setArea] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -61,8 +62,10 @@ const Produto = () => {
       qty: mode === "unit" ? qty : 1,
       area: mode === "area" ? area : 0,
       unitPrice: price,
+      notes: notes.trim().slice(0, 500),
     });
     toast.success("Adicionado ao carrinho");
+    setNotes("");
   };
 
   if (loading) {
@@ -199,6 +202,21 @@ const Produto = () => {
               <div className="mt-6 p-4 bg-card border border-border rounded-xl">
                 <p className="text-sm text-muted-foreground">Total</p>
                 <p className="text-3xl font-bold text-primary">R$ {price.toFixed(2)}</p>
+              </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Observações <span className="text-muted-foreground font-normal">(opcional)</span>
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value.slice(0, 500))}
+                  rows={3}
+                  maxLength={500}
+                  placeholder="Detalhes do pedido, cores, prazo, arte de referência..."
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1 text-right">{notes.length}/500</p>
               </div>
 
               <div className="flex flex-wrap gap-3 mt-6">
