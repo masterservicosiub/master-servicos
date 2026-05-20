@@ -24,7 +24,7 @@ const Footer = () => {
             Serviços Residenciais
           </Link>
           <Link to="/servicos-graficos" className="block hover:opacity-100">
-            Serviços Gráficos
+            Angelo Design
           </Link>
           <Link to="/midias" className="block hover:opacity-100">
             Mídias

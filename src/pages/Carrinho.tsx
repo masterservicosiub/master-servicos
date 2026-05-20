@@ -7,6 +7,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { readCart, removeFromCart, subscribeCart, clearCart, type CartItem } from "@/lib/cart";
 import { findCouponByCode, insertOrder, type CouponRow } from "@/lib/supabase";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
+import { applyPhoneMask } from "@/lib/phoneMask";
 import { toast } from "sonner";
 
 const Carrinho = () => {
@@ -162,11 +163,11 @@ const Carrinho = () => {
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">Nome *</label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                    <input value={name} onChange={(e) => setName(e.target.value.toUpperCase())} className="w-full h-10 rounded-md border border-input bg-background px-3 uppercase" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Telefone *</label>
-                    <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                    <input value={phone} onChange={(e) => setPhone(applyPhoneMask(e.target.value))} inputMode="tel" placeholder="(00) 0 0000-0000" className="w-full h-10 rounded-md border border-input bg-background px-3" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">E-mail</label>
