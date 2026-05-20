@@ -16,6 +16,8 @@ export interface ShopProductRow {
   base_area_price_per_m2: number;
   base_fixed_price: number;
   base_min_price: number;
+  download_url: string;
+  download_label: string;
 }
 
 export interface ShopProductImageRow {
