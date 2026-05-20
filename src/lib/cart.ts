@@ -9,6 +9,7 @@ export interface CartItem {
   qty: number;
   area: number;
   unitPrice: number; // already-resolved per-line subtotal
+  notes?: string;
 }
 
 const KEY = "shop_cart_v1";

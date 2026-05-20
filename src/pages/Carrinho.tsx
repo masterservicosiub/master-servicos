@@ -66,10 +66,17 @@ const Carrinho = () => {
       .map((i, idx) => {
         const qtyTxt =
           i.mode === "unit" ? `${i.qty}un` : i.mode === "area" ? `${i.area}m²` : "1x";
-        return `${idx + 1}. ${i.name}${i.variationLabel ? ` (${i.variationLabel})` : ""} — ${qtyTxt} = R$ ${i.unitPrice.toFixed(2)}`;
+        const base = `${idx + 1}. ${i.name}${i.variationLabel ? ` (${i.variationLabel})` : ""} — ${qtyTxt} = R$ ${i.unitPrice.toFixed(2)}`;
+        return i.notes?.trim() ? `${base}\n   Obs: ${i.notes.trim()}` : base;
       })
       .join("\n");
     const servicesText = lines;
+    const aggregatedNotes = items
+      .map((i, idx) =>
+        i.notes?.trim() ? `${idx + 1}. ${i.name}: ${i.notes.trim()}` : null,
+      )
+      .filter(Boolean)
+      .join("\n");
     try {
       await insertOrder({
         name: name.trim(),
@@ -79,7 +86,7 @@ const Carrinho = () => {
         services: `[Angelo Design]\n${servicesText}${coupon ? `\nCupom: ${coupon.code} (-R$ ${discount.toFixed(2)})` : ""}`,
         total,
         status: "Novo",
-        notes: "",
+        notes: aggregatedNotes,
       });
     } catch (err) {
       console.error("Erro ao salvar pedido:", err);
@@ -144,6 +151,11 @@ const Carrinho = () => {
                           ? `${it.area} m²`
                           : "Preço fixo"}
                       </p>
+                      {it.notes?.trim() && (
+                        <p className="text-xs text-muted-foreground mt-1 italic line-clamp-2">
+                          Obs: {it.notes.trim()}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-primary">R$ {it.unitPrice.toFixed(2)}</p>
