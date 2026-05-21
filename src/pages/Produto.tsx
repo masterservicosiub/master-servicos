@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Share2, ShoppingCart, ArrowLeft, Download } from "lucide-react";
+import { Share2, ShoppingCart, ArrowLeft, Download, Eye } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -9,7 +9,7 @@ import { fetchProductBySlug, computePrice, primaryImage, type ShopProductFull, t
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
 
-const SUPABASE_URL = "https://rpxlpqehpzhofxuzjbws.supabase.co";
+const SITE_URL = "https://mastersolucoes.lovable.app";
 
 const Produto = () => {
   const { slug = "" } = useParams();
@@ -21,6 +21,7 @@ const Produto = () => {
   const [area, setArea] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [notes, setNotes] = useState("");
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -38,9 +39,17 @@ const Produto = () => {
     [product, variation, qty, area],
   );
 
-  const shareUrl = `${SUPABASE_URL}/functions/v1/product-og/${slug}`;
+  const shareUrl = `${SITE_URL}/produto/${slug}`;
 
   const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product?.name, text: product?.description?.slice(0, 140), url: shareUrl });
+        return;
+      } catch {
+        // user cancelled or failed → fall back to copy
+      }
+    }
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copiado!");
@@ -66,6 +75,7 @@ const Produto = () => {
     });
     toast.success("Adicionado ao carrinho");
     setNotes("");
+    setAdded(true);
   };
 
   if (loading) {
@@ -226,6 +236,14 @@ const Produto = () => {
                 >
                   <ShoppingCart className="w-4 h-4" /> Adicionar ao carrinho
                 </button>
+                {added && (
+                  <Link
+                    to="/carrinho"
+                    className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 border border-border"
+                  >
+                    <Eye className="w-4 h-4" /> Ver carrinho
+                  </Link>
+                )}
                 <button
                   onClick={handleShare}
                   className="inline-flex items-center gap-2 border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent"
