@@ -526,31 +526,60 @@ const ShopProductsAdmin = () => {
               <div className="space-y-3">
                 {edit.variations.map((v, idx) => (
                   <div key={idx} className="border border-border rounded-lg p-3 space-y-2">
-                    <div className="flex gap-2 items-center">
-                      <input
-                        value={v.label}
-                        onChange={(e) => updateVar(idx, { label: e.target.value })}
-                        placeholder="Nome da variação (ex: 4x0 frente)"
-                        className="flex-1 rounded-md border border-input bg-card px-2 py-1 text-sm"
-                      />
-                      <select
-                        value={v.price_mode}
-                        onChange={(e) => updateVar(idx, { price_mode: e.target.value as PriceMode })}
-                        className="rounded-md border border-input bg-card px-2 py-1 text-sm"
-                      >
-                        <option value="unit">Por unidade</option>
-                        <option value="area">Por m²</option>
-                        <option value="fixed">Fixo</option>
-                      </select>
-                      <button onClick={() => removeVar(idx)} className="text-destructive">
+                    <div className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                          Nome da variação
+                        </label>
+                        <input
+                          value={v.label}
+                          onChange={(e) => updateVar(idx, { label: e.target.value })}
+                          placeholder="Ex: 4x0 frente, 9x5cm"
+                          className="w-full rounded-md border border-input bg-card px-2 py-1 text-sm"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Como o cliente verá essa opção na página do produto.
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                          Modo de cobrança
+                        </label>
+                        <select
+                          value={v.price_mode}
+                          onChange={(e) => updateVar(idx, { price_mode: e.target.value as PriceMode })}
+                          className="rounded-md border border-input bg-card px-2 py-1 text-sm"
+                        >
+                          <option value="unit">Por unidade</option>
+                          <option value="area">Por m²</option>
+                          <option value="fixed">Fixo</option>
+                        </select>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Como o preço será calculado.
+                        </p>
+                      </div>
+                      <button onClick={() => removeVar(idx)} className="text-destructive mt-6" title="Remover variação">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    {renderPriceFields(
-                      v.price_mode,
-                      { unit: v.unit_price, area: v.area_price_per_m2, fixed: v.fixed_price, min: v.min_price },
-                      (patch) => updateVar(idx, patch),
-                    )}
+                    <div>
+                      <p className="text-[11px] font-medium text-muted-foreground mb-1">
+                        {v.price_mode === "unit"
+                          ? "Valor cobrado por unidade vendida"
+                          : v.price_mode === "area"
+                          ? "Valor cobrado por metro quadrado"
+                          : "Valor fixo cobrado, independente da quantidade"}
+                        {" · "}
+                        <span className="font-normal">
+                          Preço mínimo: valor garantido mesmo se o cálculo der menos.
+                        </span>
+                      </p>
+                      {renderPriceFields(
+                        v.price_mode,
+                        { unit: v.unit_price, area: v.area_price_per_m2, fixed: v.fixed_price, min: v.min_price },
+                        (patch) => updateVar(idx, patch),
+                      )}
+                    </div>
                   </div>
                 ))}
                 {edit.variations.length === 0 && (
