@@ -10,6 +10,7 @@ import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
 
 const SITE_URL = "https://mastersolucoes.lovable.app";
+const OG_URL = "https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/product-og";
 
 const Produto = () => {
   const { slug = "" } = useParams();
@@ -39,7 +40,10 @@ const Produto = () => {
     [product, variation, qty, area],
   );
 
-  const shareUrl = `${SITE_URL}/produto/${slug}`;
+  // Share via the og edge function so WhatsApp/Facebook/etc fetch
+  // proper OG meta (with the product's main image). The function
+  // redirects real browsers to /produto/:slug.
+  const shareUrl = `${OG_URL}/${slug}`;
 
   const handleShare = async () => {
     if (navigator.share) {
