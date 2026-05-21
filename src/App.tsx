@@ -15,6 +15,7 @@ import Produto from "./pages/Produto.tsx";
 import Carrinho from "./pages/Carrinho.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import AdminGear from "./components/AdminGear.tsx";
+import AffiliateCapture from "./components/AffiliateCapture.tsx";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <AffiliateCapture />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/orcamento" element={<ServicosResidenciais />} />
