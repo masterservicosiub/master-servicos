@@ -1,5 +1,5 @@
 import angeloLogo from "@/assets/angelo-design-logo.png";
-import masterLogo from "@/assets/logo-master-servicos.png";
+import masterLogo from "@/assets/logo-master-residenciais.png";
 import defaultLogo from "@/assets/logo.png";
 
 export type OrderOrigin = "angelo" | "master" | "default";
