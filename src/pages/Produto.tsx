@@ -45,7 +45,7 @@ const Produto = () => {
   // Share via the og edge function so WhatsApp/Facebook/etc fetch
   // proper OG meta (with the product's main image). The function
   // redirects real browsers to /produto/:slug.
-  const shareUrl = `${OG_URL}/${slug}`;
+  const shareUrl = `${SITE_URL}/produto/${slug}`;
 
   const handleShare = async () => {
     if (navigator.share) {
