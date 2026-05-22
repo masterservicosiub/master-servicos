@@ -19,7 +19,9 @@ const Produto = () => {
   const [loading, setLoading] = useState(true);
   const [variation, setVariation] = useState<ShopProductVariationRow | null>(null);
   const [qty, setQty] = useState(1);
-  const [area, setArea] = useState(1);
+  const [width, setWidth] = useState(1);
+  const [height, setHeight] = useState(1);
+  const area = useMemo(() => Math.max(0, width) * Math.max(0, height), [width, height]);
   const [activeImg, setActiveImg] = useState(0);
   const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
@@ -201,15 +203,37 @@ const Produto = () => {
               )}
               {mode === "area" && (
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-foreground mb-2">Área (m²)</label>
-                  <input
-                    type="number"
-                    min={0.1}
-                    step="0.1"
-                    value={area}
-                    onChange={(e) => setArea(Math.max(0.1, Number(e.target.value) || 0.1))}
-                    className="w-32 h-10 rounded-md border border-input bg-background px-3"
-                  />
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Dimensões (em metros)
+                  </label>
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Largura (m)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={width}
+                        onChange={(e) => setWidth(Math.max(0, Number(e.target.value) || 0))}
+                        className="w-28 h-10 rounded-md border border-input bg-background px-3"
+                      />
+                    </div>
+                    <span className="pb-2 text-muted-foreground">×</span>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Altura (m)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={height}
+                        onChange={(e) => setHeight(Math.max(0, Number(e.target.value) || 0))}
+                        className="w-28 h-10 rounded-md border border-input bg-background px-3"
+                      />
+                    </div>
+                    <div className="pb-1 text-sm text-muted-foreground">
+                      = <strong className="text-foreground">{area.toFixed(2)} m²</strong>
+                    </div>
+                  </div>
                 </div>
               )}
 
