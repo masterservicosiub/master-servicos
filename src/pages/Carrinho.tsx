@@ -8,6 +8,7 @@ import { readCart, removeFromCart, subscribeCart, clearCart, type CartItem } fro
 import { findCouponByCode, insertOrder, type CouponRow } from "@/lib/supabase";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { applyPhoneMask } from "@/lib/phoneMask";
+import { getDeviceFingerprint, getClientIp, runFraudCheck } from "@/lib/antifraud";
 import { toast } from "sonner";
 
 const Carrinho = () => {
@@ -78,6 +79,32 @@ const Carrinho = () => {
       .filter(Boolean)
       .join("\n");
     try {
+      const affiliate_code =
+        (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined;
+      const fingerprint = getDeviceFingerprint();
+      const ip = await getClientIp();
+      let fraud_status = "ok";
+      let fraud_reasons = "";
+      let finalAffiliate = affiliate_code;
+      if (finalAffiliate) {
+        try {
+          const result = await runFraudCheck({
+            affiliate_code: finalAffiliate,
+            client_phone: phone.trim(),
+            client_email: email.trim(),
+            client_name: name.trim(),
+            fingerprint,
+            ip,
+          });
+          fraud_status = result.status;
+          fraud_reasons = result.reasons.join("; ");
+          if (result.status === "blocked") {
+            finalAffiliate = undefined;
+          }
+        } catch {
+          // antifraud failure should not block the order
+        }
+      }
       await insertOrder({
         name: name.trim(),
         phone: phone.trim(),
@@ -87,6 +114,11 @@ const Carrinho = () => {
         total,
         status: "Novo",
         notes: aggregatedNotes,
+        affiliate_code: finalAffiliate,
+        fraud_status,
+        fraud_reasons,
+        client_fingerprint: fingerprint,
+        client_ip: ip || undefined,
       });
     } catch (err) {
       console.error("Erro ao salvar pedido:", err);
