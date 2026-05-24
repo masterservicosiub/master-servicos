@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Share2, ShoppingCart, ArrowLeft, Download, Eye } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Download, Eye } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { fetchProductBySlug, computePrice, primaryImage, type ShopProductFull, type ShopProductVariationRow } from "@/lib/shop";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
-
-const SITE_URL = "https://mastersolucoes.lovable.app";
-const OG_URL = "https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/product-og";
 
 const Produto = () => {
   const { slug = "" } = useParams();
@@ -41,28 +38,6 @@ const Produto = () => {
     () => (product ? computePrice(product, variation, qty, area) : 0),
     [product, variation, qty, area],
   );
-
-  // Share via the og edge function so WhatsApp/Facebook/etc fetch
-  // proper OG meta (with the product's main image). The function
-  // redirects real browsers to /produto/:slug.
-  const shareUrl = `${SITE_URL}/produto/${slug}`;
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: product?.name, text: product?.description?.slice(0, 140), url: shareUrl });
-        return;
-      } catch {
-        // user cancelled or failed → fall back to copy
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copiado!");
-    } catch {
-      toast.error("Não foi possível copiar");
-    }
-  };
 
   const handleAdd = () => {
     if (!product) return;
@@ -272,12 +247,6 @@ const Produto = () => {
                     <Eye className="w-4 h-4" /> Ver carrinho
                   </Link>
                 )}
-                <button
-                  onClick={handleShare}
-                  className="inline-flex items-center gap-2 border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent"
-                >
-                  <Share2 className="w-4 h-4" /> Compartilhar
-                </button>
                 {(product as any).download_url && (
                   <a
                     href={(product as any).download_url}
