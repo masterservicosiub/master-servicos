@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ShoppingCart, ArrowLeft, Download, Eye } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Download, Eye, Share2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -57,6 +57,26 @@ const Produto = () => {
     toast.success("Adicionado ao carrinho");
     setNotes("");
     setAdded(true);
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    const url = `https://masteriub.com.br/produto/${product.slug}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.name, text: product.name, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      } catch {
+        toast.error("Não foi possível compartilhar");
+      }
+    }
   };
 
   if (loading) {
@@ -258,6 +278,12 @@ const Produto = () => {
                     {(product as any).download_label?.trim() || "Baixar catálogo"}
                   </a>
                 )}
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center gap-2 border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent"
+                >
+                  <Share2 className="w-4 h-4" /> Compartilhar
+                </button>
               </div>
             </div>
           </div>
