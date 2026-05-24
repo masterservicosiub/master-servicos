@@ -16,8 +16,8 @@ const Produto = () => {
   const [loading, setLoading] = useState(true);
   const [variation, setVariation] = useState<ShopProductVariationRow | null>(null);
   const [qty, setQty] = useState(1);
-  const [width, setWidth] = useState(1);
-  const [height, setHeight] = useState(1);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
   const area = useMemo(() => Math.max(0, width) * Math.max(0, height), [width, height]);
   const [activeImg, setActiveImg] = useState(0);
   const [notes, setNotes] = useState("");
@@ -41,6 +41,10 @@ const Produto = () => {
 
   const handleAdd = () => {
     if (!product) return;
+    if (mode === "area" && area <= 0) {
+      toast.error("Informe a largura e o comprimento");
+      return;
+    }
     addToCart({
       productId: product.id!,
       slug: product.slug,
@@ -199,7 +203,7 @@ const Produto = () => {
               {mode === "area" && (
                 <div className="mt-6">
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Dimensões (em metros)
+                    Largura e comprimento (em metros)
                   </label>
                   <div className="flex flex-wrap items-end gap-3">
                     <div>
@@ -215,7 +219,7 @@ const Produto = () => {
                     </div>
                     <span className="pb-2 text-muted-foreground">×</span>
                     <div>
-                      <label className="block text-xs text-muted-foreground mb-1">Altura (m)</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Comprimento (m)</label>
                       <input
                         type="number"
                         min={0}
@@ -229,6 +233,9 @@ const Produto = () => {
                       = <strong className="text-foreground">{area.toFixed(2)} m²</strong>
                     </div>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Valor calculado: R$/m² × área informada.
+                  </p>
                 </div>
               )}
 
