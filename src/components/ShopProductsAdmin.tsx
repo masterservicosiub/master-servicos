@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Copy, Save, Star, Upload, X } from "lucide-react";
+import { Plus, Trash2, Save, Star, Upload, X } from "lucide-react";
 import {
   fetchShopProducts,
   insertShopProduct,
@@ -16,7 +16,6 @@ import {
   type PriceMode,
 } from "@/lib/shop";
 
-const SHARE_BASE = "https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/product-og";
 const MAX_IMAGES = 5;
 const MAX_VARIATIONS = 5;
 
@@ -182,15 +181,6 @@ const ShopProductsAdmin = () => {
       await load();
     } catch (e: any) {
       toast.error("Erro: " + (e.message || e));
-    }
-  };
-
-  const copyLink = async (slug: string) => {
-    try {
-      await navigator.clipboard.writeText(`${SHARE_BASE}/${slug}`);
-      toast.success("Link copiado!");
-    } catch {
-      toast.error("Não foi possível copiar");
     }
   };
 
@@ -626,13 +616,6 @@ const ShopProductsAdmin = () => {
                       /produto/{p.slug} · {p.images.length} foto(s) · {p.variations.length} variação(ões)
                     </p>
                   </div>
-                  <button
-                    onClick={() => copyLink(p.slug)}
-                    title="Copiar link compartilhável"
-                    className="text-muted-foreground hover:text-primary p-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
                   <button
                     onClick={() => startEdit(p)}
                     className="text-xs bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md"
