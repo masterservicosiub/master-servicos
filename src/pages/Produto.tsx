@@ -41,6 +41,10 @@ const Produto = () => {
 
   const handleAdd = () => {
     if (!product) return;
+    if (mode === "area" && area <= 0) {
+      toast.error("Informe a largura e o comprimento");
+      return;
+    }
     addToCart({
       productId: product.id!,
       slug: product.slug,
