@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Trash2, Plus, CheckCircle, Tag, X, Sparkles, ShieldCheck, Clock, Zap, ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { CheckCircle, Sparkles, ShieldCheck, Clock, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import logoMasterServicos from "@/assets/logo-master-servicos.png";
@@ -456,7 +456,7 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                 Catálogo de Serviços
               </h2>
               <p className="text-sm text-muted-foreground mb-5">
-                Toque em um serviço para adicioná-lo ao seu orçamento.
+                Toque em um serviço para ver os detalhes e adicionar ao carrinho.
               </p>
               {(() => {
                 const cats = Array.from(
@@ -491,15 +491,12 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                       (s.category || "").trim() === activeCategory,
                   )
                   .map((s, idx) => {
-                  const added =
-                    s.type === "fixed" && !!selectedServices.find((sel) => sel.id === s.id);
                   return (
-                    <div
+                    <Link
+                      to={`/servico/${s.id}`}
                       key={s.id}
                       style={{ animationDelay: `${idx * 60}ms` }}
-                      className={`group rounded-2xl border-2 bg-card overflow-hidden flex flex-col transition-all shadow-sm hover:-translate-y-1 hover:shadow-2xl animate-fade-in-up ${
-                        added ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
-                      }`}
+                      className="group rounded-2xl border-2 bg-card overflow-hidden flex flex-col transition-all shadow-sm hover:-translate-y-1 hover:shadow-2xl animate-fade-in-up border-border hover:border-primary/50"
                     >
                       <div className="aspect-[4/3] bg-background overflow-hidden flex items-center justify-center">
                         {s.imageUrl ? (
@@ -528,237 +525,17 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                             ? formatBRL(s.fixedPrice ?? 0)
                             : `A partir de ${formatBRL(s.minPrice ?? 0)} • por m²`}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => addService(s.id)}
-                          disabled={added}
-                          className="mt-auto w-full bg-gradient-to-r from-primary to-accent text-white px-3 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all flex items-center justify-center gap-2"
-                        >
-                          {added ? (
-                            <>
-                              <CheckCircle className="w-4 h-4" /> Adicionado
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-4 h-4" />
-                              {s.type === "area" &&
-                              selectedServices.some((sel) => sel.id === s.id)
-                                ? "Adicionar outra área"
-                                : "Adicionar"}
-                            </>
-                          )}
-                        </button>
+                        <span className="mt-auto w-full bg-gradient-to-r from-primary to-accent text-white px-3 py-2.5 rounded-xl text-sm font-semibold text-center transition-all group-hover:shadow-lg">
+                          Ver detalhes
+                        </span>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
             </div>
 
-            {/* Selected Services */}
-            {selectedServices.length > 0 && (
-              <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg animate-fade-in-up">
-                <h2 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
-                  <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-sm">3</span>
-                  Serviços Selecionados ({selectedServices.length})
-                </h2>
-                <div className="space-y-4">
-                  {selectedServices.map((svc) => {
-                    const def = availableServices.find((d) => d.id === svc.id)!;
-                    const price = calcPrice(def, svc);
-                    return (
-                      <div key={svc.instanceId} className="p-4 rounded-xl bg-gradient-to-br from-secondary to-muted/50 border border-border hover:border-primary/40 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-medium text-foreground">{svc.name}</h3>
-                          <button
-                            type="button"
-                            onClick={() => removeService(svc.instanceId)}
-                            className="text-destructive hover:opacity-70 transition-opacity"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-
-                        {def.type === "fixed" && (
-                          <div className="flex items-center gap-3 mb-2">
-                            <label className="text-sm text-muted-foreground">Qtd:</label>
-                            <input
-                              type="number"
-                              min={1}
-                              value={svc.quantity}
-                              onChange={(e) => updateField(svc.instanceId, "quantity", Math.max(1, Number(e.target.value)))}
-                              className="w-20 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                            />
-                            <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
-                          </div>
-                        )}
-
-                        {def.type === "quantity" && (
-                          <div className="space-y-2 mb-2">
-                            <div className="flex items-center gap-3">
-                              <label className="text-sm text-muted-foreground">Qtd:</label>
-                              <input
-                                type="number"
-                                min={1}
-                                value={svc.quantity}
-                                onChange={(e) => updateField(svc.instanceId, "quantity", Math.max(1, Number(e.target.value)))}
-                                className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                              />
-                              <span className="text-sm font-semibold text-primary ml-auto">{formatBRL(price)}</span>
-                            </div>
-                            {def.qtyTiers && def.qtyTiers.length >= 3 && (
-                              <p className="text-xs text-muted-foreground">
-                                Até {def.qtyTiers[0].maxQty} un.: {formatBRL(def.qtyTiers[0].pricePerUnit)}/un · até {def.qtyTiers[1].maxQty} un.: {formatBRL(def.qtyTiers[1].pricePerUnit)}/un · acima: {formatBRL(def.qtyTiers[2].pricePerUnit)}/un
-                                {def.minPrice ? ` · Mínimo: ${formatBRL(def.minPrice)}` : ""}
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        {def.type === "area" && (
-                          <div className="space-y-2 mb-2">
-                            <div className="flex flex-wrap items-center gap-3">
-                              <div className="flex items-center gap-2">
-                                <label className="text-sm text-muted-foreground">Largura (m):</label>
-                                <input
-                                  type="number"
-                                  min={0}
-                                  step={0.1}
-                                  value={svc.width || ""}
-                                  onChange={(e) => updateField(svc.instanceId, "width", Math.max(0, Number(e.target.value)))}
-                                  className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                                />
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <label className="text-sm text-muted-foreground">Comprimento (m):</label>
-                                <input
-                                  type="number"
-                                  min={0}
-                                  step={0.1}
-                                  value={svc.height || ""}
-                                  onChange={(e) => updateField(svc.instanceId, "height", Math.max(0, Number(e.target.value)))}
-                                  className="w-24 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                                />
-                              </div>
-                            </div>
-                            {svc.width > 0 && svc.height > 0 && (
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                  Área: {(svc.width * svc.height).toFixed(1)} m²
-                                  {def.minPrice && price === def.minPrice && " (valor mínimo aplicado)"}
-                                </span>
-                                <span className="font-semibold text-primary">{formatBRL(price)}</span>
-                              </div>
-                            )}
-                            <p className="text-xs text-muted-foreground">
-                              Até 50m²: {formatBRL(def.tiers![0].pricePerM2)}/m² · 51–100m²:{" "}
-                              {formatBRL(def.tiers![1].pricePerM2)}/m² · +100m²: {formatBRL(def.tiers![2].pricePerM2)}
-                              /m²
-                              {def.minPrice ? ` · Mínimo: ${formatBRL(def.minPrice)}` : ""}
-                            </p>
-                          </div>
-                        )}
-
-                        <input
-                          type="text"
-                          value={svc.observation}
-                          onChange={(e) => updateField(svc.instanceId, "observation", e.target.value)}
-                          className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                          placeholder="Observação (opcional)"
-                          maxLength={300}
-                        />
-                      </div>
-                    );
-                  })}
-
-                  {/* Total */}
-                  <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-border">
-                    <div className="flex flex-col gap-1 w-full">
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>Subtotal:</span>
-                        <span>{formatBRL(subtotal)}</span>
-                      </div>
-                      {appliedCoupon && discount > 0 && (
-                        <div className="flex items-center justify-between text-sm text-accent">
-                          <span>Desconto ({appliedCoupon.code}):</span>
-                          <span>-{formatBRL(discount)}</span>
-                        </div>
-                      )}
-                      {clientSession && clientDiscount > 0 && (
-                        <div className="flex items-center justify-between text-sm text-accent">
-                          <span>Desconto Cliente (3%):</span>
-                          <span>-{formatBRL(clientDiscount)}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between pt-2">
-                        <span className="text-lg font-bold text-foreground">Total Estimado:</span>
-                        <span className="text-2xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{formatBRL(finalTotal)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Cupom de Desconto */}
-            {selectedServices.length > 0 && (
-              <div className="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-2xl p-6 border-2 border-amber-200 shadow-lg animate-fade-in-up">
-                <h2 className="text-xl font-bold text-card-foreground mb-3 flex items-center gap-2">
-                  <Tag className="w-5 h-5 text-amber-600" /> Cupom de Desconto
-                </h2>
-                {appliedCoupon ? (
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-accent/10 border border-accent/30">
-                    <div className="flex items-center gap-2 text-accent text-sm">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>
-                        Cupom <strong>{appliedCoupon.code}</strong> aplicado
-                        {appliedCoupon.discount_type === "percent"
-                          ? ` (${appliedCoupon.discount_value}% de desconto)`
-                          : ` (-${formatBRL(Number(appliedCoupon.discount_value))})`}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      className="text-destructive hover:opacity-70"
-                      aria-label="Remover cupom"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      placeholder="Digite o código do cupom"
-                      maxLength={50}
-                      className="flex-1 rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      disabled={validatingCoupon}
-                      className="bg-gradient-to-r from-primary to-accent text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-60"
-                    >
-                      {validatingCoupon ? "Validando..." : "Aplicar"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              className="group relative w-full overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-green-700 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2 shadow-xl"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <ShoppingCart className="w-5 h-5 relative" />
-              <span className="relative">Adicionar ao carrinho</span>
-            </button>
-          </form>
+          </div>
         </div>
       </div>
       <Footer />
