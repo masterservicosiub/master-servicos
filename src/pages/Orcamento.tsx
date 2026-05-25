@@ -1,21 +1,16 @@
 import { useState, useMemo, useEffect } from "react";
-import { Trash2, Plus, Send, CheckCircle, Tag, X, Sparkles, ShieldCheck, Clock, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Trash2, Plus, CheckCircle, Tag, X, Sparkles, ShieldCheck, Clock, Zap, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import logoMasterServicos from "@/assets/logo-master-servicos.png";
 import logoMasterResidenciais from "@/assets/logo-master-residenciais.png";
 import { toast } from "sonner";
-import { sendToGoogleSheets } from "@/lib/googleSheets";
 import { applyPhoneMask } from "@/lib/phoneMask";
-import { insertOrder, fetchBudgetServices, findCouponByCode, type CouponRow } from "@/lib/supabase";
-import { sendOrderEmailNotification } from "@/lib/emailNotification";
+import { fetchBudgetServices, findCouponByCode, type CouponRow } from "@/lib/supabase";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
-import {
-  getDeviceFingerprint,
-  getClientIp,
-  trackAffiliateClick,
-  runFraudCheck,
-} from "@/lib/antifraud";
+import { trackAffiliateClick } from "@/lib/antifraud";
+import { addToCart } from "@/lib/cart";
 
 type ServiceType = "fixed" | "area" | "quantity";
 
@@ -134,6 +129,7 @@ interface OrcamentoProps {
 }
 
 const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento", pageSubtitle = "Preencha seus dados, escolha os serviços e envie sua solicitação." }: OrcamentoProps = {}) => {
+  const navigate = useNavigate();
   const companyInfo = useCompanyInfo();
   const [availableServices, setAvailableServices] = useState<ServiceDef[]>(kind === "residencial" ? defaultServices : []);
   const [name, setName] = useState("");
