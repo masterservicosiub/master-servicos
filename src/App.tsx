@@ -12,6 +12,7 @@ import Admin from "./pages/Admin.tsx";
 import Afiliados from "./pages/Afiliados.tsx";
 import Cliente from "./pages/Cliente.tsx";
 import Produto from "./pages/Produto.tsx";
+import Servico from "./pages/Servico.tsx";
 import Carrinho from "./pages/Carrinho.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import AdminGear from "./components/AdminGear.tsx";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/afiliados" element={<Afiliados />} />
           <Route path="/cliente" element={<Cliente />} />
           <Route path="/produto/:slug" element={<Produto />} />
+          <Route path="/servico/:id" element={<Servico />} />
           <Route path="/carrinho" element={<Carrinho />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
