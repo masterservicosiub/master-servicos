@@ -812,8 +812,8 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
               className="group relative w-full overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-green-700 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2 shadow-xl"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <Send className="w-5 h-5 relative" />
-              <span className="relative">Contratar Serviços</span>
+              <ShoppingCart className="w-5 h-5 relative" />
+              <span className="relative">Adicionar ao carrinho</span>
             </button>
           </form>
         </div>
