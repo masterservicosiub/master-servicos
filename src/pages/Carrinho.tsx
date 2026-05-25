@@ -170,9 +170,13 @@ const Carrinho = () => {
                       <img src={it.image} alt={it.name} className="w-16 h-16 rounded-lg object-cover" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <Link to={`/produto/${it.slug}`} className="font-semibold text-card-foreground hover:text-primary">
-                        {it.name}
-                      </Link>
+                      {it.slug ? (
+                        <Link to={`/produto/${it.slug}`} className="font-semibold text-card-foreground hover:text-primary">
+                          {it.name}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold text-card-foreground">{it.name}</span>
+                      )}
                       {it.variationLabel && (
                         <p className="text-xs text-muted-foreground">{it.variationLabel}</p>
                       )}
