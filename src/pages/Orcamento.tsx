@@ -426,7 +426,7 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
         </section>
 
         <div className="container mx-auto px-4 py-12">
-          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
+          <div className="max-w-3xl mx-auto space-y-8">
             {!clientSession && (
               <div className="bg-gradient-to-r from-accent/15 to-orange-500/10 border-2 border-accent/40 rounded-2xl p-5 text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg animate-fade-in-up">
                 <span>
