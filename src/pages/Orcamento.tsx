@@ -309,152 +309,48 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !address.trim()) {
-      toast.error("Preencha nome, contato e endereço.");
-      return;
-    }
     if (selectedServices.length === 0) {
-      toast.error("Adicione pelo menos um serviço ao orçamento.");
+      toast.error("Adicione pelo menos um serviço.");
       return;
     }
-
-    const servicesLines = selectedServices.map((svc) => {
+    // Validate each selected service has the required inputs
+    for (const svc of selectedServices) {
+      const def = availableServices.find((d) => d.id === svc.id);
+      if (!def) continue;
+      if (def.type === "area" && (svc.width <= 0 || svc.height <= 0)) {
+        toast.error(`Informe largura e comprimento para "${svc.name}".`);
+        return;
+      }
+      if ((def.type === "fixed" || def.type === "quantity") && svc.quantity < 1) {
+        toast.error(`Quantidade inválida para "${svc.name}".`);
+        return;
+      }
+    }
+    // Push each configured service to the shared cart, preserving the
+    // current billing logic (calcPrice handles fixed / area-tiers / qty-tiers).
+    selectedServices.forEach((svc) => {
       const def = availableServices.find((d) => d.id === svc.id)!;
       const price = calcPrice(def, svc);
-      let detail = svc.name;
-      if (svc.width && svc.height) {
-        detail += ` (${svc.width}x${svc.height}m = ${(svc.width * svc.height).toFixed(1)}m²)`;
-      } else if (svc.quantity > 1) {
-        detail += ` (x${svc.quantity})`;
-      }
-      detail += ` - ${formatBRL(price)}`;
-      return detail;
-    });
-    if (appliedCoupon && discount > 0) {
-      servicesLines.push(`Cupom ${appliedCoupon.code} (-${formatBRL(discount)})`);
-    }
-    if (clientSession && clientDiscount > 0) {
-      servicesLines.push(`Desconto Cliente 3% (-${formatBRL(clientDiscount)})`);
-    }
-    const servicesText = servicesLines.join(" | ");
-
-    // Save to Supabase
-    try {
-      const affiliate_code =
-        (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined;
-      const fingerprint = getDeviceFingerprint();
-      const ip = await getClientIp();
-
-      let fraud_status = "ok";
-      let fraud_reasons = "";
-      let finalAffiliate = affiliate_code;
-
-      // Clientes logados não geram cashback para afiliados
-      if (clientSession) {
-        finalAffiliate = undefined;
-      }
-
-      if (finalAffiliate) {
-        try {
-          const result = await runFraudCheck({
-            affiliate_code: finalAffiliate,
-            client_phone: phone.trim(),
-            client_email: email.trim(),
-            client_name: name.trim(),
-            fingerprint,
-            ip,
-          });
-          fraud_status = result.status;
-          fraud_reasons = result.reasons.join("; ");
-          if (result.status === "blocked") {
-            // Drop the affiliate link entirely so the affiliate gets no credit
-            finalAffiliate = undefined;
-          }
-        } catch {
-          // antifraud failure should not block the order
-        }
-      }
-
-      await insertOrder({
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        address: address.trim(),
-        services: servicesText,
-        total: finalTotal,
-        status: "Novo",
-        notes: "",
-        affiliate_code: finalAffiliate,
-        fraud_status,
-        fraud_reasons,
-        client_fingerprint: fingerprint,
-        client_ip: ip || undefined,
+      const area = def.type === "area" ? svc.width * svc.height : 0;
+      const qty = def.type === "area" ? 1 : Math.max(1, svc.quantity || 1);
+      const mode: "unit" | "area" | "fixed" =
+        def.type === "area" ? "area" : def.type === "quantity" ? "unit" : "unit";
+      addToCart({
+        productId: def.id,
+        slug: "",
+        name: svc.name,
+        image: def.imageUrl || "",
+        variationId: null,
+        variationLabel: def.type === "area" ? `${svc.width}m x ${svc.height}m` : null,
+        mode,
+        qty,
+        area,
+        unitPrice: price,
+        notes: svc.observation?.trim().slice(0, 500) || "",
       });
-    } catch (err) {
-      console.error("Erro ao salvar no Supabase:", err);
-    }
-
-    // Also send to Google Sheets
-    const order = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      name: name.trim(),
-      phone: phone.trim(),
-      email: email.trim(),
-      address: address.trim(),
-      services: selectedServices.map((svc) => {
-        const def = availableServices.find((d) => d.id === svc.id)!;
-        return { ...svc, price: calcPrice(def, svc) };
-      }),
-      total: finalTotal,
-      status: "Novo",
-      notes: "",
-    };
-    sendToGoogleSheets(order).catch(console.error);
-
-    // Send email notification
-    sendOrderEmailNotification({
-      name: name.trim(),
-      phone: phone.trim(),
-      email: email.trim(),
-      address: address.trim(),
-      services: servicesText,
-      total: finalTotal,
-    }).catch(console.error);
-
-    // Enviar pedido por WhatsApp
-    const whatsappLines = [
-      `*Novo Orçamento*`,
-      ``,
-      `*Cliente:* ${name.trim()}`,
-      `*Telefone:* ${phone.trim()}`,
-      email.trim() ? `*E-mail:* ${email.trim()}` : null,
-      `*Endereço:* ${address.trim()}`,
-      ``,
-      `*Serviços:*`,
-      ...selectedServices.map((svc) => {
-        const def = availableServices.find((d) => d.id === svc.id)!;
-        const price = calcPrice(def, svc);
-        let detail = `• ${svc.name}`;
-        if (svc.width && svc.height) {
-          detail += ` (${svc.width}x${svc.height}m = ${(svc.width * svc.height).toFixed(1)}m²)`;
-        } else if (svc.quantity > 1) {
-          detail += ` (x${svc.quantity})`;
-        }
-        detail += ` — ${formatBRL(price)}`;
-        if (svc.observation) detail += `\n   Obs: ${svc.observation}`;
-        return detail;
-      }),
-      appliedCoupon && discount > 0 ? `\n*Cupom:* ${appliedCoupon.code} (-${formatBRL(discount)})` : null,
-      clientSession && clientDiscount > 0 ? `*Desconto Cliente 3%:* -${formatBRL(clientDiscount)}` : null,
-      ``,
-      `*Total: ${formatBRL(finalTotal)}*`,
-    ].filter(Boolean);
-    const whatsappMessage = encodeURIComponent(whatsappLines.join("\n"));
-    window.open(`https://wa.me/${companyInfo.company_whatsapp}?text=${whatsappMessage}`, "_blank");
-
-    setSubmitted(true);
-    toast.success("Orçamento enviado com sucesso!");
+    });
+    toast.success("Serviços adicionados ao carrinho!");
+    navigate("/carrinho");
   };
 
   if (submitted) {
