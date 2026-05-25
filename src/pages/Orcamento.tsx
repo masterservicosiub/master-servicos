@@ -449,63 +449,6 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                 ✅ Você está logado como <strong>{clientSession.name}</strong> — desconto de <strong>3%</strong> aplicado automaticamente.
               </div>
             )}
-            {/* Client Info */}
-            <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg hover:shadow-xl transition-shadow animate-fade-in-up">
-              <h2 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-sm">1</span>
-                Seus Dados (Sem conta)
-              </h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Nome Completo *</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Seu nome"
-                    maxLength={100}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Telefone / WhatsApp *</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(applyPhoneMask(e.target.value))}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="(64) 9 9999-9999"
-                    maxLength={20}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">E-mail</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="seu@email.com"
-                    maxLength={255}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Endereço *</label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Rua, número, bairro"
-                    maxLength={200}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Service Selection */}
             <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-lg hover:shadow-xl transition-shadow animate-fade-in-up">
               <h2 className="text-xl font-bold text-card-foreground mb-1 flex items-center gap-2">
