@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, ShoppingCart, Eye } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Eye, Share2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -93,6 +93,26 @@ const Servico = () => {
     toast.success("Adicionado ao carrinho");
     setNotes("");
     setAdded(true);
+  };
+
+  const handleShare = async () => {
+    if (!service) return;
+    const url = `https://masteriub.com.br/servico/${service.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: service.name, text: service.name, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      } catch {
+        toast.error("Não foi possível compartilhar");
+      }
+    }
   };
 
   if (loading) {
@@ -270,6 +290,12 @@ const Servico = () => {
                   className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90"
                 >
                   <ShoppingCart className="w-4 h-4" /> Adicionar ao carrinho
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 border border-border"
+                >
+                  <Share2 className="w-4 h-4" /> Compartilhar
                 </button>
                 {added && (
                   <Link
