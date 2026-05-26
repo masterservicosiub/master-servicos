@@ -640,6 +640,8 @@ const ShopProductsAdmin = () => {
                         v.price_mode,
                         { unit: v.unit_price, area: v.area_price_per_m2, fixed: v.fixed_price, min: v.min_price },
                         (patch) => updateVar(idx, patch),
+                        edit.variation_area_tiers[idx] || [0, 0, 0],
+                        (tierIdx, value) => updateVarTier(idx, tierIdx, value),
                       )}
                     </div>
                   </div>
