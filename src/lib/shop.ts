@@ -2,6 +2,12 @@ import { supabase } from "./supabase";
 
 export type PriceMode = "unit" | "area" | "fixed";
 
+export interface AreaTier {
+  /** Upper bound (inclusive) in m². null means "no upper bound" (Infinity). */
+  maxArea: number | null;
+  pricePerM2: number;
+}
+
 export interface ShopProductRow {
   id?: string;
   created_at?: string;
@@ -18,6 +24,7 @@ export interface ShopProductRow {
   base_min_price: number;
   download_url: string;
   download_label: string;
+  area_tiers?: AreaTier[] | null;
 }
 
 export interface ShopProductImageRow {
@@ -38,6 +45,7 @@ export interface ShopProductVariationRow {
   fixed_price: number;
   min_price: number;
   sort_order: number;
+  area_tiers?: AreaTier[] | null;
 }
 
 export interface ShopProductFull extends ShopProductRow {
@@ -148,22 +156,40 @@ export function computePrice(
   let raw = 0;
   if (mode === "fixed") raw = variation?.fixed_price ?? product.base_fixed_price;
   else if (mode === "unit") raw = (variation?.unit_price ?? product.base_unit_price) * Math.max(qty, 0);
-  else raw = (variation?.area_price_per_m2 ?? product.base_area_price_per_m2) * Math.max(area, 0);
+  else {
+    const a = Math.max(area, 0);
+    const tiers = (variation?.area_tiers ?? product.area_tiers) || null;
+    if (tiers && tiers.length > 0 && a > 0) {
+      const tier =
+        tiers.find((t) => t.maxArea !== null && a <= (t.maxArea as number)) ??
+        tiers[tiers.length - 1];
+      raw = (tier?.pricePerM2 ?? 0) * a;
+    } else {
+      raw = (variation?.area_price_per_m2 ?? product.base_area_price_per_m2) * a;
+    }
+  }
   const min = variation?.min_price ?? product.base_min_price;
   return Math.max(raw, min || 0);
 }
 
 export function startingPrice(p: ShopProductFull): number {
   const candidates: number[] = [];
+  const firstTier = (tiers?: AreaTier[] | null) =>
+    tiers && tiers.length > 0 ? tiers[0].pricePerM2 : 0;
   const base =
     p.base_price_mode === "fixed"
       ? p.base_fixed_price
       : p.base_price_mode === "unit"
       ? p.base_unit_price
-      : p.base_area_price_per_m2;
+      : firstTier(p.area_tiers) || p.base_area_price_per_m2;
   if (base > 0) candidates.push(Math.max(base, p.base_min_price || 0));
   for (const v of p.variations) {
-    const b = v.price_mode === "fixed" ? v.fixed_price : v.price_mode === "unit" ? v.unit_price : v.area_price_per_m2;
+    const b =
+      v.price_mode === "fixed"
+        ? v.fixed_price
+        : v.price_mode === "unit"
+        ? v.unit_price
+        : firstTier(v.area_tiers) || v.area_price_per_m2;
     if (b > 0) candidates.push(Math.max(b, v.min_price || 0));
   }
   return candidates.length ? Math.min(...candidates) : 0;

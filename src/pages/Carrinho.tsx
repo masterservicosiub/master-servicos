@@ -10,6 +10,7 @@ import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import { getDeviceFingerprint, getClientIp, runFraudCheck } from "@/lib/antifraud";
 import { toast } from "sonner";
+import { sendOrderEmailNotification } from "@/lib/emailNotification";
 
 const Carrinho = () => {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -120,6 +121,15 @@ const Carrinho = () => {
         client_fingerprint: fingerprint,
         client_ip: ip || undefined,
       });
+      // Send email notification (best-effort, non-blocking)
+      sendOrderEmailNotification({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        address: address.trim(),
+        services: servicesText,
+        total,
+      }).catch((e) => console.error("E-mail notification failed:", e));
     } catch (err) {
       console.error("Erro ao salvar pedido:", err);
       toast.error("Não foi possível registrar o pedido. Tente novamente.");

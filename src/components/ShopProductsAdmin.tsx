@@ -14,6 +14,7 @@ import {
   type ShopProductImageRow,
   type ShopProductVariationRow,
   type PriceMode,
+  type AreaTier,
 } from "@/lib/shop";
 
 const MAX_IMAGES = 5;
@@ -31,10 +32,12 @@ type EditState = {
   base_area_price_per_m2: number;
   base_fixed_price: number;
   base_min_price: number;
+  base_area_tiers: [number, number, number];
   download_url: string;
   download_label: string;
   images: ShopProductImageRow[];
   variations: ShopProductVariationRow[];
+  variation_area_tiers: [number, number, number][];
 };
 
 function emptyEdit(): EditState {
@@ -50,11 +53,33 @@ function emptyEdit(): EditState {
     base_area_price_per_m2: 0,
     base_fixed_price: 0,
     base_min_price: 0,
+    base_area_tiers: [0, 0, 0],
     download_url: "",
     download_label: "",
     images: [],
     variations: [],
+    variation_area_tiers: [],
   };
+}
+
+const TIER_BOUNDS: [number, number, null] = [50, 100, null];
+const TIER_LABELS = ["Até 50 m²", "Até 100 m²", "Acima de 100 m²"];
+
+function tiersFromRow(t: AreaTier[] | null | undefined): [number, number, number] {
+  if (!t || t.length === 0) return [0, 0, 0];
+  return [
+    Number(t[0]?.pricePerM2) || 0,
+    Number(t[1]?.pricePerM2) || 0,
+    Number(t[2]?.pricePerM2) || 0,
+  ];
+}
+
+function tiersToRow(t: [number, number, number]): AreaTier[] {
+  return [
+    { maxArea: 50, pricePerM2: t[0] || 0 },
+    { maxArea: 100, pricePerM2: t[1] || 0 },
+    { maxArea: null, pricePerM2: t[2] || 0 },
+  ];
 }
 
 function toEdit(p: ShopProductFull): EditState {
@@ -70,6 +95,7 @@ function toEdit(p: ShopProductFull): EditState {
     base_area_price_per_m2: Number(p.base_area_price_per_m2) || 0,
     base_fixed_price: Number(p.base_fixed_price) || 0,
     base_min_price: Number(p.base_min_price) || 0,
+    base_area_tiers: tiersFromRow(p.area_tiers),
     download_url: (p as any).download_url || "",
     download_label: (p as any).download_label || "",
     images: p.images.map((i) => ({
@@ -85,7 +111,9 @@ function toEdit(p: ShopProductFull): EditState {
       fixed_price: Number(v.fixed_price) || 0,
       min_price: Number(v.min_price) || 0,
       sort_order: v.sort_order,
+      area_tiers: v.area_tiers || null,
     })),
+    variation_area_tiers: p.variations.map((v) => tiersFromRow(v.area_tiers)),
   };
 }
 
@@ -145,9 +173,13 @@ const ShopProductsAdmin = () => {
         sort_order: edit.sort_order,
         base_price_mode: edit.base_price_mode,
         base_unit_price: edit.base_unit_price || 0,
-        base_area_price_per_m2: edit.base_area_price_per_m2 || 0,
+        base_area_price_per_m2:
+          edit.base_price_mode === "area"
+            ? edit.base_area_tiers[0] || 0
+            : edit.base_area_price_per_m2 || 0,
         base_fixed_price: edit.base_fixed_price || 0,
         base_min_price: edit.base_min_price || 0,
+        area_tiers: edit.base_price_mode === "area" ? tiersToRow(edit.base_area_tiers) : null,
         download_url: edit.download_url.trim(),
         download_label: edit.download_label.trim(),
       };
@@ -162,7 +194,16 @@ const ShopProductsAdmin = () => {
       const imgs = edit.images.slice(0, MAX_IMAGES);
       if (imgs.length && !imgs.some((i) => i.is_primary)) imgs[0].is_primary = true;
       await replaceProductImages(productId, imgs);
-      await replaceProductVariations(productId, edit.variations.slice(0, MAX_VARIATIONS));
+      const variationsToSave = edit.variations.slice(0, MAX_VARIATIONS).map((v, idx) => {
+        const tiers = edit.variation_area_tiers[idx] || [0, 0, 0];
+        return {
+          ...v,
+          area_price_per_m2:
+            v.price_mode === "area" ? tiers[0] || 0 : v.area_price_per_m2,
+          area_tiers: v.price_mode === "area" ? tiersToRow(tiers) : null,
+        };
+      });
+      await replaceProductVariations(productId, variationsToSave);
       toast.success("Produto salvo");
       await load();
       cancel();
@@ -247,6 +288,7 @@ const ShopProductsAdmin = () => {
           sort_order: edit.variations.length,
         },
       ],
+      variation_area_tiers: [...edit.variation_area_tiers, [0, 0, 0]],
     });
   };
   const updateVar = (idx: number, patch: Partial<ShopProductVariationRow>) => {
@@ -254,14 +296,26 @@ const ShopProductsAdmin = () => {
     next[idx] = { ...next[idx], ...patch };
     setEdit({ ...edit, variations: next });
   };
+  const updateVarTier = (idx: number, tierIdx: 0 | 1 | 2, value: number) => {
+    const next = edit.variation_area_tiers.map((t) => [...t] as [number, number, number]);
+    while (next.length <= idx) next.push([0, 0, 0]);
+    next[idx][tierIdx] = value;
+    setEdit({ ...edit, variation_area_tiers: next });
+  };
   const removeVar = (idx: number) => {
-    setEdit({ ...edit, variations: edit.variations.filter((_, k) => k !== idx) });
+    setEdit({
+      ...edit,
+      variations: edit.variations.filter((_, k) => k !== idx),
+      variation_area_tiers: edit.variation_area_tiers.filter((_, k) => k !== idx),
+    });
   };
 
   const renderPriceFields = (
     mode: PriceMode,
     values: { unit: number; area: number; fixed: number; min: number },
     onChange: (p: Partial<{ unit_price: number; area_price_per_m2: number; fixed_price: number; min_price: number }>) => void,
+    areaTiers?: [number, number, number],
+    onTierChange?: (tierIdx: 0 | 1 | 2, value: number) => void,
   ) => (
     <div className="grid grid-cols-2 gap-2">
       {mode === "unit" && (
@@ -274,15 +328,25 @@ const ShopProductsAdmin = () => {
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       )}
-      {mode === "area" && (
-        <input
-          type="number"
-          step="0.01"
-          value={values.area}
-          onChange={(e) => onChange({ area_price_per_m2: Number(e.target.value) || 0 })}
-          placeholder="R$/m²"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
+      {mode === "area" && areaTiers && onTierChange && (
+        <div className="col-span-2 space-y-2">
+          <p className="text-[11px] font-semibold text-muted-foreground">
+            Faixas de preço por m² (3 faixas)
+          </p>
+          {TIER_LABELS.map((lbl, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-xs w-28 text-muted-foreground">{lbl}</span>
+              <input
+                type="number"
+                step="0.01"
+                value={areaTiers[i]}
+                onChange={(e) => onTierChange(i as 0 | 1 | 2, Number(e.target.value) || 0)}
+                placeholder="R$/m²"
+                className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
+          ))}
+        </div>
       )}
       {mode === "fixed" && (
         <input
@@ -294,14 +358,16 @@ const ShopProductsAdmin = () => {
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       )}
-      <input
-        type="number"
-        step="0.01"
-        value={values.min}
-        onChange={(e) => onChange({ min_price: Number(e.target.value) || 0 })}
-        placeholder="Preço mínimo R$"
-        className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-      />
+      <div className={mode === "area" ? "col-span-2" : ""}>
+        <input
+          type="number"
+          step="0.01"
+          value={values.min}
+          onChange={(e) => onChange({ min_price: Number(e.target.value) || 0 })}
+          placeholder="Preço mínimo R$"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        />
+      </div>
     </div>
   );
 
@@ -438,6 +504,12 @@ const ShopProductsAdmin = () => {
                     base_fixed_price: patch.fixed_price ?? edit.base_fixed_price,
                     base_min_price: patch.min_price ?? edit.base_min_price,
                   }),
+                edit.base_area_tiers,
+                (tierIdx, value) => {
+                  const next = [...edit.base_area_tiers] as [number, number, number];
+                  next[tierIdx] = value;
+                  setEdit({ ...edit, base_area_tiers: next });
+                },
               )}
             </div>
 
@@ -568,6 +640,8 @@ const ShopProductsAdmin = () => {
                         v.price_mode,
                         { unit: v.unit_price, area: v.area_price_per_m2, fixed: v.fixed_price, min: v.min_price },
                         (patch) => updateVar(idx, patch),
+                        edit.variation_area_tiers[idx] || [0, 0, 0],
+                        (tierIdx, value) => updateVarTier(idx, tierIdx, value),
                       )}
                     </div>
                   </div>
