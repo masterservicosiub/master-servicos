@@ -504,6 +504,12 @@ const ShopProductsAdmin = () => {
                     base_fixed_price: patch.fixed_price ?? edit.base_fixed_price,
                     base_min_price: patch.min_price ?? edit.base_min_price,
                   }),
+                edit.base_area_tiers,
+                (tierIdx, value) => {
+                  const next = [...edit.base_area_tiers] as [number, number, number];
+                  next[tierIdx] = value;
+                  setEdit({ ...edit, base_area_tiers: next });
+                },
               )}
             </div>
 
