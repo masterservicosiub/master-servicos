@@ -314,6 +314,8 @@ const ShopProductsAdmin = () => {
     mode: PriceMode,
     values: { unit: number; area: number; fixed: number; min: number },
     onChange: (p: Partial<{ unit_price: number; area_price_per_m2: number; fixed_price: number; min_price: number }>) => void,
+    areaTiers?: [number, number, number],
+    onTierChange?: (tierIdx: 0 | 1 | 2, value: number) => void,
   ) => (
     <div className="grid grid-cols-2 gap-2">
       {mode === "unit" && (
@@ -326,15 +328,25 @@ const ShopProductsAdmin = () => {
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       )}
-      {mode === "area" && (
-        <input
-          type="number"
-          step="0.01"
-          value={values.area}
-          onChange={(e) => onChange({ area_price_per_m2: Number(e.target.value) || 0 })}
-          placeholder="R$/m²"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
+      {mode === "area" && areaTiers && onTierChange && (
+        <div className="col-span-2 space-y-2">
+          <p className="text-[11px] font-semibold text-muted-foreground">
+            Faixas de preço por m² (3 faixas)
+          </p>
+          {TIER_LABELS.map((lbl, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-xs w-28 text-muted-foreground">{lbl}</span>
+              <input
+                type="number"
+                step="0.01"
+                value={areaTiers[i]}
+                onChange={(e) => onTierChange(i as 0 | 1 | 2, Number(e.target.value) || 0)}
+                placeholder="R$/m²"
+                className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
+          ))}
+        </div>
       )}
       {mode === "fixed" && (
         <input
@@ -346,14 +358,16 @@ const ShopProductsAdmin = () => {
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       )}
-      <input
-        type="number"
-        step="0.01"
-        value={values.min}
-        onChange={(e) => onChange({ min_price: Number(e.target.value) || 0 })}
-        placeholder="Preço mínimo R$"
-        className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-      />
+      <div className={mode === "area" ? "col-span-2" : ""}>
+        <input
+          type="number"
+          step="0.01"
+          value={values.min}
+          onChange={(e) => onChange({ min_price: Number(e.target.value) || 0 })}
+          placeholder="Preço mínimo R$"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        />
+      </div>
     </div>
   );
 
