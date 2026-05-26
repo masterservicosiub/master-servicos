@@ -288,6 +288,7 @@ const ShopProductsAdmin = () => {
           sort_order: edit.variations.length,
         },
       ],
+      variation_area_tiers: [...edit.variation_area_tiers, [0, 0, 0]],
     });
   };
   const updateVar = (idx: number, patch: Partial<ShopProductVariationRow>) => {
@@ -295,8 +296,18 @@ const ShopProductsAdmin = () => {
     next[idx] = { ...next[idx], ...patch };
     setEdit({ ...edit, variations: next });
   };
+  const updateVarTier = (idx: number, tierIdx: 0 | 1 | 2, value: number) => {
+    const next = edit.variation_area_tiers.map((t) => [...t] as [number, number, number]);
+    while (next.length <= idx) next.push([0, 0, 0]);
+    next[idx][tierIdx] = value;
+    setEdit({ ...edit, variation_area_tiers: next });
+  };
   const removeVar = (idx: number) => {
-    setEdit({ ...edit, variations: edit.variations.filter((_, k) => k !== idx) });
+    setEdit({
+      ...edit,
+      variations: edit.variations.filter((_, k) => k !== idx),
+      variation_area_tiers: edit.variation_area_tiers.filter((_, k) => k !== idx),
+    });
   };
 
   const renderPriceFields = (
