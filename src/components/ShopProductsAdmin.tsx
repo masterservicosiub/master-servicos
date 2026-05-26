@@ -14,6 +14,7 @@ import {
   type ShopProductImageRow,
   type ShopProductVariationRow,
   type PriceMode,
+  type AreaTier,
 } from "@/lib/shop";
 
 const MAX_IMAGES = 5;
@@ -31,10 +32,12 @@ type EditState = {
   base_area_price_per_m2: number;
   base_fixed_price: number;
   base_min_price: number;
+  base_area_tiers: [number, number, number];
   download_url: string;
   download_label: string;
   images: ShopProductImageRow[];
   variations: ShopProductVariationRow[];
+  variation_area_tiers: [number, number, number][];
 };
 
 function emptyEdit(): EditState {
@@ -50,11 +53,33 @@ function emptyEdit(): EditState {
     base_area_price_per_m2: 0,
     base_fixed_price: 0,
     base_min_price: 0,
+    base_area_tiers: [0, 0, 0],
     download_url: "",
     download_label: "",
     images: [],
     variations: [],
+    variation_area_tiers: [],
   };
+}
+
+const TIER_BOUNDS: [number, number, null] = [50, 100, null];
+const TIER_LABELS = ["Até 50 m²", "Até 100 m²", "Acima de 100 m²"];
+
+function tiersFromRow(t: AreaTier[] | null | undefined): [number, number, number] {
+  if (!t || t.length === 0) return [0, 0, 0];
+  return [
+    Number(t[0]?.pricePerM2) || 0,
+    Number(t[1]?.pricePerM2) || 0,
+    Number(t[2]?.pricePerM2) || 0,
+  ];
+}
+
+function tiersToRow(t: [number, number, number]): AreaTier[] {
+  return [
+    { maxArea: 50, pricePerM2: t[0] || 0 },
+    { maxArea: 100, pricePerM2: t[1] || 0 },
+    { maxArea: null, pricePerM2: t[2] || 0 },
+  ];
 }
 
 function toEdit(p: ShopProductFull): EditState {
@@ -70,6 +95,7 @@ function toEdit(p: ShopProductFull): EditState {
     base_area_price_per_m2: Number(p.base_area_price_per_m2) || 0,
     base_fixed_price: Number(p.base_fixed_price) || 0,
     base_min_price: Number(p.base_min_price) || 0,
+    base_area_tiers: tiersFromRow(p.area_tiers),
     download_url: (p as any).download_url || "",
     download_label: (p as any).download_label || "",
     images: p.images.map((i) => ({
@@ -85,7 +111,9 @@ function toEdit(p: ShopProductFull): EditState {
       fixed_price: Number(v.fixed_price) || 0,
       min_price: Number(v.min_price) || 0,
       sort_order: v.sort_order,
+      area_tiers: v.area_tiers || null,
     })),
+    variation_area_tiers: p.variations.map((v) => tiersFromRow(v.area_tiers)),
   };
 }
 
