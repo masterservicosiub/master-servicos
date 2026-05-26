@@ -173,9 +173,13 @@ const ShopProductsAdmin = () => {
         sort_order: edit.sort_order,
         base_price_mode: edit.base_price_mode,
         base_unit_price: edit.base_unit_price || 0,
-        base_area_price_per_m2: edit.base_area_price_per_m2 || 0,
+        base_area_price_per_m2:
+          edit.base_price_mode === "area"
+            ? edit.base_area_tiers[0] || 0
+            : edit.base_area_price_per_m2 || 0,
         base_fixed_price: edit.base_fixed_price || 0,
         base_min_price: edit.base_min_price || 0,
+        area_tiers: edit.base_price_mode === "area" ? tiersToRow(edit.base_area_tiers) : null,
         download_url: edit.download_url.trim(),
         download_label: edit.download_label.trim(),
       };
@@ -190,7 +194,16 @@ const ShopProductsAdmin = () => {
       const imgs = edit.images.slice(0, MAX_IMAGES);
       if (imgs.length && !imgs.some((i) => i.is_primary)) imgs[0].is_primary = true;
       await replaceProductImages(productId, imgs);
-      await replaceProductVariations(productId, edit.variations.slice(0, MAX_VARIATIONS));
+      const variationsToSave = edit.variations.slice(0, MAX_VARIATIONS).map((v, idx) => {
+        const tiers = edit.variation_area_tiers[idx] || [0, 0, 0];
+        return {
+          ...v,
+          area_price_per_m2:
+            v.price_mode === "area" ? tiers[0] || 0 : v.area_price_per_m2,
+          area_tiers: v.price_mode === "area" ? tiersToRow(tiers) : null,
+        };
+      });
+      await replaceProductVariations(productId, variationsToSave);
       toast.success("Produto salvo");
       await load();
       cancel();
