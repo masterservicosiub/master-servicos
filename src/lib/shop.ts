@@ -2,6 +2,12 @@ import { supabase } from "./supabase";
 
 export type PriceMode = "unit" | "area" | "fixed";
 
+export interface AreaTier {
+  /** Upper bound (inclusive) in m². null means "no upper bound" (Infinity). */
+  maxArea: number | null;
+  pricePerM2: number;
+}
+
 export interface ShopProductRow {
   id?: string;
   created_at?: string;
@@ -18,6 +24,7 @@ export interface ShopProductRow {
   base_min_price: number;
   download_url: string;
   download_label: string;
+  area_tiers?: AreaTier[] | null;
 }
 
 export interface ShopProductImageRow {
@@ -38,6 +45,7 @@ export interface ShopProductVariationRow {
   fixed_price: number;
   min_price: number;
   sort_order: number;
+  area_tiers?: AreaTier[] | null;
 }
 
 export interface ShopProductFull extends ShopProductRow {
