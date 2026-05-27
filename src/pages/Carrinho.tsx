@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Trash2, ShoppingCart } from "lucide-react";
+import { Trash2, ShoppingCart, FileText } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -11,6 +11,8 @@ import { applyPhoneMask } from "@/lib/phoneMask";
 import { getDeviceFingerprint, getClientIp, runFraudCheck } from "@/lib/antifraud";
 import { toast } from "sonner";
 import { sendOrderEmailNotification } from "@/lib/emailNotification";
+import { generateBudget } from "@/lib/generateBudget";
+import type { OrderRow } from "@/lib/supabase";
 
 const Carrinho = () => {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -59,8 +61,8 @@ const Carrinho = () => {
 
   const finalize = async () => {
     if (!items.length) return;
-    if (!name.trim() || !phone.trim()) {
-      toast.error("Informe ao menos nome e telefone.");
+    if (!name.trim() || !phone.trim() || !address.trim()) {
+      toast.error("Informe nome, telefone e endereço.");
       return;
     }
     setSubmitting(true);
@@ -147,6 +149,39 @@ const Carrinho = () => {
     setCouponCode("");
     toast.success("Pedido registrado!");
     setSubmitting(false);
+  };
+
+  const handleDownloadBudget = async () => {
+    if (!items.length) return;
+    if (!name.trim()) {
+      toast.error("Informe ao menos o nome do cliente para gerar o orçamento.");
+      return;
+    }
+    const servicesText = items
+      .map((i) => {
+        const label = `${i.name}${i.variationLabel ? ` (${i.variationLabel})` : ""}${
+          i.mode === "unit" ? ` - ${i.qty}un` : i.mode === "area" ? ` - ${i.area}m²` : ""
+        }`;
+        return `${label} - R$ ${i.unitPrice.toFixed(2)}`;
+      })
+      .join(" | ");
+    const couponPart = coupon ? ` | Cupom ${coupon.code} (- R$ ${discount.toFixed(2)})` : "";
+    const order: OrderRow = {
+      name: name.trim() || "Cliente",
+      phone: phone.trim(),
+      email: email.trim(),
+      address: address.trim(),
+      services: `${servicesText}${couponPart}`,
+      total,
+      status: "Orçamento",
+      notes: "",
+    };
+    try {
+      await generateBudget(order);
+    } catch (err) {
+      console.error("Erro ao gerar orçamento PDF:", err);
+      toast.error("Não foi possível gerar o PDF.");
+    }
   };
 
   return (

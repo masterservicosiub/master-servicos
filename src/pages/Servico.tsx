@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { fetchBudgetServices, type BudgetServiceRow } from "@/lib/supabase";
 import { addToCart } from "@/lib/cart";
+import { slugify } from "@/lib/shop";
 import { toast } from "sonner";
 
 type ServiceType = "fixed" | "area" | "quantity";
@@ -41,6 +42,7 @@ function calcPrice(
 
 const Servico = () => {
   const { id = "" } = useParams();
+  const param = id;
   const nav = useNavigate();
   const [service, setService] = useState<BudgetServiceRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,12 +56,16 @@ const Servico = () => {
     setLoading(true);
     Promise.all([fetchBudgetServices("residencial"), fetchBudgetServices("grafico")])
       .then(([a, b]) => {
-        const found = [...a, ...b].find((s) => s.id === id) || null;
+        const all = [...a, ...b];
+        const found =
+          all.find((s) => slugify(s.name) === param) ||
+          all.find((s) => s.id === param) ||
+          null;
         setService(found);
       })
       .catch(() => setService(null))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [param]);
 
   const area = useMemo(
     () => Math.max(0, width) * Math.max(0, height),
@@ -97,7 +103,7 @@ const Servico = () => {
 
   const handleShare = async () => {
     if (!service) return;
-    const url = `https://masteriub.com.br/servico/${service.id}`;
+    const url = `https://masteriub.com.br/servico/${slugify(service.name)}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: service.name, text: service.name, url });

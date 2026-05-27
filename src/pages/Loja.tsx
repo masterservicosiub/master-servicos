@@ -71,11 +71,14 @@ const Loja = () => {
           )}
         </div>
         <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-semibold text-foreground leading-tight line-clamp-2">{p.name}</h3>
+          <h3 className="font-semibold text-foreground leading-tight">{p.name}</h3>
           {p.category && (
             <span className="inline-block self-start mt-1 text-[10px] uppercase tracking-wide bg-gradient-to-r from-primary/10 to-accent/10 text-primary px-2 py-0.5 rounded-full font-semibold">
               {p.category}
             </span>
+          )}
+          {p.description && (
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{p.description}</p>
           )}
           {from > 0 && (
             <div className="mt-3 mb-3 text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
