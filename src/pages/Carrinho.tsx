@@ -197,7 +197,7 @@ const Carrinho = () => {
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Seu carrinho está vazio.</p>
               <Link
-                to="/servicos-graficos"
+                to="/angelo-design"
                 className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold"
               >
                 Ver produtos

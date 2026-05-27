@@ -3085,7 +3085,7 @@ const Admin = () => {
                 <input
                   value={svcLink}
                   onChange={(e) => setSvcLink(e.target.value)}
-                  placeholder="Link do card (ex: /servicos-residenciais ou https://...)"
+                  placeholder="Link do card (ex: /master-servicos ou https://...)"
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                 />
                 <button
@@ -3168,7 +3168,7 @@ const Admin = () => {
                             <input
                               value={editSvcLink}
                               onChange={(e) => setEditSvcLink(e.target.value)}
-                              placeholder="Link do card (ex: /servicos-residenciais ou https://...)"
+                              placeholder="Link do card (ex: /master-servicos ou https://...)"
                               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                             />
                             <div className="flex gap-2">
