@@ -101,7 +101,7 @@ const Produto = () => {
         <Header />
         <main className="flex-1 pt-24 container mx-auto px-4 py-10 text-center">
           <p className="text-muted-foreground mb-4">Produto não encontrado.</p>
-          <Link to="/servicos-graficos" className="text-primary underline">
+          <Link to="/angelo-design" className="text-primary underline">
             Voltar para a loja
           </Link>
         </main>

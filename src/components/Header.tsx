@@ -25,8 +25,8 @@ const Header = () => {
 
   const links = [
     { to: "/", label: "Início" },
-    { to: "/servicos-residenciais", label: "Master Serviços" },
-    { to: "/servicos-graficos", label: "Angelo Design" },
+    { to: "/master-servicos", label: "Master Serviços" },
+    { to: "/angelo-design", label: "Angelo Design" },
     { to: "/midias", label: "Mídias" },
     { to: "/afiliados", label: "Afiliados" },
   ];

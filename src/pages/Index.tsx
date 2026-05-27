@@ -138,14 +138,14 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up [animation-delay:360ms]">
               <Link
-                to="/servicos-residenciais"
+                to="/master-servicos"
                 className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
               >
                 <Wrench className="w-5 h-5" /> Master Serviços
               </Link>
 
               <Link
-                to="/servicos-graficos"
+                to="/angelo-design"
                 className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl"
               >
                 <Printer className="w-5 h-5" /> Angelo Design
@@ -345,7 +345,7 @@ const Index = () => {
             Faça um orçamento sem compromisso online, e feche seus serviços.
           </p>
           <Link
-            to="/servicos-residenciais"
+            to="/master-servicos"
             className="inline-flex items-center gap-2 bg-white text-primary px-10 py-4 rounded-xl font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl animate-fade-in-up [animation-delay:240ms]"
           >
             Fazer Orçamento Gratuito <ArrowRight className="w-5 h-5" />

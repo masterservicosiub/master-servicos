@@ -139,7 +139,7 @@ const Servico = () => {
         <Header />
         <main className="flex-1 pt-24 container mx-auto px-4 py-10 text-center">
           <p className="text-muted-foreground mb-4">Serviço não encontrado.</p>
-          <Link to="/servicos-residenciais" className="text-primary underline">
+          <Link to="/master-servicos" className="text-primary underline">
             Voltar
           </Link>
         </main>
