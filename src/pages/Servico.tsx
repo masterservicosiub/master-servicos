@@ -156,6 +156,12 @@ const Servico = () => {
       <Helmet>
         <title>{service.name} — Master Soluções</title>
         <meta name="description" content={(service.description || service.name).slice(0, 160)} />
+        <meta property="og:title" content={service.name} />
+        <meta property="og:description" content={(service.description || service.name).slice(0, 160)} />
+        {service.image_url && <meta property="og:image" content={service.image_url} />}
+        {service.image_url && <meta name="twitter:image" content={service.image_url} />}
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header />
       <main className="flex-1 pt-24">
