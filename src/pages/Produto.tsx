@@ -121,7 +121,9 @@ const Produto = () => {
         <meta property="og:title" content={product.name} />
         <meta property="og:description" content={product.description.slice(0, 160)} />
         {ogImg && <meta property="og:image" content={ogImg} />}
+        {ogImg && <meta name="twitter:image" content={ogImg} />}
         <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header />
       <main className="flex-1 pt-24">
