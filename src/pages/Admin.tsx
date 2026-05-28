@@ -57,6 +57,12 @@ import {
   type AffiliateRankingRow,
   DEFAULT_STAR_RATES,
 } from "@/lib/supabase";
+import {
+  fetchExpenses,
+  insertExpense,
+  deleteExpense,
+  type ExpenseRow,
+} from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import {
