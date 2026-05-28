@@ -81,6 +81,35 @@ export async function deleteOrderById(id: string) {
   if (error) throw error;
 }
 
+// Expenses (saídas)
+export interface ExpenseRow {
+  id?: string;
+  created_at?: string;
+  expense_date?: string;
+  description: string;
+  amount: number;
+}
+
+export async function fetchExpenses(): Promise<ExpenseRow[]> {
+  const { data, error } = await supabase
+    .from("expenses")
+    .select("*")
+    .order("expense_date", { ascending: false });
+  if (error) throw error;
+  return (data as ExpenseRow[]) || [];
+}
+
+export async function insertExpense(expense: Omit<ExpenseRow, "id" | "created_at">) {
+  const { data, error } = await supabase.from("expenses").insert([expense]).select();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteExpense(id: string) {
+  const { error } = await supabase.from("expenses").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // Services CRUD (page showcase)
 export interface ServiceRow {
   id?: string;
