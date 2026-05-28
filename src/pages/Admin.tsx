@@ -1477,6 +1477,93 @@ const Admin = () => {
                 </button>
               </div>
 
+              {/* Saídas */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <h2 className="text-lg font-semibold text-card-foreground">Saídas ({filterYear})</h2>
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Total de saídas no ano: </span>
+                    <span className="font-bold text-destructive">R$ {annualExpenses.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-[1fr_140px_140px_auto] gap-2 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Descrição da saída"
+                    value={newExpenseDesc}
+                    onChange={(e) => setNewExpenseDesc(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Valor (R$)"
+                    value={newExpenseAmount}
+                    onChange={(e) => setNewExpenseAmount(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="date"
+                    value={newExpenseDate}
+                    onChange={(e) => setNewExpenseDate(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    onClick={handleAddExpense}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 text-sm flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+                {expenses.filter((e) => {
+                  const ds = e.expense_date || e.created_at;
+                  return ds && new Date(ds).getFullYear() === filterYear;
+                }).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhuma saída registrada neste ano.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-muted-foreground">
+                          <th className="text-left py-2 px-2 font-medium">Data</th>
+                          <th className="text-left py-2 px-2 font-medium">Descrição</th>
+                          <th className="text-right py-2 px-2 font-medium">Valor</th>
+                          <th className="py-2 px-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expenses
+                          .filter((e) => {
+                            const ds = e.expense_date || e.created_at;
+                            return ds && new Date(ds).getFullYear() === filterYear;
+                          })
+                          .map((e) => (
+                            <tr key={e.id} className="border-b border-border/50">
+                              <td className="py-2 px-2">
+                                {new Date(e.expense_date || e.created_at!).toLocaleDateString("pt-BR")}
+                              </td>
+                              <td className="py-2 px-2">{e.description}</td>
+                              <td className="py-2 px-2 text-right text-destructive font-medium">
+                                R$ {Number(e.amount).toFixed(2)}
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <button
+                                  onClick={() => handleDeleteExpense(e.id!)}
+                                  className="text-destructive hover:opacity-80"
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
               {/* Filtros */}
               <div className="bg-card rounded-xl p-4 border border-border flex flex-wrap items-center gap-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
