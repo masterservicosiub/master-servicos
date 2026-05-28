@@ -57,6 +57,12 @@ import {
   type AffiliateRankingRow,
   DEFAULT_STAR_RATES,
 } from "@/lib/supabase";
+import {
+  fetchExpenses,
+  insertExpense,
+  deleteExpense,
+  type ExpenseRow,
+} from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import {
@@ -164,6 +170,10 @@ const Admin = () => {
   const [recoverEmail, setRecoverEmail] = useState("");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [newExpenseDesc, setNewExpenseDesc] = useState("");
+  const [newExpenseAmount, setNewExpenseAmount] = useState("");
+  const [newExpenseDate, setNewExpenseDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [filterMonth, setFilterMonth] = useState(() => {
     const v = localStorage.getItem("admin_default_filter_month");
     return v !== null ? Number(v) : new Date().getMonth() + 1;
@@ -521,6 +531,47 @@ const Admin = () => {
     setLoading(false);
   };
 
+  const loadExpenses = async () => {
+    try {
+      const data = await fetchExpenses();
+      setExpenses(data);
+    } catch (err) {
+      console.error("Erro ao buscar saídas:", err);
+    }
+  };
+
+  const handleAddExpense = async () => {
+    const amount = Number(String(newExpenseAmount).replace(",", "."));
+    if (!newExpenseDesc.trim() || !amount || amount <= 0) {
+      toast.error("Informe descrição e valor válido");
+      return;
+    }
+    try {
+      await insertExpense({
+        description: newExpenseDesc.trim(),
+        amount,
+        expense_date: newExpenseDate,
+      });
+      setNewExpenseDesc("");
+      setNewExpenseAmount("");
+      setNewExpenseDate(new Date().toISOString().slice(0, 10));
+      await loadExpenses();
+      toast.success("Saída registrada");
+    } catch (err: any) {
+      toast.error("Erro ao registrar saída: " + (err?.message || ""));
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!confirm("Excluir esta saída?")) return;
+    try {
+      await deleteExpense(id);
+      await loadExpenses();
+    } catch (err: any) {
+      toast.error("Erro ao excluir: " + (err?.message || ""));
+    }
+  };
+
   const loadServices = async () => {
     try {
       const data = await fetchServicesAdmin();
@@ -564,6 +615,7 @@ const Admin = () => {
       loadBudgetServices();
       loadCoupons();
       loadClients();
+      loadExpenses();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
@@ -660,7 +712,7 @@ const Admin = () => {
   };
 
   // Dashboard calculations
-  const { annualRevenue, monthlyRevenue, monthlyBreakdown } = useMemo(() => {
+  const { annualRevenue, monthlyRevenue, monthlyBreakdown, annualExpenses, monthlyExpenses, monthlyExpensesBreakdown } = useMemo(() => {
     const now = new Date();
     const currentYear = filterYear;
     const currentMonth = now.getMonth();
@@ -671,7 +723,7 @@ const Admin = () => {
       return d.getFullYear() === currentYear;
     });
 
-    const annualRevenue = yearOrders
+    const annualGross = yearOrders
       .filter((o) => o.status === "Pago")
       .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
@@ -680,22 +732,50 @@ const Admin = () => {
       return new Date(o.created_at).getMonth() === currentMonth;
     });
 
-    const monthlyRevenue = monthOrders
+    const monthlyGross = monthOrders
       .filter((o) => o.status === "Pago")
       .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
-    const monthlyBreakdown: number[] = Array(12).fill(0);
+    const grossBreakdown: number[] = Array(12).fill(0);
     yearOrders
       .filter((o) => o.status === "Pago")
       .forEach((o) => {
         if (o.created_at) {
           const m = new Date(o.created_at).getMonth();
-          monthlyBreakdown[m] += Number(o.total || 0);
+          grossBreakdown[m] += Number(o.total || 0);
         }
       });
 
-    return { annualRevenue, monthlyRevenue, monthlyBreakdown };
-  }, [orders, filterYear]);
+    const yearExpenses = expenses.filter((e) => {
+      const ds = e.expense_date || e.created_at;
+      if (!ds) return false;
+      return new Date(ds).getFullYear() === currentYear;
+    });
+    const annualExpenses = yearExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const monthlyExpenses = yearExpenses
+      .filter((e) => {
+        const ds = e.expense_date || e.created_at!;
+        return new Date(ds).getMonth() === currentMonth;
+      })
+      .reduce((s, e) => s + Number(e.amount || 0), 0);
+    const monthlyExpensesBreakdown: number[] = Array(12).fill(0);
+    yearExpenses.forEach((e) => {
+      const ds = e.expense_date || e.created_at!;
+      const m = new Date(ds).getMonth();
+      monthlyExpensesBreakdown[m] += Number(e.amount || 0);
+    });
+
+    const monthlyBreakdown = grossBreakdown.map((v, i) => v - monthlyExpensesBreakdown[i]);
+
+    return {
+      annualRevenue: annualGross - annualExpenses,
+      monthlyRevenue: monthlyGross - monthlyExpenses,
+      monthlyBreakdown,
+      annualExpenses,
+      monthlyExpenses,
+      monthlyExpensesBreakdown,
+    };
+  }, [orders, expenses, filterYear]);
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
@@ -1390,11 +1470,98 @@ const Admin = () => {
               {/* Botão Relatório PDF */}
               <div className="flex justify-end">
                 <button
-                  onClick={() => generateRevenueReport(orders, filterYear)}
+                  onClick={() => generateRevenueReport(orders, filterYear, expenses)}
                   className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 text-sm"
                 >
                   <FileText className="w-4 h-4" /> Gerar Relatório PDF ({filterYear})
                 </button>
+              </div>
+
+              {/* Saídas */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <h2 className="text-lg font-semibold text-card-foreground">Saídas ({filterYear})</h2>
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Total de saídas no ano: </span>
+                    <span className="font-bold text-destructive">R$ {annualExpenses.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-[1fr_140px_140px_auto] gap-2 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Descrição da saída"
+                    value={newExpenseDesc}
+                    onChange={(e) => setNewExpenseDesc(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Valor (R$)"
+                    value={newExpenseAmount}
+                    onChange={(e) => setNewExpenseAmount(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="date"
+                    value={newExpenseDate}
+                    onChange={(e) => setNewExpenseDate(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    onClick={handleAddExpense}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 text-sm flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+                {expenses.filter((e) => {
+                  const ds = e.expense_date || e.created_at;
+                  return ds && new Date(ds).getFullYear() === filterYear;
+                }).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhuma saída registrada neste ano.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-muted-foreground">
+                          <th className="text-left py-2 px-2 font-medium">Data</th>
+                          <th className="text-left py-2 px-2 font-medium">Descrição</th>
+                          <th className="text-right py-2 px-2 font-medium">Valor</th>
+                          <th className="py-2 px-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expenses
+                          .filter((e) => {
+                            const ds = e.expense_date || e.created_at;
+                            return ds && new Date(ds).getFullYear() === filterYear;
+                          })
+                          .map((e) => (
+                            <tr key={e.id} className="border-b border-border/50">
+                              <td className="py-2 px-2">
+                                {new Date(e.expense_date || e.created_at!).toLocaleDateString("pt-BR")}
+                              </td>
+                              <td className="py-2 px-2">{e.description}</td>
+                              <td className="py-2 px-2 text-right text-destructive font-medium">
+                                R$ {Number(e.amount).toFixed(2)}
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <button
+                                  onClick={() => handleDeleteExpense(e.id!)}
+                                  className="text-destructive hover:opacity-80"
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
               {/* Filtros */}
