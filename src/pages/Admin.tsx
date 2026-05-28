@@ -1470,7 +1470,7 @@ const Admin = () => {
               {/* Botão Relatório PDF */}
               <div className="flex justify-end">
                 <button
-                  onClick={() => generateRevenueReport(orders, filterYear)}
+                  onClick={() => generateRevenueReport(orders, filterYear, expenses)}
                   className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 text-sm"
                 >
                   <FileText className="w-4 h-4" /> Gerar Relatório PDF ({filterYear})
