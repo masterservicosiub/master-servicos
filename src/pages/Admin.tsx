@@ -615,6 +615,7 @@ const Admin = () => {
       loadBudgetServices();
       loadCoupons();
       loadClients();
+      loadExpenses();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
