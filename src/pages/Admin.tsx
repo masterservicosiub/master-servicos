@@ -712,7 +712,7 @@ const Admin = () => {
   };
 
   // Dashboard calculations
-  const { annualRevenue, monthlyRevenue, monthlyBreakdown } = useMemo(() => {
+  const { annualRevenue, monthlyRevenue, monthlyBreakdown, annualExpenses, monthlyExpenses, monthlyExpensesBreakdown } = useMemo(() => {
     const now = new Date();
     const currentYear = filterYear;
     const currentMonth = now.getMonth();
@@ -723,7 +723,7 @@ const Admin = () => {
       return d.getFullYear() === currentYear;
     });
 
-    const annualRevenue = yearOrders
+    const annualGross = yearOrders
       .filter((o) => o.status === "Pago")
       .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
@@ -732,22 +732,50 @@ const Admin = () => {
       return new Date(o.created_at).getMonth() === currentMonth;
     });
 
-    const monthlyRevenue = monthOrders
+    const monthlyGross = monthOrders
       .filter((o) => o.status === "Pago")
       .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
-    const monthlyBreakdown: number[] = Array(12).fill(0);
+    const grossBreakdown: number[] = Array(12).fill(0);
     yearOrders
       .filter((o) => o.status === "Pago")
       .forEach((o) => {
         if (o.created_at) {
           const m = new Date(o.created_at).getMonth();
-          monthlyBreakdown[m] += Number(o.total || 0);
+          grossBreakdown[m] += Number(o.total || 0);
         }
       });
 
-    return { annualRevenue, monthlyRevenue, monthlyBreakdown };
-  }, [orders, filterYear]);
+    const yearExpenses = expenses.filter((e) => {
+      const ds = e.expense_date || e.created_at;
+      if (!ds) return false;
+      return new Date(ds).getFullYear() === currentYear;
+    });
+    const annualExpenses = yearExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const monthlyExpenses = yearExpenses
+      .filter((e) => {
+        const ds = e.expense_date || e.created_at!;
+        return new Date(ds).getMonth() === currentMonth;
+      })
+      .reduce((s, e) => s + Number(e.amount || 0), 0);
+    const monthlyExpensesBreakdown: number[] = Array(12).fill(0);
+    yearExpenses.forEach((e) => {
+      const ds = e.expense_date || e.created_at!;
+      const m = new Date(ds).getMonth();
+      monthlyExpensesBreakdown[m] += Number(e.amount || 0);
+    });
+
+    const monthlyBreakdown = grossBreakdown.map((v, i) => v - monthlyExpensesBreakdown[i]);
+
+    return {
+      annualRevenue: annualGross - annualExpenses,
+      monthlyRevenue: monthlyGross - monthlyExpenses,
+      monthlyBreakdown,
+      annualExpenses,
+      monthlyExpenses,
+      monthlyExpensesBreakdown,
+    };
+  }, [orders, expenses, filterYear]);
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
