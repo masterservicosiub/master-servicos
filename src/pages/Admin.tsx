@@ -531,6 +531,47 @@ const Admin = () => {
     setLoading(false);
   };
 
+  const loadExpenses = async () => {
+    try {
+      const data = await fetchExpenses();
+      setExpenses(data);
+    } catch (err) {
+      console.error("Erro ao buscar saídas:", err);
+    }
+  };
+
+  const handleAddExpense = async () => {
+    const amount = Number(String(newExpenseAmount).replace(",", "."));
+    if (!newExpenseDesc.trim() || !amount || amount <= 0) {
+      toast.error("Informe descrição e valor válido");
+      return;
+    }
+    try {
+      await insertExpense({
+        description: newExpenseDesc.trim(),
+        amount,
+        expense_date: newExpenseDate,
+      });
+      setNewExpenseDesc("");
+      setNewExpenseAmount("");
+      setNewExpenseDate(new Date().toISOString().slice(0, 10));
+      await loadExpenses();
+      toast.success("Saída registrada");
+    } catch (err: any) {
+      toast.error("Erro ao registrar saída: " + (err?.message || ""));
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!confirm("Excluir esta saída?")) return;
+    try {
+      await deleteExpense(id);
+      await loadExpenses();
+    } catch (err: any) {
+      toast.error("Erro ao excluir: " + (err?.message || ""));
+    }
+  };
+
   const loadServices = async () => {
     try {
       const data = await fetchServicesAdmin();
