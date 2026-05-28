@@ -170,6 +170,10 @@ const Admin = () => {
   const [recoverEmail, setRecoverEmail] = useState("");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [newExpenseDesc, setNewExpenseDesc] = useState("");
+  const [newExpenseAmount, setNewExpenseAmount] = useState("");
+  const [newExpenseDate, setNewExpenseDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [filterMonth, setFilterMonth] = useState(() => {
     const v = localStorage.getItem("admin_default_filter_month");
     return v !== null ? Number(v) : new Date().getMonth() + 1;
