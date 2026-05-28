@@ -103,7 +103,8 @@ const Servico = () => {
 
   const handleShare = async () => {
     if (!service) return;
-    const url = `https://masteriub.com.br/servico/${slugify(service.name)}`;
+    const slug = slugify(service.name);
+    const url = `https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/og-share?type=servico&slug=${encodeURIComponent(slug)}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: service.name, text: service.name, url });

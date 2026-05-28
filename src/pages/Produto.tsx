@@ -65,7 +65,7 @@ const Produto = () => {
 
   const handleShare = async () => {
     if (!product) return;
-    const url = `https://masteriub.com.br/produto/${product.slug}`;
+    const url = `https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/og-share?type=produto&slug=${encodeURIComponent(product.slug)}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: product.name, text: product.name, url });
