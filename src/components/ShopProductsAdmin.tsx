@@ -123,6 +123,8 @@ const ShopProductsAdmin = () => {
   const [editingId, setEditingId] = useState<string | "new" | null>(null);
   const [edit, setEdit] = useState<EditState>(emptyEdit());
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
 
   const load = async () => {
     setLoading(true);
@@ -673,7 +675,49 @@ const ShopProductsAdmin = () => {
           <p className="text-muted-foreground text-sm">Nenhum produto cadastrado.</p>
         ) : (
           <div className="space-y-2">
-            {products.map((p) => {
+            {(() => {
+              const cats = Array.from(
+                new Set(
+                  products
+                    .map((p) => (p as any).category)
+                    .filter((c): c is string => !!c && c.trim().length > 0),
+                ),
+              ).sort();
+              const q = search.trim().toLowerCase();
+              const filtered = products.filter((p) => {
+                if (categoryFilter && ((p as any).category || "") !== categoryFilter) return false;
+                if (!q) return true;
+                return (
+                  p.name.toLowerCase().includes(q) ||
+                  (p.slug || "").toLowerCase().includes(q) ||
+                  ((p as any).category || "").toLowerCase().includes(q) ||
+                  (p.description || "").toLowerCase().includes(q)
+                );
+              });
+              return (
+                <>
+                  <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Pesquisar por nome, slug ou descrição..."
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    />
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="rounded-md border border-input bg-background px-3 py-2 text-sm sm:w-56"
+                    >
+                      <option value="">Todas as categorias</option>
+                      {cats.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {filtered.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">Nenhum produto encontrado.</p>
+                  ) : (
+                    filtered.map((p) => {
               const primary = p.images.find((i) => i.is_primary)?.image_url || p.images[0]?.image_url;
               return (
                 <div key={p.id} className="flex items-center gap-3 border border-border rounded-lg p-3">
@@ -701,7 +745,11 @@ const ShopProductsAdmin = () => {
                   </button>
                 </div>
               );
-            })}
+                    })
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

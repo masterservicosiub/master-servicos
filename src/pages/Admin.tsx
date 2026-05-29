@@ -174,6 +174,8 @@ const Admin = () => {
   });
   const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
+  const [bsSearch, setBsSearch] = useState("");
+  const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
 
   // Mídias
   const [mediaVideos, setMediaVideos] = useState<VideoItem[]>([]);
@@ -2752,7 +2754,47 @@ const Admin = () => {
 
                 {budgetServices.filter((b) => b.kind === bsKindFilter).length > 0 && (
                   <div className="mt-6 space-y-4">
-                    {budgetServices.filter((b) => b.kind === bsKindFilter).map((bs) => (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        value={bsSearch}
+                        onChange={(e) => setBsSearch(e.target.value)}
+                        placeholder="Pesquisar serviço por nome, categoria ou descrição..."
+                        className="flex-1 rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                      <select
+                        value={bsCategoryFilter}
+                        onChange={(e) => setBsCategoryFilter(e.target.value)}
+                        className="rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-64"
+                      >
+                        <option value="">Todas as categorias</option>
+                        {Array.from(
+                          new Set(
+                            budgetServices
+                              .filter((b) => b.kind === bsKindFilter)
+                              .map((b) => b.category)
+                              .filter((c): c is string => !!c && c.trim().length > 0),
+                          ),
+                        ).sort().map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {(() => {
+                      const q = bsSearch.trim().toLowerCase();
+                      const list = budgetServices.filter((b) => {
+                        if (b.kind !== bsKindFilter) return false;
+                        if (bsCategoryFilter && (b.category || "") !== bsCategoryFilter) return false;
+                        if (!q) return true;
+                        return (
+                          (b.name || "").toLowerCase().includes(q) ||
+                          (b.category || "").toLowerCase().includes(q) ||
+                          (b.description || "").toLowerCase().includes(q)
+                        );
+                      });
+                      if (list.length === 0) {
+                        return <p className="text-sm text-muted-foreground">Nenhum serviço encontrado.</p>;
+                      }
+                      return list.map((bs) => (
                       <div key={bs.id} className="p-4 rounded-lg bg-secondary border border-border">
                         {editingBsId === bs.id ? (
                           <div className="space-y-3">
@@ -2989,7 +3031,8 @@ const Admin = () => {
                           </div>
                         )}
                       </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                 )}
               </div>
