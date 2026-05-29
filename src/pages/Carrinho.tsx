@@ -319,6 +319,12 @@ const Carrinho = () => {
                 >
                   {submitting ? "Enviando..." : "Finalizar pedido via WhatsApp"}
                 </button>
+                <button
+                  onClick={handleDownloadBudget}
+                  className="w-full bg-secondary text-secondary-foreground py-3 rounded-lg font-semibold hover:opacity-90 border border-border"
+                >
+                  Gerar Orçamento em PDF
+                </button>
               </div>
             </>
           )}
