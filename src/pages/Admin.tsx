@@ -174,6 +174,8 @@ const Admin = () => {
   });
   const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
+  const [bsSearch, setBsSearch] = useState("");
+  const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
 
   // Mídias
   const [mediaVideos, setMediaVideos] = useState<VideoItem[]>([]);
