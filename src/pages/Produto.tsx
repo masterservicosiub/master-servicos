@@ -5,7 +5,13 @@ import { ShoppingCart, ArrowLeft, Download, Eye, Share2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
-import { fetchProductBySlug, computePrice, primaryImage, type ShopProductFull, type ShopProductVariationRow } from "@/lib/shop";
+import {
+  fetchProductBySlug,
+  computePrice,
+  primaryImage,
+  type ShopProductFull,
+  type ShopProductVariationRow,
+} from "@/lib/shop";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
 
@@ -65,7 +71,7 @@ const Produto = () => {
 
   const handleShare = async () => {
     if (!product) return;
-    const url = `https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/og-share?type=produto&slug=${encodeURIComponent(product.slug)}`;
+    const url = `https://masteriub.com.br/produto/${encodeURIComponent(product.slug)}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: product.name, text: product.name, url });
@@ -141,9 +147,7 @@ const Produto = () => {
                 {mainImg ? (
                   <img src={mainImg} alt={product.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    Sem imagem
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">Sem imagem</div>
                 )}
               </div>
               {product.images.length > 1 && (
@@ -235,9 +239,7 @@ const Produto = () => {
                       = <strong className="text-foreground">{area.toFixed(2)} m²</strong>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Valor calculado: R$/m² × área informada.
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">Valor calculado: R$/m² × área informada.</p>
                 </div>
               )}
 
