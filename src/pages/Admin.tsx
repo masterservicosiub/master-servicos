@@ -1348,7 +1348,7 @@ const Admin = () => {
     );
   }
 
-  const maxMonthly = Math.max(...monthlyBreakdown, 1);
+  const maxMonthly = Math.max(...monthlyBreakdown.map((v) => Math.abs(v)), 1);
 
   return (
     <div className="min-h-screen">
