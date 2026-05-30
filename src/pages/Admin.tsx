@@ -715,7 +715,7 @@ const Admin = () => {
   };
 
   // Dashboard calculations
-  const { annualRevenue, monthlyRevenue, monthlyBreakdown } = useMemo(() => {
+  const { annualRevenue, monthlyRevenue, monthlyBreakdown, annualExpenses, monthlyExpenses, monthlyExpensesBreakdown, yearExpenses } = useMemo(() => {
     const now = new Date();
     const currentYear = filterYear;
     const currentMonth = now.getMonth();
@@ -749,8 +749,38 @@ const Admin = () => {
         }
       });
 
-    return { annualRevenue, monthlyRevenue, monthlyBreakdown };
-  }, [orders, filterYear]);
+    // Expenses (saídas)
+    const yearExpenses = expenses.filter((e) => {
+      if (!e.expense_date) return false;
+      // expense_date é YYYY-MM-DD; usar UTC para evitar timezone
+      const y = Number(e.expense_date.slice(0, 4));
+      return y === currentYear;
+    });
+    const annualExpenses = yearExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const monthlyExpenses = yearExpenses
+      .filter((e) => Number(e.expense_date.slice(5, 7)) - 1 === currentMonth)
+      .reduce((s, e) => s + Number(e.amount || 0), 0);
+    const monthlyExpensesBreakdown: number[] = Array(12).fill(0);
+    yearExpenses.forEach((e) => {
+      const m = Number(e.expense_date.slice(5, 7)) - 1;
+      if (m >= 0 && m < 12) monthlyExpensesBreakdown[m] += Number(e.amount || 0);
+    });
+
+    // Subtrair saídas do faturamento
+    const annualRevenueNet = annualRevenue - annualExpenses;
+    const monthlyRevenueNet = monthlyRevenue - monthlyExpenses;
+    const monthlyBreakdownNet = monthlyBreakdown.map((v, i) => v - monthlyExpensesBreakdown[i]);
+
+    return {
+      annualRevenue: annualRevenueNet,
+      monthlyRevenue: monthlyRevenueNet,
+      monthlyBreakdown: monthlyBreakdownNet,
+      annualExpenses,
+      monthlyExpenses,
+      monthlyExpensesBreakdown,
+      yearExpenses,
+    };
+  }, [orders, filterYear, expenses]);
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
