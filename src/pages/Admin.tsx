@@ -1423,14 +1423,15 @@ const Admin = () => {
           {activeTab === "pedidos" ? (
             <>
               {/* Dashboard */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Faturamento Anual ({filterYear})</p>
+                    <p className="text-sm text-muted-foreground">Faturamento Líquido Anual ({filterYear})</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {annualRevenue.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Saídas: R$ {annualExpenses.toFixed(2)}</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1438,8 +1439,19 @@ const Admin = () => {
                     <DollarSign className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Faturamento Mês Atual</p>
+                    <p className="text-sm text-muted-foreground">Faturamento Líquido Mês Atual</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {monthlyRevenue.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Saídas: R$ {monthlyExpenses.toFixed(2)}</p>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
+                  <div className="bg-destructive/10 p-3 rounded-lg">
+                    <Receipt className="w-6 h-6 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saídas Anuais ({filterYear})</p>
+                    <p className="text-2xl font-bold text-card-foreground">R$ {annualExpenses.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">{yearExpenses.length} lançamento(s)</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1453,18 +1465,96 @@ const Admin = () => {
                 </div>
               </div>
 
+              {/* Saídas (Despesas) */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Receipt className="w-5 h-5" /> Saídas ({filterYear})
+                </h2>
+                <div className="grid sm:grid-cols-[1fr,160px,160px,auto] gap-2 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Descrição"
+                    value={newExpenseDesc}
+                    onChange={(e) => setNewExpenseDesc(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Valor (R$)"
+                    value={newExpenseAmount}
+                    onChange={(e) => setNewExpenseAmount(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="date"
+                    value={newExpenseDate}
+                    onChange={(e) => setNewExpenseDate(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    onClick={handleAddExpense}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center gap-1 text-sm"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+                {yearExpenses.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Nenhuma saída registrada em {filterYear}.</p>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted sticky top-0">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-semibold">Data</th>
+                          <th className="text-left px-3 py-2 font-semibold">Descrição</th>
+                          <th className="text-right px-3 py-2 font-semibold">Valor</th>
+                          <th className="px-3 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {yearExpenses
+                          .slice()
+                          .sort((a, b) => (a.expense_date < b.expense_date ? 1 : -1))
+                          .map((e) => (
+                            <tr key={e.id} className="border-t border-border">
+                              <td className="px-3 py-2 whitespace-nowrap">
+                                {e.expense_date.split("-").reverse().join("/")}
+                              </td>
+                              <td className="px-3 py-2">{e.description}</td>
+                              <td className="px-3 py-2 text-right font-semibold text-destructive">
+                                - R$ {Number(e.amount).toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2 text-right">
+                                <button
+                                  onClick={() => e.id && handleDeleteExpense(e.id)}
+                                  className="text-destructive hover:opacity-80"
+                                  aria-label="Excluir saída"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
               {/* Gráfico Mensal */}
               <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Mensal ({filterYear})</h2>
+                <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Líquido Mensal ({filterYear})</h2>
                 <div className="flex items-end gap-1 h-40">
                   {monthlyBreakdown.map((val, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1">
                       <span className="text-[10px] text-muted-foreground font-medium">
-                        {val > 0 ? `R$${(val / 1000).toFixed(1)}k` : ""}
+                        {val !== 0 ? `R$${(val / 1000).toFixed(1)}k` : ""}
                       </span>
                       <div
-                        className="w-full bg-primary/80 rounded-t-sm min-h-[2px] transition-all"
-                        style={{ height: `${(val / maxMonthly) * 120}px` }}
+                        className={`w-full rounded-t-sm min-h-[2px] transition-all ${val < 0 ? "bg-destructive/80" : "bg-primary/80"}`}
+                        style={{ height: `${(Math.max(0, Math.abs(val)) / Math.max(maxMonthly, 1)) * 120}px` }}
                       />
                       <span className="text-[10px] text-muted-foreground">{MONTHS[i + 1]?.slice(0, 3)}</span>
                     </div>
@@ -1475,7 +1565,7 @@ const Admin = () => {
               {/* Botão Relatório PDF */}
               <div className="flex justify-end">
                 <button
-                  onClick={() => generateRevenueReport(orders, filterYear)}
+                  onClick={() => generateRevenueReport(orders, filterYear, expenses)}
                   className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 text-sm"
                 >
                   <FileText className="w-4 h-4" /> Gerar Relatório PDF ({filterYear})
