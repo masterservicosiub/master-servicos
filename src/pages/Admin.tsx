@@ -569,6 +569,48 @@ const Admin = () => {
     }
   };
 
+  const loadExpenses = async () => {
+    try {
+      const data = await fetchExpenses();
+      setExpenses(data);
+    } catch (err) {
+      console.error("Erro ao buscar saídas:", err);
+    }
+  };
+
+  const handleAddExpense = async () => {
+    const amt = Number(newExpenseAmount.replace(",", "."));
+    if (!newExpenseDesc.trim() || !amt || amt <= 0 || !newExpenseDate) {
+      toast.error("Preencha descrição, valor e data.");
+      return;
+    }
+    try {
+      const row = await insertExpense({
+        description: newExpenseDesc.trim(),
+        amount: amt,
+        expense_date: newExpenseDate,
+      });
+      setExpenses([row, ...expenses]);
+      setNewExpenseDesc("");
+      setNewExpenseAmount("");
+      setNewExpenseDate(new Date().toISOString().slice(0, 10));
+      toast.success("Saída adicionada!");
+    } catch {
+      toast.error("Erro ao adicionar saída");
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!confirm("Excluir esta saída?")) return;
+    try {
+      await deleteExpense(id);
+      setExpenses(expenses.filter((e) => e.id !== id));
+      toast.success("Saída excluída!");
+    } catch {
+      toast.error("Erro ao excluir saída");
+    }
+  };
+
   useEffect(() => {
     if (authenticated) {
       loadOrders();
