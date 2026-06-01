@@ -1585,7 +1585,7 @@ const Admin = () => {
 
               {/* Gráfico Mensal */}
               <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Líquido Mensal ({filterYear})</h2>
+                <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Bruto Mensal ({filterYear})</h2>
                 <div className="flex items-end gap-1 h-40">
                   {monthlyBreakdown.map((val, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1">
@@ -1593,13 +1593,45 @@ const Admin = () => {
                         {val !== 0 ? `R$${(val / 1000).toFixed(1)}k` : ""}
                       </span>
                       <div
-                        className={`w-full rounded-t-sm min-h-[2px] transition-all ${val < 0 ? "bg-destructive/80" : "bg-primary/80"}`}
-                        style={{ height: `${(Math.max(0, Math.abs(val)) / Math.max(maxMonthly, 1)) * 120}px` }}
+                        className="w-full rounded-t-sm min-h-[2px] transition-all bg-primary/80"
+                        style={{ height: `${(Math.max(0, val) / Math.max(maxMonthly, 1)) * 120}px` }}
                       />
                       <span className="text-[10px] text-muted-foreground">{MONTHS[i + 1]?.slice(0, 3)}</span>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Saldo mês a mês (acumulado) */}
+              <div className="bg-card rounded-xl p-6 border border-border overflow-x-auto">
+                <h2 className="text-lg font-semibold text-card-foreground mb-4">Saldo Acumulado Mês a Mês ({filterYear})</h2>
+                <table className="w-full text-sm min-w-[700px]">
+                  <thead>
+                    <tr className="border-b border-border text-muted-foreground">
+                      <th className="text-left px-2 py-2">Mês</th>
+                      <th className="text-right px-2 py-2">Entradas</th>
+                      <th className="text-right px-2 py-2">Saídas</th>
+                      <th className="text-right px-2 py-2">Saldo do Mês</th>
+                      <th className="text-right px-2 py-2">Saldo Acumulado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {monthlyBreakdown.map((entrada, i) => {
+                      const saida = monthlyExpensesBreakdown[i];
+                      const saldoMes = entrada - saida;
+                      const acumulado = cumulativeBalanceBreakdown[i];
+                      return (
+                        <tr key={i} className="border-b border-border/50">
+                          <td className="px-2 py-2 text-card-foreground">{MONTHS[i + 1]}</td>
+                          <td className="px-2 py-2 text-right">R$ {entrada.toFixed(2)}</td>
+                          <td className="px-2 py-2 text-right text-destructive">- R$ {saida.toFixed(2)}</td>
+                          <td className={`px-2 py-2 text-right font-medium ${saldoMes < 0 ? "text-destructive" : "text-card-foreground"}`}>R$ {saldoMes.toFixed(2)}</td>
+                          <td className={`px-2 py-2 text-right font-semibold ${acumulado < 0 ? "text-destructive" : "text-primary"}`}>R$ {acumulado.toFixed(2)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
 
               {/* Botão Relatório PDF */}
