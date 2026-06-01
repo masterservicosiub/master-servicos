@@ -189,7 +189,7 @@ const Admin = () => {
   const [filterStatus, setFilterStatus] = useState(() => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
   const [bsSearch, setBsSearch] = useState("");
   const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
