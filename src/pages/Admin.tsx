@@ -3392,6 +3392,158 @@ const Admin = () => {
             </>
           ) : activeTab === "loja" ? (
             <ShopProductsAdmin />
+          ) : activeTab === "estoque" ? (
+            <div className="bg-card rounded-xl p-6 border border-border">
+              <h2 className="text-xl font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                <Package className="w-5 h-5" /> Controle de Estoque
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Gerencie itens de estoque com descrição, link do produto e observações.
+              </p>
+
+              {/* Formulário de novo item */}
+              <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                <input
+                  value={newStockDesc}
+                  onChange={(e) => setNewStockDesc(e.target.value)}
+                  placeholder="Descrição *"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <input
+                  value={newStockUrl}
+                  onChange={(e) => setNewStockUrl(e.target.value)}
+                  placeholder="Link do produto (URL)"
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <textarea
+                value={newStockNotes}
+                onChange={(e) => setNewStockNotes(e.target.value)}
+                placeholder="Observação"
+                rows={2}
+                className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-3"
+              />
+              <button
+                onClick={handleAddStockItem}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" /> Adicionar item
+              </button>
+
+              {/* Busca */}
+              <div className="mt-6 mb-3 relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={stockSearch}
+                  onChange={(e) => setStockSearch(e.target.value)}
+                  placeholder="Pesquisar no estoque..."
+                  className="w-full rounded-lg border border-input bg-background pl-9 pr-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+
+              {/* Lista */}
+              {(() => {
+                const q = stockSearch.trim().toLowerCase();
+                const list = q
+                  ? stockItems.filter(
+                      (s) =>
+                        s.description.toLowerCase().includes(q) ||
+                        (s.product_url || "").toLowerCase().includes(q) ||
+                        (s.notes || "").toLowerCase().includes(q),
+                    )
+                  : stockItems;
+                if (list.length === 0) {
+                  return (
+                    <p className="text-sm text-muted-foreground text-center py-6">
+                      {stockItems.length === 0 ? "Nenhum item cadastrado." : "Nenhum resultado."}
+                    </p>
+                  );
+                }
+                return (
+                  <div className="space-y-3">
+                    {list.map((item) => (
+                      <div
+                        key={item.id}
+                        className="border border-border rounded-lg p-4 bg-background"
+                      >
+                        {editingStockId === item.id ? (
+                          <div className="space-y-3">
+                            <input
+                              value={editStockDesc}
+                              onChange={(e) => setEditStockDesc(e.target.value)}
+                              placeholder="Descrição *"
+                              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <input
+                              value={editStockUrl}
+                              onChange={(e) => setEditStockUrl(e.target.value)}
+                              placeholder="Link do produto"
+                              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <textarea
+                              value={editStockNotes}
+                              onChange={(e) => setEditStockNotes(e.target.value)}
+                              placeholder="Observação"
+                              rows={2}
+                              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={cancelEditStockItem}
+                                className="px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary text-sm"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                onClick={handleSaveStockItem}
+                                className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2"
+                              >
+                                <Save className="w-4 h-4" /> Salvar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground">{item.description}</p>
+                              {item.product_url && (
+                                <a
+                                  href={item.product_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline inline-flex items-center gap-1 mt-1 break-all"
+                                >
+                                  <ExternalLink className="w-3 h-3 shrink-0" /> {item.product_url}
+                                </a>
+                              )}
+                              {item.notes && (
+                                <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{item.notes}</p>
+                              )}
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <button
+                                onClick={() => startEditStockItem(item)}
+                                className="p-2 rounded-lg hover:bg-secondary text-foreground"
+                                title="Editar"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => item.id && handleDeleteStockItem(item.id)}
+                                className="p-2 rounded-lg hover:bg-destructive/10 text-destructive"
+                                title="Excluir"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
           ) : (
             <>
               {/* Gerenciar Serviços da Página Inicial */}
