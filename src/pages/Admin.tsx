@@ -715,7 +715,18 @@ const Admin = () => {
   };
 
   // Dashboard calculations
-  const { annualRevenue, monthlyRevenue, monthlyBreakdown, annualExpenses, monthlyExpenses, monthlyExpensesBreakdown, yearExpenses } = useMemo(() => {
+  const {
+    annualRevenue,
+    monthlyRevenue,
+    monthlyBreakdown,
+    annualExpenses,
+    monthlyExpenses,
+    monthlyExpensesBreakdown,
+    yearExpenses,
+    monthlySaldo,
+    cumulativeBalance,
+    cumulativeBalanceBreakdown,
+  } = useMemo(() => {
     const now = new Date();
     const currentYear = filterYear;
     const currentMonth = now.getMonth();
@@ -766,19 +777,28 @@ const Admin = () => {
       if (m >= 0 && m < 12) monthlyExpensesBreakdown[m] += Number(e.amount || 0);
     });
 
-    // Subtrair saídas do faturamento
-    const annualRevenueNet = annualRevenue - annualExpenses;
-    const monthlyRevenueNet = monthlyRevenue - monthlyExpenses;
-    const monthlyBreakdownNet = monthlyBreakdown.map((v, i) => v - monthlyExpensesBreakdown[i]);
+    // Saldo mensal (Faturamento Bruto Mensal - Saídas Mensais)
+    // Saldo acumulado: cada mês carrega o saldo restante do mês anterior
+    const cumulativeBalanceBreakdown: number[] = Array(12).fill(0);
+    let running = 0;
+    for (let i = 0; i < 12; i++) {
+      running += monthlyBreakdown[i] - monthlyExpensesBreakdown[i];
+      cumulativeBalanceBreakdown[i] = running;
+    }
+    const monthlySaldo = monthlyRevenue - monthlyExpenses;
+    const cumulativeBalance = cumulativeBalanceBreakdown[currentMonth] ?? 0;
 
     return {
-      annualRevenue: annualRevenueNet,
-      monthlyRevenue: monthlyRevenueNet,
-      monthlyBreakdown: monthlyBreakdownNet,
+      annualRevenue,
+      monthlyRevenue,
+      monthlyBreakdown,
       annualExpenses,
       monthlyExpenses,
       monthlyExpensesBreakdown,
       yearExpenses,
+      monthlySaldo,
+      cumulativeBalance,
+      cumulativeBalanceBreakdown,
     };
   }, [orders, filterYear, expenses]);
 
@@ -1423,15 +1443,15 @@ const Admin = () => {
           {activeTab === "pedidos" ? (
             <>
               {/* Dashboard */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Faturamento Líquido Anual ({filterYear})</p>
+                    <p className="text-sm text-muted-foreground">Faturamento Bruto Anual ({filterYear})</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {annualRevenue.toFixed(2)}</p>
-                    <p className="text-[11px] text-muted-foreground">Saídas: R$ {annualExpenses.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Somatório dos pedidos pagos</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1439,9 +1459,9 @@ const Admin = () => {
                     <DollarSign className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Faturamento Líquido Mês Atual</p>
+                    <p className="text-sm text-muted-foreground">Faturamento Bruto Mensal</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {monthlyRevenue.toFixed(2)}</p>
-                    <p className="text-[11px] text-muted-foreground">Saídas: R$ {monthlyExpenses.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Pedidos pagos do mês atual</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1452,6 +1472,26 @@ const Admin = () => {
                     <p className="text-sm text-muted-foreground">Saídas Anuais ({filterYear})</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {annualExpenses.toFixed(2)}</p>
                     <p className="text-[11px] text-muted-foreground">{yearExpenses.length} lançamento(s)</p>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
+                  <div className={`${monthlySaldo < 0 ? "bg-destructive/10" : "bg-primary/10"} p-3 rounded-lg`}>
+                    <DollarSign className={`w-6 h-6 ${monthlySaldo < 0 ? "text-destructive" : "text-primary"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo do Mês</p>
+                    <p className={`text-2xl font-bold ${monthlySaldo < 0 ? "text-destructive" : "text-card-foreground"}`}>R$ {monthlySaldo.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Faturamento − Saídas</p>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
+                  <div className={`${cumulativeBalance < 0 ? "bg-destructive/10" : "bg-primary/10"} p-3 rounded-lg`}>
+                    <TrendingUp className={`w-6 h-6 ${cumulativeBalance < 0 ? "text-destructive" : "text-primary"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo Acumulado</p>
+                    <p className={`text-2xl font-bold ${cumulativeBalance < 0 ? "text-destructive" : "text-card-foreground"}`}>R$ {cumulativeBalance.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Saldo em conta (acumulado do ano)</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1545,7 +1585,7 @@ const Admin = () => {
 
               {/* Gráfico Mensal */}
               <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Líquido Mensal ({filterYear})</h2>
+                <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Bruto Mensal ({filterYear})</h2>
                 <div className="flex items-end gap-1 h-40">
                   {monthlyBreakdown.map((val, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1">
@@ -1553,13 +1593,45 @@ const Admin = () => {
                         {val !== 0 ? `R$${(val / 1000).toFixed(1)}k` : ""}
                       </span>
                       <div
-                        className={`w-full rounded-t-sm min-h-[2px] transition-all ${val < 0 ? "bg-destructive/80" : "bg-primary/80"}`}
-                        style={{ height: `${(Math.max(0, Math.abs(val)) / Math.max(maxMonthly, 1)) * 120}px` }}
+                        className="w-full rounded-t-sm min-h-[2px] transition-all bg-primary/80"
+                        style={{ height: `${(Math.max(0, val) / Math.max(maxMonthly, 1)) * 120}px` }}
                       />
                       <span className="text-[10px] text-muted-foreground">{MONTHS[i + 1]?.slice(0, 3)}</span>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Saldo mês a mês (acumulado) */}
+              <div className="bg-card rounded-xl p-6 border border-border overflow-x-auto">
+                <h2 className="text-lg font-semibold text-card-foreground mb-4">Saldo Acumulado Mês a Mês ({filterYear})</h2>
+                <table className="w-full text-sm min-w-[700px]">
+                  <thead>
+                    <tr className="border-b border-border text-muted-foreground">
+                      <th className="text-left px-2 py-2">Mês</th>
+                      <th className="text-right px-2 py-2">Entradas</th>
+                      <th className="text-right px-2 py-2">Saídas</th>
+                      <th className="text-right px-2 py-2">Saldo do Mês</th>
+                      <th className="text-right px-2 py-2">Saldo Acumulado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {monthlyBreakdown.map((entrada, i) => {
+                      const saida = monthlyExpensesBreakdown[i];
+                      const saldoMes = entrada - saida;
+                      const acumulado = cumulativeBalanceBreakdown[i];
+                      return (
+                        <tr key={i} className="border-b border-border/50">
+                          <td className="px-2 py-2 text-card-foreground">{MONTHS[i + 1]}</td>
+                          <td className="px-2 py-2 text-right">R$ {entrada.toFixed(2)}</td>
+                          <td className="px-2 py-2 text-right text-destructive">- R$ {saida.toFixed(2)}</td>
+                          <td className={`px-2 py-2 text-right font-medium ${saldoMes < 0 ? "text-destructive" : "text-card-foreground"}`}>R$ {saldoMes.toFixed(2)}</td>
+                          <td className={`px-2 py-2 text-right font-semibold ${acumulado < 0 ? "text-destructive" : "text-primary"}`}>R$ {acumulado.toFixed(2)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
 
               {/* Botão Relatório PDF */}
