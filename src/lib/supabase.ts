@@ -848,3 +848,39 @@ export async function deleteExpense(id: string) {
   const { error } = await supabase.from("expenses").delete().eq("id", id);
   if (error) throw error;
 }
+
+// ============================================================
+// Stock items (Estoque)
+// ============================================================
+export interface StockItemRow {
+  id?: string;
+  created_at?: string;
+  description: string;
+  product_url: string;
+  notes: string;
+}
+
+export async function fetchStockItems(): Promise<StockItemRow[]> {
+  const { data, error } = await supabase
+    .from("stock_items")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data || []) as StockItemRow[];
+}
+
+export async function insertStockItem(item: Omit<StockItemRow, "id" | "created_at">) {
+  const { data, error } = await supabase.from("stock_items").insert([item]).select();
+  if (error) throw error;
+  return data?.[0] as StockItemRow;
+}
+
+export async function updateStockItem(id: string, item: Partial<Omit<StockItemRow, "id" | "created_at">>) {
+  const { error } = await supabase.from("stock_items").update(item).eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteStockItem(id: string) {
+  const { error } = await supabase.from("stock_items").delete().eq("id", id);
+  if (error) throw error;
+}
