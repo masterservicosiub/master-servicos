@@ -1443,15 +1443,15 @@ const Admin = () => {
           {activeTab === "pedidos" ? (
             <>
               {/* Dashboard */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Faturamento Líquido Anual ({filterYear})</p>
+                    <p className="text-sm text-muted-foreground">Faturamento Bruto Anual ({filterYear})</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {annualRevenue.toFixed(2)}</p>
-                    <p className="text-[11px] text-muted-foreground">Saídas: R$ {annualExpenses.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Somatório dos pedidos pagos</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1459,9 +1459,9 @@ const Admin = () => {
                     <DollarSign className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Faturamento Líquido Mês Atual</p>
+                    <p className="text-sm text-muted-foreground">Faturamento Bruto Mensal</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {monthlyRevenue.toFixed(2)}</p>
-                    <p className="text-[11px] text-muted-foreground">Saídas: R$ {monthlyExpenses.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Pedidos pagos do mês atual</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
@@ -1472,6 +1472,26 @@ const Admin = () => {
                     <p className="text-sm text-muted-foreground">Saídas Anuais ({filterYear})</p>
                     <p className="text-2xl font-bold text-card-foreground">R$ {annualExpenses.toFixed(2)}</p>
                     <p className="text-[11px] text-muted-foreground">{yearExpenses.length} lançamento(s)</p>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
+                  <div className={`${monthlySaldo < 0 ? "bg-destructive/10" : "bg-primary/10"} p-3 rounded-lg`}>
+                    <DollarSign className={`w-6 h-6 ${monthlySaldo < 0 ? "text-destructive" : "text-primary"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo do Mês</p>
+                    <p className={`text-2xl font-bold ${monthlySaldo < 0 ? "text-destructive" : "text-card-foreground"}`}>R$ {monthlySaldo.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Faturamento − Saídas</p>
+                  </div>
+                </div>
+                <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
+                  <div className={`${cumulativeBalance < 0 ? "bg-destructive/10" : "bg-primary/10"} p-3 rounded-lg`}>
+                    <TrendingUp className={`w-6 h-6 ${cumulativeBalance < 0 ? "text-destructive" : "text-primary"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saldo Acumulado</p>
+                    <p className={`text-2xl font-bold ${cumulativeBalance < 0 ? "text-destructive" : "text-card-foreground"}`}>R$ {cumulativeBalance.toFixed(2)}</p>
+                    <p className="text-[11px] text-muted-foreground">Saldo em conta (acumulado do ano)</p>
                   </div>
                 </div>
                 <div className="bg-card rounded-xl p-6 border border-border flex items-center gap-4">
