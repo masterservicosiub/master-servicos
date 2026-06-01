@@ -629,6 +629,87 @@ const Admin = () => {
     }
   };
 
+  const loadStockItems = async () => {
+    try {
+      const data = await fetchStockItems();
+      setStockItems(data);
+    } catch {
+      toast.error("Erro ao carregar estoque");
+    }
+  };
+
+  const handleAddStockItem = async () => {
+    if (!newStockDesc.trim()) {
+      toast.error("Descrição obrigatória");
+      return;
+    }
+    try {
+      const row = await insertStockItem({
+        description: newStockDesc.trim(),
+        product_url: newStockUrl.trim(),
+        notes: newStockNotes.trim(),
+      });
+      setStockItems([row, ...stockItems]);
+      setNewStockDesc("");
+      setNewStockUrl("");
+      setNewStockNotes("");
+      toast.success("Item adicionado ao estoque!");
+    } catch {
+      toast.error("Erro ao adicionar item");
+    }
+  };
+
+  const startEditStockItem = (item: StockItemRow) => {
+    setEditingStockId(item.id || null);
+    setEditStockDesc(item.description);
+    setEditStockUrl(item.product_url || "");
+    setEditStockNotes(item.notes || "");
+  };
+
+  const cancelEditStockItem = () => {
+    setEditingStockId(null);
+    setEditStockDesc("");
+    setEditStockUrl("");
+    setEditStockNotes("");
+  };
+
+  const handleSaveStockItem = async () => {
+    if (!editingStockId) return;
+    if (!editStockDesc.trim()) {
+      toast.error("Descrição obrigatória");
+      return;
+    }
+    try {
+      await updateStockItem(editingStockId, {
+        description: editStockDesc.trim(),
+        product_url: editStockUrl.trim(),
+        notes: editStockNotes.trim(),
+      });
+      setStockItems(
+        stockItems.map((s) =>
+          s.id === editingStockId
+            ? { ...s, description: editStockDesc.trim(), product_url: editStockUrl.trim(), notes: editStockNotes.trim() }
+            : s,
+        ),
+      );
+      cancelEditStockItem();
+      toast.success("Item atualizado!");
+    } catch {
+      toast.error("Erro ao atualizar item");
+    }
+  };
+
+  const handleDeleteStockItem = async (id: string) => {
+    if (!confirm("Excluir este item do estoque?")) return;
+    try {
+      await deleteStockItem(id);
+      setStockItems(stockItems.filter((s) => s.id !== id));
+      toast.success("Item excluído!");
+    } catch {
+      toast.error("Erro ao excluir item");
+    }
+  };
+
   useEffect(() => {
     if (authenticated) {
       loadOrders();
