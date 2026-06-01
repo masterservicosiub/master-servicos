@@ -715,7 +715,18 @@ const Admin = () => {
   };
 
   // Dashboard calculations
-  const { annualRevenue, monthlyRevenue, monthlyBreakdown, annualExpenses, monthlyExpenses, monthlyExpensesBreakdown, yearExpenses } = useMemo(() => {
+  const {
+    annualRevenue,
+    monthlyRevenue,
+    monthlyBreakdown,
+    annualExpenses,
+    monthlyExpenses,
+    monthlyExpensesBreakdown,
+    yearExpenses,
+    monthlySaldo,
+    cumulativeBalance,
+    cumulativeBalanceBreakdown,
+  } = useMemo(() => {
     const now = new Date();
     const currentYear = filterYear;
     const currentMonth = now.getMonth();
@@ -766,19 +777,28 @@ const Admin = () => {
       if (m >= 0 && m < 12) monthlyExpensesBreakdown[m] += Number(e.amount || 0);
     });
 
-    // Subtrair saídas do faturamento
-    const annualRevenueNet = annualRevenue - annualExpenses;
-    const monthlyRevenueNet = monthlyRevenue - monthlyExpenses;
-    const monthlyBreakdownNet = monthlyBreakdown.map((v, i) => v - monthlyExpensesBreakdown[i]);
+    // Saldo mensal (Faturamento Bruto Mensal - Saídas Mensais)
+    // Saldo acumulado: cada mês carrega o saldo restante do mês anterior
+    const cumulativeBalanceBreakdown: number[] = Array(12).fill(0);
+    let running = 0;
+    for (let i = 0; i < 12; i++) {
+      running += monthlyBreakdown[i] - monthlyExpensesBreakdown[i];
+      cumulativeBalanceBreakdown[i] = running;
+    }
+    const monthlySaldo = monthlyRevenue - monthlyExpenses;
+    const cumulativeBalance = cumulativeBalanceBreakdown[currentMonth] ?? 0;
 
     return {
-      annualRevenue: annualRevenueNet,
-      monthlyRevenue: monthlyRevenueNet,
-      monthlyBreakdown: monthlyBreakdownNet,
+      annualRevenue,
+      monthlyRevenue,
+      monthlyBreakdown,
       annualExpenses,
       monthlyExpenses,
       monthlyExpensesBreakdown,
       yearExpenses,
+      monthlySaldo,
+      cumulativeBalance,
+      cumulativeBalanceBreakdown,
     };
   }, [orders, filterYear, expenses]);
 
