@@ -63,6 +63,13 @@ import {
   deleteExpense,
   type ExpenseRow,
 } from "@/lib/supabase";
+import {
+  fetchStockItems,
+  insertStockItem,
+  updateStockItem,
+  deleteStockItem,
+  type StockItemRow,
+} from "@/lib/supabase";
 import { toast } from "sonner";
 import { applyPhoneMask } from "@/lib/phoneMask";
 import {
