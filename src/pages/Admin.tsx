@@ -103,7 +103,7 @@ import {
   Users,
   Search,
 } from "lucide-react";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Package, ExternalLink } from "lucide-react";
 import { Star, Trophy, Video as VideoIcon, Radio as RadioIcon } from "lucide-react";
 import {
   fetchVideos,
