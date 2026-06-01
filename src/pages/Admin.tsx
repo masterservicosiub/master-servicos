@@ -1528,6 +1528,14 @@ const Admin = () => {
                 <Tag className="w-5 h-5" />
               </button>
               <button
+                onClick={() => setActiveTab("estoque")}
+                title="Estoque"
+                aria-label="Estoque"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "estoque" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <Package className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => setActiveTab("config")}
                 title="Configurações"
                 aria-label="Configurações"
