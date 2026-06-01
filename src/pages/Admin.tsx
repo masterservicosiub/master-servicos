@@ -194,6 +194,17 @@ const Admin = () => {
   const [bsSearch, setBsSearch] = useState("");
   const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
 
+  // Estoque
+  const [stockItems, setStockItems] = useState<StockItemRow[]>([]);
+  const [stockSearch, setStockSearch] = useState("");
+  const [newStockDesc, setNewStockDesc] = useState("");
+  const [newStockUrl, setNewStockUrl] = useState("");
+  const [newStockNotes, setNewStockNotes] = useState("");
+  const [editingStockId, setEditingStockId] = useState<string | null>(null);
+  const [editStockDesc, setEditStockDesc] = useState("");
+  const [editStockUrl, setEditStockUrl] = useState("");
+  const [editStockNotes, setEditStockNotes] = useState("");
+
   // Mídias
   const [mediaVideos, setMediaVideos] = useState<VideoItem[]>([]);
   const [mediaRadios, setMediaRadios] = useState<RadioItem[]>([]);
