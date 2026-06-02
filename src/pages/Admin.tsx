@@ -3281,30 +3281,30 @@ const Admin = () => {
                               <div className="flex flex-col gap-1">
                                 <button
                                   onClick={async () => {
-                                    const idx = budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id);
+                                    const idx = budgetServices.findIndex((b) => b.id === bs.id);
                                     if (idx <= 0) return;
-                                    const prev = budgetServices.filter((b) => b.kind === bsKindFilter)[idx - 1];
+                                    const prev = budgetServices[idx - 1];
                                     await updateBudgetService(bs.id!, { sort_order: prev.sort_order });
                                     await updateBudgetService(prev.id!, { sort_order: bs.sort_order });
                                     loadBudgetServices();
                                   }}
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                  disabled={budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id) === 0}
+                                  disabled={budgetServices.findIndex((b) => b.id === bs.id) === 0}
                                 >
                                   <ArrowUp className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={async () => {
-                                    const idx = budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id);
-                                    if (idx >= budgetServices.filter((b) => b.kind === bsKindFilter).length - 1) return;
-                                    const next = budgetServices.filter((b) => b.kind === bsKindFilter)[idx + 1];
+                                    const idx = budgetServices.findIndex((b) => b.id === bs.id);
+                                    if (idx >= budgetServices.length - 1) return;
+                                    const next = budgetServices[idx + 1];
                                     await updateBudgetService(bs.id!, { sort_order: next.sort_order });
                                     await updateBudgetService(next.id!, { sort_order: bs.sort_order });
                                     loadBudgetServices();
                                   }}
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                                   disabled={
-                                    budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id) === budgetServices.filter((b) => b.kind === bsKindFilter).length - 1
+                                    budgetServices.findIndex((b) => b.id === bs.id) === budgetServices.length - 1
                                   }
                                 >
                                   <ArrowDown className="w-4 h-4" />
