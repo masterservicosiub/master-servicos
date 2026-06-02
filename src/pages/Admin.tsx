@@ -3094,7 +3094,7 @@ const Admin = () => {
                   <Plus className="w-4 h-4" /> Adicionar Serviço
                 </button>
 
-                {budgetServices.filter((b) => b.kind === bsKindFilter).length > 0 && (
+                {budgetServices.length > 0 && (
                   <div className="mt-6 space-y-4">
                     <div className="flex flex-col sm:flex-row gap-2">
                       <input
