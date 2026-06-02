@@ -1556,7 +1556,7 @@ const Admin = () => {
         </div>
 
         <div className="container mx-auto px-4 py-8 space-y-8">
-          {activeTab === "pedidos" ? (
+          {activeTab === "financeiro" ? (
             <>
               {/* Dashboard */}
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
