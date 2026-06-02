@@ -189,7 +189,7 @@ const Admin = () => {
   const [filterStatus, setFilterStatus] = useState(() => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "financeiro" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
   const [bsSearch, setBsSearch] = useState("");
   const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
@@ -1486,6 +1486,14 @@ const Admin = () => {
                 className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "pedidos" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
               >
                 <ClipboardList className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setActiveTab("financeiro")}
+                title="Financeiro"
+                aria-label="Financeiro"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "financeiro" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <TrendingUp className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setActiveTab("clientes")}
