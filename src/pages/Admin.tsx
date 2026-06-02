@@ -190,7 +190,7 @@ const Admin = () => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
   const [activeTab, setActiveTab] = useState<"pedidos" | "financeiro" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
-  const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
+  
   const [bsSearch, setBsSearch] = useState("");
   const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
 
