@@ -1759,7 +1759,9 @@ const Admin = () => {
                   <FileText className="w-4 h-4" /> Gerar Relatório PDF ({filterYear})
                 </button>
               </div>
-
+            </>
+          ) : activeTab === "pedidos" ? (
+            <>
               {/* Filtros */}
               <div className="bg-card rounded-xl p-4 border border-border flex flex-wrap items-center gap-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
