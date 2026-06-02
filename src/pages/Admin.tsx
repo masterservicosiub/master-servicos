@@ -3123,7 +3123,6 @@ const Admin = () => {
                     {(() => {
                       const q = bsSearch.trim().toLowerCase();
                       const list = budgetServices.filter((b) => {
-                        if (b.kind !== bsKindFilter) return false;
                         if (bsCategoryFilter && (b.category || "") !== bsCategoryFilter) return false;
                         if (!q) return true;
                         return (
