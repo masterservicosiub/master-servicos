@@ -3112,7 +3112,6 @@ const Admin = () => {
                         {Array.from(
                           new Set(
                             budgetServices
-                              .filter((b) => b.kind === bsKindFilter)
                               .map((b) => b.category)
                               .filter((c): c is string => !!c && c.trim().length > 0),
                           ),
