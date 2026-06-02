@@ -2991,7 +2991,7 @@ const Admin = () => {
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                 />
                 <datalist id="bs-categories-list">
-                  {Array.from(new Set(budgetServices.filter((b) => b.kind === bsKindFilter).map((b) => b.category).filter(Boolean))).map((c) => (
+                  {Array.from(new Set(budgetServices.map((b) => b.category).filter(Boolean))).map((c) => (
                     <option key={c} value={c as string} />
                   ))}
                 </datalist>
