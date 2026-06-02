@@ -190,7 +190,7 @@ const Admin = () => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
   const [activeTab, setActiveTab] = useState<"pedidos" | "financeiro" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
-  const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
+  
   const [bsSearch, setBsSearch] = useState("");
   const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
 
@@ -1156,7 +1156,6 @@ const Admin = () => {
         image_url: bsImage.trim(),
         description: bsDescription.trim(),
         category: bsCategory.trim(),
-        kind: bsKindFilter,
       });
       setBsName("");
       setBsFixedPrice("");
@@ -2956,26 +2955,6 @@ const Admin = () => {
             </>
           ) : activeTab === "servicos" ? (
             <>
-              <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
-                  <DollarSign className="w-5 h-5" /> Tipo de Serviço
-                </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setBsKindFilter("residencial")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold border ${bsKindFilter === "residencial" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
-                  >
-                    Serviços Residenciais
-                  </button>
-                  <button
-                    onClick={() => setBsKindFilter("grafico")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold border ${bsKindFilter === "grafico" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
-                  >
-                    Serviços Gráficos
-                  </button>
-                </div>
-              </div>
-
               {/* Gerenciar Serviços de Orçamento */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
@@ -3012,7 +2991,7 @@ const Admin = () => {
                   className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring mb-4"
                 />
                 <datalist id="bs-categories-list">
-                  {Array.from(new Set(budgetServices.filter((b) => b.kind === bsKindFilter).map((b) => b.category).filter(Boolean))).map((c) => (
+                  {Array.from(new Set(budgetServices.map((b) => b.category).filter(Boolean))).map((c) => (
                     <option key={c} value={c as string} />
                   ))}
                 </datalist>
@@ -3115,7 +3094,7 @@ const Admin = () => {
                   <Plus className="w-4 h-4" /> Adicionar Serviço
                 </button>
 
-                {budgetServices.filter((b) => b.kind === bsKindFilter).length > 0 && (
+                {budgetServices.length > 0 && (
                   <div className="mt-6 space-y-4">
                     <div className="flex flex-col sm:flex-row gap-2">
                       <input
@@ -3133,7 +3112,6 @@ const Admin = () => {
                         {Array.from(
                           new Set(
                             budgetServices
-                              .filter((b) => b.kind === bsKindFilter)
                               .map((b) => b.category)
                               .filter((c): c is string => !!c && c.trim().length > 0),
                           ),
@@ -3145,7 +3123,6 @@ const Admin = () => {
                     {(() => {
                       const q = bsSearch.trim().toLowerCase();
                       const list = budgetServices.filter((b) => {
-                        if (b.kind !== bsKindFilter) return false;
                         if (bsCategoryFilter && (b.category || "") !== bsCategoryFilter) return false;
                         if (!q) return true;
                         return (
@@ -3304,30 +3281,30 @@ const Admin = () => {
                               <div className="flex flex-col gap-1">
                                 <button
                                   onClick={async () => {
-                                    const idx = budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id);
+                                    const idx = budgetServices.findIndex((b) => b.id === bs.id);
                                     if (idx <= 0) return;
-                                    const prev = budgetServices.filter((b) => b.kind === bsKindFilter)[idx - 1];
+                                    const prev = budgetServices[idx - 1];
                                     await updateBudgetService(bs.id!, { sort_order: prev.sort_order });
                                     await updateBudgetService(prev.id!, { sort_order: bs.sort_order });
                                     loadBudgetServices();
                                   }}
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                  disabled={budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id) === 0}
+                                  disabled={budgetServices.findIndex((b) => b.id === bs.id) === 0}
                                 >
                                   <ArrowUp className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={async () => {
-                                    const idx = budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id);
-                                    if (idx >= budgetServices.filter((b) => b.kind === bsKindFilter).length - 1) return;
-                                    const next = budgetServices.filter((b) => b.kind === bsKindFilter)[idx + 1];
+                                    const idx = budgetServices.findIndex((b) => b.id === bs.id);
+                                    if (idx >= budgetServices.length - 1) return;
+                                    const next = budgetServices[idx + 1];
                                     await updateBudgetService(bs.id!, { sort_order: next.sort_order });
                                     await updateBudgetService(next.id!, { sort_order: bs.sort_order });
                                     loadBudgetServices();
                                   }}
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                                   disabled={
-                                    budgetServices.filter((b) => b.kind === bsKindFilter).findIndex((b) => b.id === bs.id) === budgetServices.filter((b) => b.kind === bsKindFilter).length - 1
+                                    budgetServices.findIndex((b) => b.id === bs.id) === budgetServices.length - 1
                                   }
                                 >
                                   <ArrowDown className="w-4 h-4" />
