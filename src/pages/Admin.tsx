@@ -189,7 +189,7 @@ const Admin = () => {
   const [filterStatus, setFilterStatus] = useState(() => {
     return localStorage.getItem("admin_default_filter_status") || "Novo";
   });
-  const [activeTab, setActiveTab] = useState<"pedidos" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "financeiro" | "clientes" | "antifraude" | "midias" | "servicos" | "loja" | "estoque" | "config">("pedidos");
   const [bsKindFilter, setBsKindFilter] = useState<"residencial" | "grafico">("residencial");
   const [bsSearch, setBsSearch] = useState("");
   const [bsCategoryFilter, setBsCategoryFilter] = useState<string>("");
@@ -1488,6 +1488,14 @@ const Admin = () => {
                 <ClipboardList className="w-5 h-5" />
               </button>
               <button
+                onClick={() => setActiveTab("financeiro")}
+                title="Financeiro"
+                aria-label="Financeiro"
+                className={`w-11 h-11 rounded-lg transition-colors flex items-center justify-center ${activeTab === "financeiro" ? "bg-background text-foreground" : "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"}`}
+              >
+                <TrendingUp className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => setActiveTab("clientes")}
                 title="Clientes"
                 aria-label="Clientes"
@@ -1548,7 +1556,7 @@ const Admin = () => {
         </div>
 
         <div className="container mx-auto px-4 py-8 space-y-8">
-          {activeTab === "pedidos" ? (
+          {activeTab === "financeiro" ? (
             <>
               {/* Dashboard */}
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -1751,7 +1759,9 @@ const Admin = () => {
                   <FileText className="w-4 h-4" /> Gerar Relatório PDF ({filterYear})
                 </button>
               </div>
-
+            </>
+          ) : activeTab === "pedidos" ? (
+            <>
               {/* Filtros */}
               <div className="bg-card rounded-xl p-4 border border-border flex flex-wrap items-center gap-4">
                 <Filter className="w-5 h-5 text-muted-foreground" />
