@@ -2955,26 +2955,6 @@ const Admin = () => {
             </>
           ) : activeTab === "servicos" ? (
             <>
-              <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-xl font-semibold text-card-foreground mb-3 flex items-center gap-2">
-                  <DollarSign className="w-5 h-5" /> Tipo de Serviço
-                </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setBsKindFilter("residencial")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold border ${bsKindFilter === "residencial" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
-                  >
-                    Serviços Residenciais
-                  </button>
-                  <button
-                    onClick={() => setBsKindFilter("grafico")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold border ${bsKindFilter === "grafico" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
-                  >
-                    Serviços Gráficos
-                  </button>
-                </div>
-              </div>
-
               {/* Gerenciar Serviços de Orçamento */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-xl font-semibold text-card-foreground mb-4 flex items-center gap-2">
