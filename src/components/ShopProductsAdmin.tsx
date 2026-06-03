@@ -38,6 +38,10 @@ type EditState = {
   images: ShopProductImageRow[];
   variations: ShopProductVariationRow[];
   variation_area_tiers: [number, number, number][];
+  option1_name: string;
+  option1_values: string[];
+  option2_name: string;
+  option2_values: string[];
 };
 
 function emptyEdit(): EditState {
@@ -59,11 +63,21 @@ function emptyEdit(): EditState {
     images: [],
     variations: [],
     variation_area_tiers: [],
+    option1_name: "",
+    option1_values: ["", "", "", "", ""],
+    option2_name: "",
+    option2_values: ["", "", "", "", ""],
   };
 }
 
 const TIER_BOUNDS: [number, number, null] = [50, 100, null];
 const TIER_LABELS = ["Até 50 m²", "Até 100 m²", "Acima de 100 m²"];
+
+function padTo5(arr: string[]): string[] {
+  const out = arr.slice(0, 5);
+  while (out.length < 5) out.push("");
+  return out;
+}
 
 function tiersFromRow(t: AreaTier[] | null | undefined): [number, number, number] {
   if (!t || t.length === 0) return [0, 0, 0];
@@ -114,6 +128,10 @@ function toEdit(p: ShopProductFull): EditState {
       area_tiers: v.area_tiers || null,
     })),
     variation_area_tiers: p.variations.map((v) => tiersFromRow(v.area_tiers)),
+    option1_name: (p as any).option1_name || "",
+    option1_values: padTo5(((p as any).option1_values as string[]) || []),
+    option2_name: (p as any).option2_name || "",
+    option2_values: padTo5(((p as any).option2_values as string[]) || []),
   };
 }
 
@@ -184,6 +202,10 @@ const ShopProductsAdmin = () => {
         area_tiers: edit.base_price_mode === "area" ? tiersToRow(edit.base_area_tiers) : null,
         download_url: edit.download_url.trim(),
         download_label: edit.download_label.trim(),
+        option1_name: edit.option1_name.trim(),
+        option1_values: edit.option1_values.map((v) => v.trim()).filter((v) => v.length > 0),
+        option2_name: edit.option2_name.trim(),
+        option2_values: edit.option2_values.map((v) => v.trim()).filter((v) => v.length > 0),
       };
       if (editingId === "new") {
         const row = await insertShopProduct(payload);
@@ -575,6 +597,52 @@ const ShopProductsAdmin = () => {
 
             {/* Variations */}
             <div className="border-t border-border pt-4">
+              {/* Option groups (variations editáveis) */}
+              <div className="mb-4">
+                <h4 className="font-medium text-sm mb-2">Variações editáveis (grupos de opção)</h4>
+                <p className="text-[11px] text-muted-foreground mb-3">
+                  Crie até 2 grupos (ex.: "Tamanho" e "Cor") com até 5 opções cada. O cliente escolhe 1 opção de cada grupo na página do produto.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {([1, 2] as const).map((n) => {
+                    const nameKey = `option${n}_name` as "option1_name" | "option2_name";
+                    const valuesKey = `option${n}_values` as "option1_values" | "option2_values";
+                    return (
+                      <div key={n} className="border border-border rounded-lg p-3 space-y-2">
+                        <div>
+                          <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                            Nome do grupo {n}
+                          </label>
+                          <input
+                            value={edit[nameKey]}
+                            onChange={(e) => setEdit({ ...edit, [nameKey]: e.target.value } as EditState)}
+                            placeholder={n === 1 ? "Ex: Tamanho" : "Ex: Cor"}
+                            className="w-full rounded-md border border-input bg-card px-2 py-1 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[11px] font-medium text-muted-foreground">
+                            Opções (até 5)
+                          </label>
+                          {edit[valuesKey].map((val, i) => (
+                            <input
+                              key={i}
+                              value={val}
+                              onChange={(e) => {
+                                const next = [...edit[valuesKey]];
+                                next[i] = e.target.value;
+                                setEdit({ ...edit, [valuesKey]: next } as EditState);
+                              }}
+                              placeholder={`Opção ${i + 1}`}
+                              className="w-full rounded-md border border-input bg-card px-2 py-1 text-xs"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-sm">
                   Variações ({edit.variations.length}/{MAX_VARIATIONS})

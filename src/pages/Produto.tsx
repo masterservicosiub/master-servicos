@@ -28,6 +28,13 @@ const Produto = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
+  const [opt1, setOpt1] = useState<string>("");
+  const [opt2, setOpt2] = useState<string>("");
+
+  const opt1Name = ((product as any)?.option1_name || "").trim();
+  const opt1Values: string[] = (((product as any)?.option1_values as string[]) || []).filter((v) => v && v.trim());
+  const opt2Name = ((product as any)?.option2_name || "").trim();
+  const opt2Values: string[] = (((product as any)?.option2_values as string[]) || []).filter((v) => v && v.trim());
 
   useEffect(() => {
     setLoading(true);
@@ -35,6 +42,10 @@ const Produto = () => {
       .then((p) => {
         setProduct(p);
         if (p?.variations.length) setVariation(p.variations[0]);
+        const v1 = (((p as any)?.option1_values as string[]) || []).filter((v) => v && v.trim());
+        const v2 = (((p as any)?.option2_values as string[]) || []).filter((v) => v && v.trim());
+        if (v1.length) setOpt1(v1[0]);
+        if (v2.length) setOpt2(v2[0]);
       })
       .finally(() => setLoading(false));
   }, [slug]);
@@ -51,13 +62,28 @@ const Produto = () => {
       toast.error("Informe a largura e o comprimento");
       return;
     }
+    if (opt1Values.length && !opt1) {
+      toast.error(`Selecione: ${opt1Name || "opção 1"}`);
+      return;
+    }
+    if (opt2Values.length && !opt2) {
+      toast.error(`Selecione: ${opt2Name || "opção 2"}`);
+      return;
+    }
+    const optsLabel = [
+      opt1 ? `${opt1Name || "Opção 1"}: ${opt1}` : "",
+      opt2 ? `${opt2Name || "Opção 2"}: ${opt2}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const combinedLabel = [variation?.label || null, optsLabel || null].filter(Boolean).join(" — ") || null;
     addToCart({
       productId: product.id!,
       slug: product.slug,
       name: product.name,
       image: primaryImage(product),
       variationId: variation?.id ?? null,
-      variationLabel: variation?.label ?? null,
+      variationLabel: combinedLabel,
       mode,
       qty: mode === "unit" ? qty : 1,
       area: mode === "area" ? area : 0,
@@ -192,6 +218,34 @@ const Produto = () => {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {[
+                { name: opt1Name, values: opt1Values, selected: opt1, set: setOpt1, fallback: "Opção 1" },
+                { name: opt2Name, values: opt2Values, selected: opt2, set: setOpt2, fallback: "Opção 2" },
+              ].map((g, gi) =>
+                g.values.length > 0 ? (
+                  <div key={gi} className="mt-6">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {g.name || g.fallback}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {g.values.map((val) => (
+                        <button
+                          key={val}
+                          onClick={() => g.set(val)}
+                          className={`px-3 py-2 rounded-lg border text-sm ${
+                            g.selected === val
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-card text-card-foreground hover:border-primary/50"
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null,
               )}
 
               {mode === "unit" && (
