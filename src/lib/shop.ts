@@ -25,6 +25,10 @@ export interface ShopProductRow {
   download_url: string;
   download_label: string;
   area_tiers?: AreaTier[] | null;
+  option1_name?: string;
+  option1_values?: string[];
+  option2_name?: string;
+  option2_values?: string[];
 }
 
 export interface ShopProductImageRow {
