@@ -38,6 +38,10 @@ type EditState = {
   images: ShopProductImageRow[];
   variations: ShopProductVariationRow[];
   variation_area_tiers: [number, number, number][];
+  option1_name: string;
+  option1_values: string[];
+  option2_name: string;
+  option2_values: string[];
 };
 
 function emptyEdit(): EditState {
@@ -59,6 +63,10 @@ function emptyEdit(): EditState {
     images: [],
     variations: [],
     variation_area_tiers: [],
+    option1_name: "",
+    option1_values: ["", "", "", "", ""],
+    option2_name: "",
+    option2_values: ["", "", "", "", ""],
   };
 }
 
