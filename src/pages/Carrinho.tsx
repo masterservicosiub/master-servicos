@@ -216,7 +216,7 @@ const Carrinho = () => {
                     )}
                     <div className="flex-1 min-w-0">
                       {it.slug ? (
-                        <Link to={`/produto/${it.slug}`} className="font-semibold text-card-foreground hover:text-primary">
+                        <Link to={`/angelo-design/${it.slug}`} className="font-semibold text-card-foreground hover:text-primary">
                           {it.name}
                         </Link>
                       ) : (

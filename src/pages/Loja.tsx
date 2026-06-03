@@ -54,7 +54,7 @@ const Loja = () => {
     const from = startingPrice(p);
     return (
       <Link
-        to={`/produto/${p.slug}`}
+        to={`/angelo-design/${p.slug}`}
         key={p.id}
         className="group rounded-2xl border-2 bg-card overflow-hidden flex flex-col transition-all shadow-sm hover:-translate-y-1 hover:shadow-2xl animate-fade-in-up border-border hover:border-primary/50"
       >

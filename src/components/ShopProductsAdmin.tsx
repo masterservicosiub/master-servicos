@@ -731,7 +731,7 @@ const ShopProductsAdmin = () => {
                       {p.name} {!p.active && <span className="text-xs text-muted-foreground">(inativo)</span>}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      /produto/{p.slug} · {p.images.length} foto(s) · {p.variations.length} variação(ões)
+                      /angelo-design/{p.slug} · {p.images.length} foto(s) · {p.variations.length} variação(ões)
                     </p>
                   </div>
                   <button
