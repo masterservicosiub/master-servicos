@@ -220,6 +220,34 @@ const Produto = () => {
                 </div>
               )}
 
+              {[
+                { name: opt1Name, values: opt1Values, selected: opt1, set: setOpt1, fallback: "Opção 1" },
+                { name: opt2Name, values: opt2Values, selected: opt2, set: setOpt2, fallback: "Opção 2" },
+              ].map((g, gi) =>
+                g.values.length > 0 ? (
+                  <div key={gi} className="mt-6">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      {g.name || g.fallback}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {g.values.map((val) => (
+                        <button
+                          key={val}
+                          onClick={() => g.set(val)}
+                          className={`px-3 py-2 rounded-lg border text-sm ${
+                            g.selected === val
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-card text-card-foreground hover:border-primary/50"
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null,
+              )}
+
               {mode === "unit" && (
                 <div className="mt-6">
                   <label className="block text-sm font-medium text-foreground mb-2">Quantidade</label>
