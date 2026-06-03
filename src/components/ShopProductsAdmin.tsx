@@ -202,6 +202,10 @@ const ShopProductsAdmin = () => {
         area_tiers: edit.base_price_mode === "area" ? tiersToRow(edit.base_area_tiers) : null,
         download_url: edit.download_url.trim(),
         download_label: edit.download_label.trim(),
+        option1_name: edit.option1_name.trim(),
+        option1_values: edit.option1_values.map((v) => v.trim()).filter((v) => v.length > 0),
+        option2_name: edit.option2_name.trim(),
+        option2_values: edit.option2_values.map((v) => v.trim()).filter((v) => v.length > 0),
       };
       if (editingId === "new") {
         const row = await insertShopProduct(payload);
