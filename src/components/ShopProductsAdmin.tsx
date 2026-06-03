@@ -122,6 +122,10 @@ function toEdit(p: ShopProductFull): EditState {
       area_tiers: v.area_tiers || null,
     })),
     variation_area_tiers: p.variations.map((v) => tiersFromRow(v.area_tiers)),
+    option1_name: (p as any).option1_name || "",
+    option1_values: padTo5(((p as any).option1_values as string[]) || []),
+    option2_name: (p as any).option2_name || "",
+    option2_values: padTo5(((p as any).option2_values as string[]) || []),
   };
 }
 
