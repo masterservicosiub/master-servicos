@@ -71,7 +71,7 @@ const Produto = () => {
 
   const handleShare = async () => {
     if (!product) return;
-    const url = `https://masteriub.com.br/produto/${encodeURIComponent(product.slug)}`;
+    const url = `https://masteriub.com.br/angelo-design/${encodeURIComponent(product.slug)}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: product.name, text: product.name, url });
