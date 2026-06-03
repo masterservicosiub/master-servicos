@@ -494,7 +494,7 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
                   .map((s, idx) => {
                   return (
                     <Link
-                      to={`/servico/${slugify(s.name)}`}
+                      to={`/master-servicos/${slugify(s.name)}`}
                       key={s.id}
                       style={{ animationDelay: `${idx * 60}ms` }}
                       className="group rounded-2xl border-2 bg-card overflow-hidden flex flex-col transition-all shadow-sm hover:-translate-y-1 hover:shadow-2xl animate-fade-in-up border-border hover:border-primary/50"
