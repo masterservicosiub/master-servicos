@@ -62,13 +62,28 @@ const Produto = () => {
       toast.error("Informe a largura e o comprimento");
       return;
     }
+    if (opt1Values.length && !opt1) {
+      toast.error(`Selecione: ${opt1Name || "opção 1"}`);
+      return;
+    }
+    if (opt2Values.length && !opt2) {
+      toast.error(`Selecione: ${opt2Name || "opção 2"}`);
+      return;
+    }
+    const optsLabel = [
+      opt1 ? `${opt1Name || "Opção 1"}: ${opt1}` : "",
+      opt2 ? `${opt2Name || "Opção 2"}: ${opt2}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const combinedLabel = [variation?.label || null, optsLabel || null].filter(Boolean).join(" — ") || null;
     addToCart({
       productId: product.id!,
       slug: product.slug,
       name: product.name,
       image: primaryImage(product),
       variationId: variation?.id ?? null,
-      variationLabel: variation?.label ?? null,
+      variationLabel: combinedLabel,
       mode,
       qty: mode === "unit" ? qty : 1,
       area: mode === "area" ? area : 0,
