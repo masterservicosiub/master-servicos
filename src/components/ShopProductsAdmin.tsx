@@ -73,6 +73,12 @@ function emptyEdit(): EditState {
 const TIER_BOUNDS: [number, number, null] = [50, 100, null];
 const TIER_LABELS = ["Até 50 m²", "Até 100 m²", "Acima de 100 m²"];
 
+function padTo5(arr: string[]): string[] {
+  const out = arr.slice(0, 5);
+  while (out.length < 5) out.push("");
+  return out;
+}
+
 function tiersFromRow(t: AreaTier[] | null | undefined): [number, number, number] {
   if (!t || t.length === 0) return [0, 0, 0];
   return [
