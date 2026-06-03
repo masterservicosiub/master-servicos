@@ -28,6 +28,13 @@ const Produto = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
+  const [opt1, setOpt1] = useState<string>("");
+  const [opt2, setOpt2] = useState<string>("");
+
+  const opt1Name = ((product as any)?.option1_name || "").trim();
+  const opt1Values: string[] = (((product as any)?.option1_values as string[]) || []).filter((v) => v && v.trim());
+  const opt2Name = ((product as any)?.option2_name || "").trim();
+  const opt2Values: string[] = (((product as any)?.option2_values as string[]) || []).filter((v) => v && v.trim());
 
   useEffect(() => {
     setLoading(true);
@@ -35,6 +42,10 @@ const Produto = () => {
       .then((p) => {
         setProduct(p);
         if (p?.variations.length) setVariation(p.variations[0]);
+        const v1 = (((p as any)?.option1_values as string[]) || []).filter((v) => v && v.trim());
+        const v2 = (((p as any)?.option2_values as string[]) || []).filter((v) => v && v.trim());
+        if (v1.length) setOpt1(v1[0]);
+        if (v2.length) setOpt2(v2[0]);
       })
       .finally(() => setLoading(false));
   }, [slug]);
