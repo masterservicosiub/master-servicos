@@ -42,6 +42,7 @@ const App = () => (
           <Route path="/produto/:slug" element={<Produto />} />
           <Route path="/angelo-design/:slug" element={<Produto />} />
           <Route path="/servico/:id" element={<Servico />} />
+          <Route path="/master-servicos/:id" element={<Servico />} />
           <Route path="/carrinho" element={<Carrinho />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
