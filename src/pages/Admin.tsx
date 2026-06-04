@@ -64,6 +64,13 @@ import {
   type ExpenseRow,
 } from "@/lib/supabase";
 import {
+  fetchPayables,
+  insertPayable,
+  updatePayable,
+  deletePayable,
+  type PayableRow,
+} from "@/lib/supabase";
+import {
   fetchStockItems,
   insertStockItem,
   updateStockItem,
@@ -127,6 +134,7 @@ import {
 } from "@/lib/antifraud";
 import type { AffiliateRow } from "@/lib/supabase";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
+import { generateExpensesReport } from "@/lib/generateExpensesReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { generateBudget } from "@/lib/generateBudget";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
@@ -181,6 +189,11 @@ const Admin = () => {
   const [newExpenseDesc, setNewExpenseDesc] = useState("");
   const [newExpenseAmount, setNewExpenseAmount] = useState("");
   const [newExpenseDate, setNewExpenseDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [payables, setPayables] = useState<PayableRow[]>([]);
+  const [newPayableDesc, setNewPayableDesc] = useState("");
+  const [newPayableAmount, setNewPayableAmount] = useState("");
+  const [newPayableDue, setNewPayableDue] = useState(() => new Date().toISOString().slice(0, 10));
+  const [newPayableRecurring, setNewPayableRecurring] = useState(false);
   const [filterMonth, setFilterMonth] = useState(() => {
     const v = localStorage.getItem("admin_default_filter_month");
     return v !== null ? Number(v) : new Date().getMonth() + 1;
