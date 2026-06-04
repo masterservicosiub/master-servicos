@@ -1785,6 +1785,114 @@ const Admin = () => {
                 )}
               </div>
 
+              {/* Contas a Pagar */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" /> Contas a Pagar
+                </h2>
+                <div className="grid sm:grid-cols-[1fr,160px,160px,auto,auto] gap-2 mb-4 items-center">
+                  <input
+                    type="text"
+                    placeholder="Descrição"
+                    value={newPayableDesc}
+                    onChange={(e) => setNewPayableDesc(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Valor (R$)"
+                    value={newPayableAmount}
+                    onChange={(e) => setNewPayableAmount(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="date"
+                    value={newPayableDue}
+                    onChange={(e) => setNewPayableDue(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <label className="flex items-center gap-2 text-sm text-card-foreground whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={newPayableRecurring}
+                      onChange={(e) => setNewPayableRecurring(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    Recorrente
+                  </label>
+                  <button
+                    onClick={handleAddPayable}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center gap-1 text-sm"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+                {payables.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Nenhuma conta cadastrada.</p>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted sticky top-0">
+                        <tr>
+                          <th className="text-center px-2 py-2 font-semibold">Pago</th>
+                          <th className="text-left px-3 py-2 font-semibold">Vencimento</th>
+                          <th className="text-left px-3 py-2 font-semibold">Descrição</th>
+                          <th className="text-right px-3 py-2 font-semibold">Valor</th>
+                          <th className="text-center px-2 py-2 font-semibold">Recorrente</th>
+                          <th className="px-3 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {payables
+                          .slice()
+                          .sort((a, b) => (a.due_date < b.due_date ? -1 : 1))
+                          .map((p) => {
+                            const overdue = !p.paid && p.due_date < new Date().toISOString().slice(0, 10);
+                            return (
+                              <tr key={p.id} className={`border-t border-border ${p.paid ? "opacity-60" : ""}`}>
+                                <td className="px-2 py-2 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={p.paid}
+                                    onChange={() => handleTogglePayablePaid(p)}
+                                    className="h-4 w-4"
+                                  />
+                                </td>
+                                <td className={`px-3 py-2 whitespace-nowrap ${overdue ? "text-destructive font-semibold" : ""}`}>
+                                  {p.due_date.split("-").reverse().join("/")}
+                                </td>
+                                <td className={`px-3 py-2 ${p.paid ? "line-through" : ""}`}>{p.description}</td>
+                                <td className="px-3 py-2 text-right font-semibold">
+                                  R$ {Number(p.amount).toFixed(2)}
+                                </td>
+                                <td className="px-2 py-2 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={p.recurring}
+                                    onChange={() => handleTogglePayableRecurring(p)}
+                                    className="h-4 w-4"
+                                  />
+                                </td>
+                                <td className="px-3 py-2 text-right">
+                                  <button
+                                    onClick={() => p.id && handleDeletePayable(p.id)}
+                                    className="text-destructive hover:opacity-80"
+                                    aria-label="Excluir conta"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
               {/* Gráfico Mensal */}
               <div className="bg-card rounded-xl p-6 border border-border">
                 <h2 className="text-lg font-semibold text-card-foreground mb-4">Faturamento Bruto Mensal ({filterYear})</h2>
