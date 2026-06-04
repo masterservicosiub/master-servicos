@@ -642,6 +642,71 @@ const Admin = () => {
     }
   };
 
+  const loadPayables = async () => {
+    try {
+      const data = await fetchPayables();
+      setPayables(data);
+    } catch (err) {
+      console.error("Erro ao buscar contas a pagar:", err);
+    }
+  };
+
+  const handleAddPayable = async () => {
+    const amt = Number(newPayableAmount.replace(",", "."));
+    if (!newPayableDesc.trim() || !amt || amt <= 0 || !newPayableDue) {
+      toast.error("Preencha descrição, valor e vencimento.");
+      return;
+    }
+    try {
+      const row = await insertPayable({
+        description: newPayableDesc.trim(),
+        amount: amt,
+        due_date: newPayableDue,
+        paid: false,
+        recurring: newPayableRecurring,
+      });
+      setPayables([row, ...payables]);
+      setNewPayableDesc("");
+      setNewPayableAmount("");
+      setNewPayableDue(new Date().toISOString().slice(0, 10));
+      setNewPayableRecurring(false);
+      toast.success("Conta adicionada!");
+    } catch {
+      toast.error("Erro ao adicionar conta");
+    }
+  };
+
+  const handleTogglePayablePaid = async (p: PayableRow) => {
+    if (!p.id) return;
+    try {
+      const updated = await updatePayable(p.id, { paid: !p.paid });
+      setPayables(payables.map((x) => (x.id === p.id ? updated : x)));
+    } catch {
+      toast.error("Erro ao atualizar conta");
+    }
+  };
+
+  const handleTogglePayableRecurring = async (p: PayableRow) => {
+    if (!p.id) return;
+    try {
+      const updated = await updatePayable(p.id, { recurring: !p.recurring });
+      setPayables(payables.map((x) => (x.id === p.id ? updated : x)));
+    } catch {
+      toast.error("Erro ao atualizar conta");
+    }
+  };
+
+  const handleDeletePayable = async (id: string) => {
+    if (!confirm("Excluir esta conta?")) return;
+    try {
+      await deletePayable(id);
+      setPayables(payables.filter((p) => p.id !== id));
+      toast.success("Conta excluída!");
+    } catch {
+      toast.error("Erro ao excluir conta");
+    }
+  };
+
   const loadStockItems = async () => {
     try {
       const data = await fetchStockItems();
