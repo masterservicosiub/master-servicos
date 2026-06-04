@@ -850,6 +850,49 @@ export async function deleteExpense(id: string) {
 }
 
 // ============================================================
+// Payables (Contas a Pagar)
+// ============================================================
+export interface PayableRow {
+  id?: string;
+  created_at?: string;
+  description: string;
+  amount: number;
+  due_date: string; // YYYY-MM-DD
+  paid: boolean;
+  recurring: boolean;
+}
+
+export async function fetchPayables(): Promise<PayableRow[]> {
+  const { data, error } = await supabase
+    .from("payables")
+    .select("*")
+    .order("due_date", { ascending: true });
+  if (error) throw error;
+  return (data || []) as PayableRow[];
+}
+
+export async function insertPayable(p: Omit<PayableRow, "id" | "created_at">) {
+  const { data, error } = await supabase.from("payables").insert([p]).select();
+  if (error) throw error;
+  return data?.[0] as PayableRow;
+}
+
+export async function updatePayable(id: string, patch: Partial<PayableRow>) {
+  const { data, error } = await supabase
+    .from("payables")
+    .update(patch)
+    .eq("id", id)
+    .select();
+  if (error) throw error;
+  return data?.[0] as PayableRow;
+}
+
+export async function deletePayable(id: string) {
+  const { error } = await supabase.from("payables").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ============================================================
 // Stock items (Estoque)
 // ============================================================
 export interface StockItemRow {
