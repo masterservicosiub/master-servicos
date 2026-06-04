@@ -797,6 +797,7 @@ const Admin = () => {
       loadClients();
       loadExpenses();
       loadStockItems();
+      loadPayables();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
