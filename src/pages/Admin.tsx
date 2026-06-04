@@ -1701,9 +1701,17 @@ const Admin = () => {
 
               {/* Saídas (Despesas) */}
               <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                  <Receipt className="w-5 h-5" /> Saídas ({filterYear})
-                </h2>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <h2 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                    <Receipt className="w-5 h-5" /> Saídas ({filterYear})
+                  </h2>
+                  <button
+                    onClick={() => generateExpensesReport(expenses, filterYear)}
+                    className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 text-sm"
+                  >
+                    <FileText className="w-4 h-4" /> Relatório de Saídas PDF
+                  </button>
+                </div>
                 <div className="grid sm:grid-cols-[1fr,160px,160px,auto] gap-2 mb-4">
                   <input
                     type="text"
