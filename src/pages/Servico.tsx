@@ -104,7 +104,7 @@ const Servico = () => {
   const handleShare = async () => {
     if (!service) return;
     const slug = slugify(service.name);
-    const url = `https://rpxlpqehpzhofxuzjbws.supabase.co/functions/v1/og-share?type=servico&slug=${encodeURIComponent(slug)}`;
+    const url = `${window.location.origin}/master-servicos/${slug}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: service.name, text: service.name, url });
