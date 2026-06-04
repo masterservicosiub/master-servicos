@@ -64,6 +64,13 @@ import {
   type ExpenseRow,
 } from "@/lib/supabase";
 import {
+  fetchPayables,
+  insertPayable,
+  updatePayable,
+  deletePayable,
+  type PayableRow,
+} from "@/lib/supabase";
+import {
   fetchStockItems,
   insertStockItem,
   updateStockItem,
@@ -127,6 +134,7 @@ import {
 } from "@/lib/antifraud";
 import type { AffiliateRow } from "@/lib/supabase";
 import { generateRevenueReport } from "@/lib/generateRevenueReport";
+import { generateExpensesReport } from "@/lib/generateExpensesReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { generateBudget } from "@/lib/generateBudget";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
@@ -181,6 +189,11 @@ const Admin = () => {
   const [newExpenseDesc, setNewExpenseDesc] = useState("");
   const [newExpenseAmount, setNewExpenseAmount] = useState("");
   const [newExpenseDate, setNewExpenseDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [payables, setPayables] = useState<PayableRow[]>([]);
+  const [newPayableDesc, setNewPayableDesc] = useState("");
+  const [newPayableAmount, setNewPayableAmount] = useState("");
+  const [newPayableDue, setNewPayableDue] = useState(() => new Date().toISOString().slice(0, 10));
+  const [newPayableRecurring, setNewPayableRecurring] = useState(false);
   const [filterMonth, setFilterMonth] = useState(() => {
     const v = localStorage.getItem("admin_default_filter_month");
     return v !== null ? Number(v) : new Date().getMonth() + 1;
@@ -629,6 +642,71 @@ const Admin = () => {
     }
   };
 
+  const loadPayables = async () => {
+    try {
+      const data = await fetchPayables();
+      setPayables(data);
+    } catch (err) {
+      console.error("Erro ao buscar contas a pagar:", err);
+    }
+  };
+
+  const handleAddPayable = async () => {
+    const amt = Number(newPayableAmount.replace(",", "."));
+    if (!newPayableDesc.trim() || !amt || amt <= 0 || !newPayableDue) {
+      toast.error("Preencha descrição, valor e vencimento.");
+      return;
+    }
+    try {
+      const row = await insertPayable({
+        description: newPayableDesc.trim(),
+        amount: amt,
+        due_date: newPayableDue,
+        paid: false,
+        recurring: newPayableRecurring,
+      });
+      setPayables([row, ...payables]);
+      setNewPayableDesc("");
+      setNewPayableAmount("");
+      setNewPayableDue(new Date().toISOString().slice(0, 10));
+      setNewPayableRecurring(false);
+      toast.success("Conta adicionada!");
+    } catch {
+      toast.error("Erro ao adicionar conta");
+    }
+  };
+
+  const handleTogglePayablePaid = async (p: PayableRow) => {
+    if (!p.id) return;
+    try {
+      const updated = await updatePayable(p.id, { paid: !p.paid });
+      setPayables(payables.map((x) => (x.id === p.id ? updated : x)));
+    } catch {
+      toast.error("Erro ao atualizar conta");
+    }
+  };
+
+  const handleTogglePayableRecurring = async (p: PayableRow) => {
+    if (!p.id) return;
+    try {
+      const updated = await updatePayable(p.id, { recurring: !p.recurring });
+      setPayables(payables.map((x) => (x.id === p.id ? updated : x)));
+    } catch {
+      toast.error("Erro ao atualizar conta");
+    }
+  };
+
+  const handleDeletePayable = async (id: string) => {
+    if (!confirm("Excluir esta conta?")) return;
+    try {
+      await deletePayable(id);
+      setPayables(payables.filter((p) => p.id !== id));
+      toast.success("Conta excluída!");
+    } catch {
+      toast.error("Erro ao excluir conta");
+    }
+  };
+
   const loadStockItems = async () => {
     try {
       const data = await fetchStockItems();
@@ -719,6 +797,7 @@ const Admin = () => {
       loadClients();
       loadExpenses();
       loadStockItems();
+      loadPayables();
       startOrderNotificationListener();
       // Sync email settings from DB and populate form
       syncEmailSettingsFromDB().then(() => {
@@ -1622,9 +1701,17 @@ const Admin = () => {
 
               {/* Saídas (Despesas) */}
               <div className="bg-card rounded-xl p-6 border border-border">
-                <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                  <Receipt className="w-5 h-5" /> Saídas ({filterYear})
-                </h2>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <h2 className="text-lg font-semibold text-card-foreground flex items-center gap-2">
+                    <Receipt className="w-5 h-5" /> Saídas ({filterYear})
+                  </h2>
+                  <button
+                    onClick={() => generateExpensesReport(expenses, filterYear)}
+                    className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 text-sm"
+                  >
+                    <FileText className="w-4 h-4" /> Relatório de Saídas PDF
+                  </button>
+                </div>
                 <div className="grid sm:grid-cols-[1fr,160px,160px,auto] gap-2 mb-4">
                   <input
                     type="text"
@@ -1692,6 +1779,114 @@ const Admin = () => {
                               </td>
                             </tr>
                           ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Contas a Pagar */}
+              <div className="bg-card rounded-xl p-6 border border-border">
+                <h2 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5" /> Contas a Pagar
+                </h2>
+                <div className="grid sm:grid-cols-[1fr,160px,160px,auto,auto] gap-2 mb-4 items-center">
+                  <input
+                    type="text"
+                    placeholder="Descrição"
+                    value={newPayableDesc}
+                    onChange={(e) => setNewPayableDesc(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Valor (R$)"
+                    value={newPayableAmount}
+                    onChange={(e) => setNewPayableAmount(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    type="date"
+                    value={newPayableDue}
+                    onChange={(e) => setNewPayableDue(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <label className="flex items-center gap-2 text-sm text-card-foreground whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={newPayableRecurring}
+                      onChange={(e) => setNewPayableRecurring(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    Recorrente
+                  </label>
+                  <button
+                    onClick={handleAddPayable}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:opacity-90 flex items-center gap-1 text-sm"
+                  >
+                    <Plus className="w-4 h-4" /> Adicionar
+                  </button>
+                </div>
+                {payables.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Nenhuma conta cadastrada.</p>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto border border-border rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted sticky top-0">
+                        <tr>
+                          <th className="text-center px-2 py-2 font-semibold">Pago</th>
+                          <th className="text-left px-3 py-2 font-semibold">Vencimento</th>
+                          <th className="text-left px-3 py-2 font-semibold">Descrição</th>
+                          <th className="text-right px-3 py-2 font-semibold">Valor</th>
+                          <th className="text-center px-2 py-2 font-semibold">Recorrente</th>
+                          <th className="px-3 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {payables
+                          .slice()
+                          .sort((a, b) => (a.due_date < b.due_date ? -1 : 1))
+                          .map((p) => {
+                            const overdue = !p.paid && p.due_date < new Date().toISOString().slice(0, 10);
+                            return (
+                              <tr key={p.id} className={`border-t border-border ${p.paid ? "opacity-60" : ""}`}>
+                                <td className="px-2 py-2 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={p.paid}
+                                    onChange={() => handleTogglePayablePaid(p)}
+                                    className="h-4 w-4"
+                                  />
+                                </td>
+                                <td className={`px-3 py-2 whitespace-nowrap ${overdue ? "text-destructive font-semibold" : ""}`}>
+                                  {p.due_date.split("-").reverse().join("/")}
+                                </td>
+                                <td className={`px-3 py-2 ${p.paid ? "line-through" : ""}`}>{p.description}</td>
+                                <td className="px-3 py-2 text-right font-semibold">
+                                  R$ {Number(p.amount).toFixed(2)}
+                                </td>
+                                <td className="px-2 py-2 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={p.recurring}
+                                    onChange={() => handleTogglePayableRecurring(p)}
+                                    className="h-4 w-4"
+                                  />
+                                </td>
+                                <td className="px-3 py-2 text-right">
+                                  <button
+                                    onClick={() => p.id && handleDeletePayable(p.id)}
+                                    className="text-destructive hover:opacity-80"
+                                    aria-label="Excluir conta"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>
