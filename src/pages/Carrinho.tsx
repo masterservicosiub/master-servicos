@@ -41,10 +41,7 @@ const Carrinho = () => {
   const subtotal = items.reduce((s, i) => s + i.unitPrice, 0);
   let discount = 0;
   if (coupon) {
-    discount =
-      coupon.discount_type === "percent"
-        ? subtotal * (coupon.discount_value / 100)
-        : coupon.discount_value;
+    discount = coupon.discount_type === "percent" ? subtotal * (coupon.discount_value / 100) : coupon.discount_value;
     discount = Math.min(discount, subtotal);
   }
   const total = subtotal - discount;
@@ -81,23 +78,19 @@ const Carrinho = () => {
     }
     const lines = items
       .map((i, idx) => {
-        const qtyTxt =
-          i.mode === "unit" ? `${i.qty}un` : i.mode === "area" ? `${i.area}m²` : "1x";
+        const qtyTxt = i.mode === "unit" ? `${i.qty}un` : i.mode === "area" ? `${i.area}m²` : "1x";
         const base = `${idx + 1}. ${i.name}${i.variationLabel ? ` (${i.variationLabel})` : ""} — ${qtyTxt} = R$ ${i.unitPrice.toFixed(2)}`;
         return i.notes?.trim() ? `${base}\n   Obs: ${i.notes.trim()}` : base;
       })
       .join("\n");
     const servicesText = lines;
     const aggregatedNotes = items
-      .map((i, idx) =>
-        i.notes?.trim() ? `${idx + 1}. ${i.name}: ${i.notes.trim()}` : null,
-      )
+      .map((i, idx) => (i.notes?.trim() ? `${idx + 1}. ${i.name}: ${i.notes.trim()}` : null))
       .filter(Boolean)
       .join("\n");
     try {
       const affiliate_code =
-        typedRef ||
-        ((typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined);
+        typedRef || (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined;
       const fingerprint = getDeviceFingerprint();
       const ip = await getClientIp();
       let fraud_status = "ok";
@@ -221,35 +214,29 @@ const Carrinho = () => {
             <>
               <div className="space-y-3">
                 {items.map((it, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-card border border-border rounded-xl p-4 flex gap-4 items-center"
-                  >
-                    {it.image && (
-                      <img src={it.image} alt={it.name} className="w-16 h-16 rounded-lg object-cover" />
-                    )}
+                  <div key={idx} className="bg-card border border-border rounded-xl p-4 flex gap-4 items-center">
+                    {it.image && <img src={it.image} alt={it.name} className="w-16 h-16 rounded-lg object-cover" />}
                     <div className="flex-1 min-w-0">
                       {it.slug ? (
-                        <Link to={`/angelo-design/${it.slug}`} className="font-semibold text-card-foreground hover:text-primary">
+                        <Link
+                          to={`/angelo-design/${it.slug}`}
+                          className="font-semibold text-card-foreground hover:text-primary"
+                        >
                           {it.name}
                         </Link>
                       ) : (
                         <span className="font-semibold text-card-foreground">{it.name}</span>
                       )}
-                      {it.variationLabel && (
-                        <p className="text-xs text-muted-foreground">{it.variationLabel}</p>
-                      )}
+                      {it.variationLabel && <p className="text-xs text-muted-foreground">{it.variationLabel}</p>}
                       <p className="text-xs text-muted-foreground mt-1">
                         {it.mode === "unit"
                           ? `${it.qty} unidade(s)`
                           : it.mode === "area"
-                          ? `${it.area} m²`
-                          : "Preço fixo"}
+                            ? `${it.area} m²`
+                            : "Preço fixo"}
                       </p>
                       {it.notes?.trim() && (
-                        <p className="text-xs text-muted-foreground mt-1 italic line-clamp-2">
-                          Obs: {it.notes.trim()}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1 italic line-clamp-2">Obs: {it.notes.trim()}</p>
                       )}
                     </div>
                     <div className="text-right">
@@ -270,19 +257,37 @@ const Carrinho = () => {
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">Nome *</label>
-                    <input value={name} onChange={(e) => setName(e.target.value.toUpperCase())} className="w-full h-10 rounded-md border border-input bg-background px-3 uppercase" />
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value.toUpperCase())}
+                      className="w-full h-10 rounded-md border border-input bg-background px-3 uppercase"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Telefone *</label>
-                    <input value={phone} onChange={(e) => setPhone(applyPhoneMask(e.target.value))} inputMode="tel" placeholder="(00) 0 0000-0000" className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(applyPhoneMask(e.target.value))}
+                      inputMode="tel"
+                      placeholder="(00) 0 0000-0000"
+                      className="w-full h-10 rounded-md border border-input bg-background px-3"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">E-mail</label>
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                    <input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full h-10 rounded-md border border-input bg-background px-3"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Endereço</label>
-                    <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3" />
+                    <input
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full h-10 rounded-md border border-input bg-background px-3"
+                    />
                   </div>
                 </div>
                 <div>
@@ -317,9 +322,6 @@ const Carrinho = () => {
                     className="w-full h-10 rounded-md border border-input bg-background px-3 uppercase"
                     placeholder="Digite o código do afiliado (opcional)"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Ao informar o código, o afiliado receberá o cashback referente ao seu pedido.
-                  </p>
                 </div>
 
                 <div className="space-y-1 pt-3 border-t border-border">
