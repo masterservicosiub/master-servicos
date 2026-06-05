@@ -24,6 +24,13 @@ const Carrinho = () => {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [refCode, setRefCode] = useState(() => {
+    try {
+      return (localStorage.getItem("affiliate_ref") || "").toUpperCase();
+    } catch {
+      return "";
+    }
+  });
   const info = useCompanyInfo();
 
   useEffect(() => {
@@ -66,6 +73,12 @@ const Carrinho = () => {
       return;
     }
     setSubmitting(true);
+    const typedRef = refCode.trim().toUpperCase();
+    if (typedRef) {
+      try {
+        localStorage.setItem("affiliate_ref", typedRef);
+      } catch {}
+    }
     const lines = items
       .map((i, idx) => {
         const qtyTxt =
@@ -83,7 +96,8 @@ const Carrinho = () => {
       .join("\n");
     try {
       const affiliate_code =
-        (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined;
+        typedRef ||
+        ((typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined);
       const fingerprint = getDeviceFingerprint();
       const ip = await getClientIp();
       let fraud_status = "ok";
