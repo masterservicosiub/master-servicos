@@ -24,6 +24,13 @@ const Carrinho = () => {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [refCode, setRefCode] = useState(() => {
+    try {
+      return (localStorage.getItem("affiliate_ref") || "").toUpperCase();
+    } catch {
+      return "";
+    }
+  });
   const info = useCompanyInfo();
 
   useEffect(() => {
@@ -66,6 +73,12 @@ const Carrinho = () => {
       return;
     }
     setSubmitting(true);
+    const typedRef = refCode.trim().toUpperCase();
+    if (typedRef) {
+      try {
+        localStorage.setItem("affiliate_ref", typedRef);
+      } catch {}
+    }
     const lines = items
       .map((i, idx) => {
         const qtyTxt =
@@ -83,7 +96,8 @@ const Carrinho = () => {
       .join("\n");
     try {
       const affiliate_code =
-        (typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined;
+        typedRef ||
+        ((typeof window !== "undefined" && localStorage.getItem("affiliate_ref")) || undefined);
       const fingerprint = getDeviceFingerprint();
       const ip = await getClientIp();
       let fraud_status = "ok";
@@ -293,6 +307,19 @@ const Carrinho = () => {
                       Cupom {coupon.code} aplicado (-R$ {discount.toFixed(2)})
                     </p>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Código de Indicação</label>
+                  <input
+                    value={refCode}
+                    onChange={(e) => setRefCode(e.target.value.toUpperCase())}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 uppercase"
+                    placeholder="Digite o código do afiliado (opcional)"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ao informar o código, o afiliado receberá o cashback referente ao seu pedido.
+                  </p>
                 </div>
 
                 <div className="space-y-1 pt-3 border-t border-border">
