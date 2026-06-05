@@ -309,6 +309,19 @@ const Carrinho = () => {
                   )}
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium mb-2">Código de Indicação</label>
+                  <input
+                    value={refCode}
+                    onChange={(e) => setRefCode(e.target.value.toUpperCase())}
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 uppercase"
+                    placeholder="Digite o código do afiliado (opcional)"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ao informar o código, o afiliado receberá o cashback referente ao seu pedido.
+                  </p>
+                </div>
+
                 <div className="space-y-1 pt-3 border-t border-border">
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Subtotal</span>
