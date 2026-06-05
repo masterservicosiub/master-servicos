@@ -394,7 +394,7 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
   }
 
   return (
-    <>
+    <div className="min-h-screen">
       <Helmet>
         <title>{pageTitle} — Master Soluções</title>
         <meta name="description" content={pageSubtitle} />
@@ -410,7 +410,6 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://masterservicos.lovable.app/__l5e/assets-v1/40765529-6010-4dae-beb2-759346072eac/logo-master-servicos.png" />
       </Helmet>
-      <div className="min-h-screen">
       <Header />
       <div className="pt-16 bg-background">
         {/* Hero */}
