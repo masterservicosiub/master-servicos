@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { CheckCircle, Sparkles, ShieldCheck, Clock, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -394,6 +395,21 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>{pageTitle} — Master Soluções</title>
+        <meta name="description" content={pageSubtitle} />
+        <meta property="og:title" content={`${pageTitle} — Master Soluções`} />
+        <meta property="og:description" content={pageSubtitle} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://masterservicos.lovable.app/master-servicos" />
+        <meta property="og:image" content="https://masterservicos.lovable.app/__l5e/assets-v1/40765529-6010-4dae-beb2-759346072eac/logo-master-servicos.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Master Serviços" />
+        <meta property="og:site_name" content="Master Soluções" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://masterservicos.lovable.app/__l5e/assets-v1/40765529-6010-4dae-beb2-759346072eac/logo-master-servicos.png" />
+      </Helmet>
       <Header />
       <div className="pt-16 bg-background">
         {/* Hero */}

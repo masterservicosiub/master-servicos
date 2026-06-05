@@ -98,6 +98,17 @@ const Loja = () => {
       <Helmet>
         <title>Angelo Design — Master Soluções</title>
         <meta name="description" content="Cartões, banners, panfletos e produtos gráficos sob medida." />
+        <meta property="og:title" content="Angelo Design — Master Soluções" />
+        <meta property="og:description" content="Cartões, banners, panfletos e produtos gráficos sob medida." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://masterservicos.lovable.app/angelo-design" />
+        <meta property="og:image" content="https://masterservicos.lovable.app/__l5e/assets-v1/60349e70-2de4-406f-9765-50e588a4862e/angelo-design-logo.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Angelo Design - Serviços Gráficos" />
+        <meta property="og:site_name" content="Master Soluções" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://masterservicos.lovable.app/__l5e/assets-v1/60349e70-2de4-406f-9765-50e588a4862e/angelo-design-logo.png" />
       </Helmet>
       <Header />
       <main className="flex-1 pt-16 bg-background">
