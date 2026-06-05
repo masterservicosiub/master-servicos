@@ -557,7 +557,7 @@ const Orcamento = ({ kind = "residencial", pageTitle = "Solicite seu Orçamento"
         </div>
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 
