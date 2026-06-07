@@ -233,8 +233,8 @@ const Produto = () => {
               )}
 
               {[
-                { name: opt1Name, values: opt1Values, selected: opt1, set: setOpt1, fallback: "Opção 1" },
-                { name: opt2Name, values: opt2Values, selected: opt2, set: setOpt2, fallback: "Opção 2" },
+                { name: opt1Name, values: opt1Values, prices: opt1PricesRaw, selected: opt1, set: setOpt1, fallback: "Opção 1" },
+                { name: opt2Name, values: opt2Values, prices: opt2PricesRaw, selected: opt2, set: setOpt2, fallback: "Opção 2" },
               ].map((g, gi) =>
                 g.values.length > 0 ? (
                   <div key={gi} className="mt-6">
@@ -242,19 +242,25 @@ const Produto = () => {
                       {g.name || g.fallback}
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {g.values.map((val) => (
-                        <button
-                          key={val}
-                          onClick={() => g.set(val)}
-                          className={`px-3 py-2 rounded-lg border text-sm ${
-                            g.selected === val
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border bg-card text-card-foreground hover:border-primary/50"
-                          }`}
-                        >
-                          {val}
-                        </button>
-                      ))}
+                      {g.values.map((val, vi) => {
+                        const extra = Number(g.prices?.[vi]) || 0;
+                        return (
+                          <button
+                            key={val}
+                            onClick={() => g.set(val)}
+                            className={`px-3 py-2 rounded-lg border text-sm ${
+                              g.selected === val
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card text-card-foreground hover:border-primary/50"
+                            }`}
+                          >
+                            {val}
+                            {extra > 0 && (
+                              <span className="ml-1 text-xs opacity-80">(+R$ {extra.toFixed(2)})</span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null,
