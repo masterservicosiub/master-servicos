@@ -627,6 +627,7 @@ const ShopProductsAdmin = () => {
                   {([1, 2] as const).map((n) => {
                     const nameKey = `option${n}_name` as "option1_name" | "option2_name";
                     const valuesKey = `option${n}_values` as "option1_values" | "option2_values";
+                    const pricesKey = `option${n}_prices` as "option1_prices" | "option2_prices";
                     return (
                       <div key={n} className="border border-border rounded-lg p-3 space-y-2">
                         <div>
@@ -642,20 +643,34 @@ const ShopProductsAdmin = () => {
                         </div>
                         <div className="space-y-1">
                           <label className="block text-[11px] font-medium text-muted-foreground">
-                            Opções (até 5)
+                            Opções (até 5) — preço adicional opcional por opção
                           </label>
                           {edit[valuesKey].map((val, i) => (
-                            <input
-                              key={i}
-                              value={val}
-                              onChange={(e) => {
-                                const next = [...edit[valuesKey]];
-                                next[i] = e.target.value;
-                                setEdit({ ...edit, [valuesKey]: next } as EditState);
-                              }}
-                              placeholder={`Opção ${i + 1}`}
-                              className="w-full rounded-md border border-input bg-card px-2 py-1 text-xs"
-                            />
+                            <div key={i} className="flex gap-1">
+                              <input
+                                value={val}
+                                onChange={(e) => {
+                                  const next = [...edit[valuesKey]];
+                                  next[i] = e.target.value;
+                                  setEdit({ ...edit, [valuesKey]: next } as EditState);
+                                }}
+                                placeholder={`Opção ${i + 1}`}
+                                className="flex-1 rounded-md border border-input bg-card px-2 py-1 text-xs"
+                              />
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={edit[pricesKey][i] ?? 0}
+                                onChange={(e) => {
+                                  const next = [...edit[pricesKey]];
+                                  next[i] = Number(e.target.value) || 0;
+                                  setEdit({ ...edit, [pricesKey]: next } as EditState);
+                                }}
+                                placeholder="R$"
+                                title="Preço adicional (somado ao total)"
+                                className="w-20 rounded-md border border-input bg-card px-2 py-1 text-xs"
+                              />
+                            </div>
                           ))}
                         </div>
                       </div>
