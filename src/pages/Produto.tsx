@@ -33,8 +33,19 @@ const Produto = () => {
 
   const opt1Name = ((product as any)?.option1_name || "").trim();
   const opt1Values: string[] = (((product as any)?.option1_values as string[]) || []).filter((v) => v && v.trim());
+  const opt1PricesRaw: number[] = ((product as any)?.option1_prices as number[]) || [];
   const opt2Name = ((product as any)?.option2_name || "").trim();
   const opt2Values: string[] = (((product as any)?.option2_values as string[]) || []).filter((v) => v && v.trim());
+  const opt2PricesRaw: number[] = ((product as any)?.option2_prices as number[]) || [];
+
+  const opt1Price = (() => {
+    const i = opt1Values.indexOf(opt1);
+    return i >= 0 ? Number(opt1PricesRaw[i]) || 0 : 0;
+  })();
+  const opt2Price = (() => {
+    const i = opt2Values.indexOf(opt2);
+    return i >= 0 ? Number(opt2PricesRaw[i]) || 0 : 0;
+  })();
 
   useEffect(() => {
     setLoading(true);
@@ -51,10 +62,11 @@ const Produto = () => {
   }, [slug]);
 
   const mode = variation?.price_mode ?? product?.base_price_mode ?? "unit";
-  const price = useMemo(
+  const basePrice = useMemo(
     () => (product ? computePrice(product, variation, qty, area) : 0),
     [product, variation, qty, area],
   );
+  const price = basePrice + opt1Price + opt2Price;
 
   const handleAdd = () => {
     if (!product) return;
