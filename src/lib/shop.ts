@@ -27,8 +27,10 @@ export interface ShopProductRow {
   area_tiers?: AreaTier[] | null;
   option1_name?: string;
   option1_values?: string[];
+  option1_prices?: number[];
   option2_name?: string;
   option2_values?: string[];
+  option2_prices?: number[];
 }
 
 export interface ShopProductImageRow {
