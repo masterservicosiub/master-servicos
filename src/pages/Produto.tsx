@@ -33,8 +33,19 @@ const Produto = () => {
 
   const opt1Name = ((product as any)?.option1_name || "").trim();
   const opt1Values: string[] = (((product as any)?.option1_values as string[]) || []).filter((v) => v && v.trim());
+  const opt1PricesRaw: number[] = ((product as any)?.option1_prices as number[]) || [];
   const opt2Name = ((product as any)?.option2_name || "").trim();
   const opt2Values: string[] = (((product as any)?.option2_values as string[]) || []).filter((v) => v && v.trim());
+  const opt2PricesRaw: number[] = ((product as any)?.option2_prices as number[]) || [];
+
+  const opt1Price = (() => {
+    const i = opt1Values.indexOf(opt1);
+    return i >= 0 ? Number(opt1PricesRaw[i]) || 0 : 0;
+  })();
+  const opt2Price = (() => {
+    const i = opt2Values.indexOf(opt2);
+    return i >= 0 ? Number(opt2PricesRaw[i]) || 0 : 0;
+  })();
 
   useEffect(() => {
     setLoading(true);
@@ -51,10 +62,11 @@ const Produto = () => {
   }, [slug]);
 
   const mode = variation?.price_mode ?? product?.base_price_mode ?? "unit";
-  const price = useMemo(
+  const basePrice = useMemo(
     () => (product ? computePrice(product, variation, qty, area) : 0),
     [product, variation, qty, area],
   );
+  const price = basePrice + opt1Price + opt2Price;
 
   const handleAdd = () => {
     if (!product) return;
@@ -221,8 +233,8 @@ const Produto = () => {
               )}
 
               {[
-                { name: opt1Name, values: opt1Values, selected: opt1, set: setOpt1, fallback: "Opção 1" },
-                { name: opt2Name, values: opt2Values, selected: opt2, set: setOpt2, fallback: "Opção 2" },
+                { name: opt1Name, values: opt1Values, prices: opt1PricesRaw, selected: opt1, set: setOpt1, fallback: "Opção 1" },
+                { name: opt2Name, values: opt2Values, prices: opt2PricesRaw, selected: opt2, set: setOpt2, fallback: "Opção 2" },
               ].map((g, gi) =>
                 g.values.length > 0 ? (
                   <div key={gi} className="mt-6">
@@ -230,19 +242,25 @@ const Produto = () => {
                       {g.name || g.fallback}
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {g.values.map((val) => (
-                        <button
-                          key={val}
-                          onClick={() => g.set(val)}
-                          className={`px-3 py-2 rounded-lg border text-sm ${
-                            g.selected === val
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border bg-card text-card-foreground hover:border-primary/50"
-                          }`}
-                        >
-                          {val}
-                        </button>
-                      ))}
+                      {g.values.map((val, vi) => {
+                        const extra = Number(g.prices?.[vi]) || 0;
+                        return (
+                          <button
+                            key={val}
+                            onClick={() => g.set(val)}
+                            className={`px-3 py-2 rounded-lg border text-sm ${
+                              g.selected === val
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card text-card-foreground hover:border-primary/50"
+                            }`}
+                          >
+                            {val}
+                            {extra > 0 && (
+                              <span className="ml-1 text-xs opacity-80">(+R$ {extra.toFixed(2)})</span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null,
