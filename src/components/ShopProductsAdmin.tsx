@@ -216,8 +216,16 @@ const ShopProductsAdmin = () => {
         download_label: edit.download_label.trim(),
         option1_name: edit.option1_name.trim(),
         option1_values: edit.option1_values.map((v) => v.trim()).filter((v) => v.length > 0),
+        option1_prices: edit.option1_values
+          .map((v, i) => ({ v: v.trim(), p: Number(edit.option1_prices[i]) || 0 }))
+          .filter((x) => x.v.length > 0)
+          .map((x) => x.p),
         option2_name: edit.option2_name.trim(),
         option2_values: edit.option2_values.map((v) => v.trim()).filter((v) => v.length > 0),
+        option2_prices: edit.option2_values
+          .map((v, i) => ({ v: v.trim(), p: Number(edit.option2_prices[i]) || 0 }))
+          .filter((x) => x.v.length > 0)
+          .map((x) => x.p),
       };
       if (editingId === "new") {
         const row = await insertShopProduct(payload);
