@@ -40,8 +40,10 @@ type EditState = {
   variation_area_tiers: [number, number, number][];
   option1_name: string;
   option1_values: string[];
+  option1_prices: number[];
   option2_name: string;
   option2_values: string[];
+  option2_prices: number[];
 };
 
 function emptyEdit(): EditState {
@@ -65,8 +67,10 @@ function emptyEdit(): EditState {
     variation_area_tiers: [],
     option1_name: "",
     option1_values: ["", "", "", "", ""],
+    option1_prices: [0, 0, 0, 0, 0],
     option2_name: "",
     option2_values: ["", "", "", "", ""],
+    option2_prices: [0, 0, 0, 0, 0],
   };
 }
 
@@ -76,6 +80,12 @@ const TIER_LABELS = ["Até 50 m²", "Até 100 m²", "Acima de 100 m²"];
 function padTo5(arr: string[]): string[] {
   const out = arr.slice(0, 5);
   while (out.length < 5) out.push("");
+  return out;
+}
+
+function padNums5(arr: number[]): number[] {
+  const out = (arr || []).slice(0, 5).map((n) => Number(n) || 0);
+  while (out.length < 5) out.push(0);
   return out;
 }
 
@@ -130,8 +140,10 @@ function toEdit(p: ShopProductFull): EditState {
     variation_area_tiers: p.variations.map((v) => tiersFromRow(v.area_tiers)),
     option1_name: (p as any).option1_name || "",
     option1_values: padTo5(((p as any).option1_values as string[]) || []),
+    option1_prices: padNums5(((p as any).option1_prices as number[]) || []),
     option2_name: (p as any).option2_name || "",
     option2_values: padTo5(((p as any).option2_values as string[]) || []),
+    option2_prices: padNums5(((p as any).option2_prices as number[]) || []),
   };
 }
 
