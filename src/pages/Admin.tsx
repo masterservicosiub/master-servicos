@@ -425,6 +425,9 @@ const Admin = () => {
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(DEFAULT_COMPANY_INFO);
   const [savingCompany, setSavingCompany] = useState(false);
 
+  // Per-order brand override for receipt/budget PDFs (auto = detect from services)
+  const [pdfBrandOverride, setPdfBrandOverride] = useState<Record<string, OrderOrigin | "auto">>({});
+
   // Coupons
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [coupCode, setCoupCode] = useState("");
@@ -1044,9 +1047,15 @@ const Admin = () => {
       return;
     }
     const total = validItems.reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0);
-    const servicesText = validItems
+    const baseServicesText = validItems
       .map((it) => `${it.description.trim()} - R$ ${(parseFloat(it.value) || 0).toFixed(2)}`)
       .join(" | ");
+    // Preserve origin prefix (e.g. "[Angelo Design]") so the receipt/budget keeps the original brand
+    const originalOrigin = detectOrigin(editingOrder.services);
+    const prefix = originPrefix(originalOrigin);
+    const servicesText = prefix && !baseServicesText.startsWith(prefix.trim())
+      ? `${prefix}${baseServicesText}`
+      : baseServicesText;
     try {
       await insertOrder({
         name: manualName.trim(),
