@@ -184,9 +184,11 @@ const Loja = () => {
                     <h2 className="text-xl font-bold text-foreground mb-4 border-b border-border pb-2">
                       {cat}
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {items.map(renderCard)}
-                    </div>
+              <div className="max-w-3xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {items.map(renderCard)}
+                </div>
+              </div>
                   </section>
                 ))}
               </div>
