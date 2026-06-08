@@ -10,6 +10,11 @@ export function detectOrigin(servicesText: string | undefined | null): OrderOrig
   return "master";
 }
 
+export function originPrefix(origin: OrderOrigin): string {
+  if (origin === "angelo") return "[Angelo Design] ";
+  return "";
+}
+
 export function logoUrlFor(origin: OrderOrigin): string {
   if (origin === "angelo") return angeloLogo;
   if (origin === "master") return masterLogo;
