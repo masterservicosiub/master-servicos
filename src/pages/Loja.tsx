@@ -11,7 +11,7 @@ import angeloLogo from "@/assets/angelo-design-logo.png";
 const Loja = () => {
   const [products, setProducts] = useState<ShopProductFull[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCat, setActiveCat] = useState<string>("all");
+  const [catPath, setCatPath] = useState<string[]>([]);
 
   useEffect(() => {
     fetchShopProducts(true)
@@ -20,25 +20,39 @@ const Loja = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const categories = useMemo(() => {
+  const splitCat = (c: string) =>
+    (c || "")
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  // Products that match the current cascade path (prefix match on category segments)
+  const filteredProducts = useMemo(() => {
+    if (catPath.length === 0) return products;
+    return products.filter((p) => {
+      const segs = splitCat(p.category || "");
+      if (segs.length < catPath.length) return false;
+      return catPath.every((s, i) => segs[i] === s);
+    });
+  }, [products, catPath]);
+
+  // Next-level category options at the current depth
+  const nextLevelCats = useMemo(() => {
     const set = new Set<string>();
     products.forEach((p) => {
-      const c = (p.category || "").trim();
-      if (c) set.add(c);
+      const segs = splitCat(p.category || "");
+      if (segs.length <= catPath.length) return;
+      if (!catPath.every((s, i) => segs[i] === s)) return;
+      set.add(segs[catPath.length]);
     });
     return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [products]);
+  }, [products, catPath]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, ShopProductFull[]>();
-    const visible =
-      activeCat === "all"
-        ? products
-        : activeCat === "__none__"
-        ? products.filter((p) => !(p.category || "").trim())
-        : products.filter((p) => (p.category || "").trim() === activeCat);
-    visible.forEach((p) => {
-      const key = (p.category || "").trim() || "Outros";
+    filteredProducts.forEach((p) => {
+      const segs = splitCat(p.category || "");
+      const key = segs.join(" › ") || "Outros";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(p);
     });
@@ -47,7 +61,7 @@ const Loja = () => {
       if (b === "Outros") return -1;
       return a.localeCompare(b, "pt-BR");
     });
-  }, [products, activeCat]);
+  }, [filteredProducts]);
 
   const renderCard = (p: ShopProductFull) => {
     const img = primaryImage(p);
@@ -151,33 +165,46 @@ const Loja = () => {
             </p>
           ) : (
             <>
-              {categories.length > 0 && (
-                <div className="flex flex-wrap gap-2 justify-center mb-8">
+              <div className="mb-8 space-y-3">
+                {/* Breadcrumb cascade */}
+                <div className="flex flex-wrap items-center gap-2 justify-center text-sm">
                   <button
-                    onClick={() => setActiveCat("all")}
-                    className={`px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition-all ${
-                      activeCat === "all"
-                        ? "bg-gradient-to-r from-primary to-accent text-white border-transparent shadow-lg scale-105"
-                        : "bg-card text-foreground border-border hover:border-primary/50 hover:scale-105"
+                    onClick={() => setCatPath([])}
+                    className={`px-3 py-1 rounded-full font-semibold border-2 transition-all ${
+                      catPath.length === 0
+                        ? "bg-gradient-to-r from-primary to-accent text-white border-transparent shadow"
+                        : "bg-card text-foreground border-border hover:border-primary/50"
                     }`}
                   >
                     Todos
                   </button>
-                  {categories.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setActiveCat(c)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-semibold border-2 transition-all ${
-                        activeCat === c
-                          ? "bg-gradient-to-r from-primary to-accent text-white border-transparent shadow-lg scale-105"
-                          : "bg-card text-foreground border-border hover:border-primary/50 hover:scale-105"
-                      }`}
-                    >
-                      {c}
-                    </button>
+                  {catPath.map((seg, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-muted-foreground">›</span>
+                      <button
+                        onClick={() => setCatPath(catPath.slice(0, i + 1))}
+                        className="px-3 py-1 rounded-full font-semibold border-2 bg-gradient-to-r from-primary to-accent text-white border-transparent shadow"
+                      >
+                        {seg}
+                      </button>
+                    </div>
                   ))}
                 </div>
-              )}
+                {/* Next-level options */}
+                {nextLevelCats.length > 0 && (
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {nextLevelCats.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setCatPath([...catPath, c])}
+                        className="px-4 py-1.5 rounded-full text-sm font-semibold border-2 bg-card text-foreground border-border hover:border-primary/50 hover:scale-105 transition-all"
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="space-y-10">
                 {grouped.map(([cat, items]) => (
                   <section key={cat}>
