@@ -137,6 +137,7 @@ import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateExpensesReport } from "@/lib/generateExpensesReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { generateBudget } from "@/lib/generateBudget";
+import { detectOrigin, originPrefix, type OrderOrigin } from "@/lib/pdfLogo";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
 import {
   setGoogleScriptUrl,
