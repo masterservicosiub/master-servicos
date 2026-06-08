@@ -2207,7 +2207,8 @@ const Admin = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await generateReceipt(order);
+                          const ov = pdfBrandOverride[order.id!];
+                          await generateReceipt(order, ov && ov !== "auto" ? ov : undefined);
                           toast.success("Recibo gerado!");
                         } catch (err) {
                           console.error("Erro ao gerar recibo:", err);
@@ -2221,7 +2222,8 @@ const Admin = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await generateBudget(order);
+                          const ov = pdfBrandOverride[order.id!];
+                          await generateBudget(order, ov && ov !== "auto" ? ov : undefined);
                           toast.success("Orçamento gerado!");
                         } catch (err) {
                           console.error("Erro ao gerar orçamento:", err);
@@ -2232,6 +2234,21 @@ const Admin = () => {
                     >
                       <FileText className="w-4 h-4" /> Gerar Orçamento PDF
                     </button>
+                    <select
+                      value={pdfBrandOverride[order.id!] || "auto"}
+                      onChange={(e) =>
+                        setPdfBrandOverride((prev) => ({
+                          ...prev,
+                          [order.id!]: e.target.value as OrderOrigin | "auto",
+                        }))
+                      }
+                      className="bg-background border border-border text-foreground px-2 py-1.5 rounded-lg text-sm"
+                      title="Empresa do Recibo/Orçamento"
+                    >
+                      <option value="auto">Empresa: Automático ({detectOrigin(order.services) === "angelo" ? "Angelo Design" : "Master Serviços"})</option>
+                      <option value="master">Master Serviços</option>
+                      <option value="angelo">Angelo Design</option>
+                    </select>
                     {order.phone && (
                       <button
                         onClick={() => {
