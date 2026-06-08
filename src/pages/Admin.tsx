@@ -137,6 +137,7 @@ import { generateRevenueReport } from "@/lib/generateRevenueReport";
 import { generateExpensesReport } from "@/lib/generateExpensesReport";
 import { generateReceipt } from "@/lib/generateReceipt";
 import { generateBudget } from "@/lib/generateBudget";
+import { detectOrigin, originPrefix, type OrderOrigin } from "@/lib/pdfLogo";
 import { startOrderNotificationListener } from "@/lib/orderNotifications";
 import {
   setGoogleScriptUrl,
@@ -423,6 +424,9 @@ const Admin = () => {
   // Company info (public contact)
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(DEFAULT_COMPANY_INFO);
   const [savingCompany, setSavingCompany] = useState(false);
+
+  // Per-order brand override for receipt/budget PDFs (auto = detect from services)
+  const [pdfBrandOverride, setPdfBrandOverride] = useState<Record<string, OrderOrigin | "auto">>({});
 
   // Coupons
   const [coupons, setCoupons] = useState<CouponRow[]>([]);
@@ -1043,9 +1047,15 @@ const Admin = () => {
       return;
     }
     const total = validItems.reduce((sum, it) => sum + (parseFloat(it.value) || 0), 0);
-    const servicesText = validItems
+    const baseServicesText = validItems
       .map((it) => `${it.description.trim()} - R$ ${(parseFloat(it.value) || 0).toFixed(2)}`)
       .join(" | ");
+    // Preserve origin prefix (e.g. "[Angelo Design]") so the receipt/budget keeps the original brand
+    const originalOrigin = detectOrigin(editingOrder.services);
+    const prefix = originPrefix(originalOrigin);
+    const servicesText = prefix && !baseServicesText.startsWith(prefix.trim())
+      ? `${prefix}${baseServicesText}`
+      : baseServicesText;
     try {
       await insertOrder({
         name: manualName.trim(),
@@ -2197,7 +2207,8 @@ const Admin = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await generateReceipt(order);
+                          const ov = pdfBrandOverride[order.id!];
+                          await generateReceipt(order, ov && ov !== "auto" ? ov : undefined);
                           toast.success("Recibo gerado!");
                         } catch (err) {
                           console.error("Erro ao gerar recibo:", err);
@@ -2211,7 +2222,8 @@ const Admin = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await generateBudget(order);
+                          const ov = pdfBrandOverride[order.id!];
+                          await generateBudget(order, ov && ov !== "auto" ? ov : undefined);
                           toast.success("Orçamento gerado!");
                         } catch (err) {
                           console.error("Erro ao gerar orçamento:", err);
@@ -2222,6 +2234,21 @@ const Admin = () => {
                     >
                       <FileText className="w-4 h-4" /> Gerar Orçamento PDF
                     </button>
+                    <select
+                      value={pdfBrandOverride[order.id!] || "auto"}
+                      onChange={(e) =>
+                        setPdfBrandOverride((prev) => ({
+                          ...prev,
+                          [order.id!]: e.target.value as OrderOrigin | "auto",
+                        }))
+                      }
+                      className="bg-background border border-border text-foreground px-2 py-1.5 rounded-lg text-sm"
+                      title="Empresa do Recibo/Orçamento"
+                    >
+                      <option value="auto">Empresa: Automático ({detectOrigin(order.services) === "angelo" ? "Angelo Design" : "Master Serviços"})</option>
+                      <option value="master">Master Serviços</option>
+                      <option value="angelo">Angelo Design</option>
+                    </select>
                     {order.phone && (
                       <button
                         onClick={() => {

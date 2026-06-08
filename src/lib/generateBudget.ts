@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { OrderRow } from "./supabase";
-import { detectOrigin, loadLogo, fitLogo, companyNameFor } from "./pdfLogo";
+import { detectOrigin, loadLogo, fitLogo, companyNameFor, type OrderOrigin } from "./pdfLogo";
 
 const COMPANY = {
   name: "MASTER SOLUÇÕES",
@@ -52,13 +52,13 @@ function parseServices(servicesText: string): {
   return { items, discountFromText };
 }
 
-export async function generateBudget(order: OrderRow) {
+export async function generateBudget(order: OrderRow, originOverride?: OrderOrigin) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
 
   // ===== LOGO =====
-  const origin = detectOrigin(order.services);
+  const origin = originOverride ?? detectOrigin(order.services);
   const logo = await loadLogo(origin);
   const logoData = logo?.dataUrl || "";
 
